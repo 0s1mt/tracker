@@ -1,0 +1,1521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+<title>Refunding Services  - Patched.to</title>
+<meta charset="UTF-8">
+<meta name="title" content="Refunding Services - Patched.to">
+
+<link rel="canonical" href="https://patched.to/Forum-refunding-services">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+<meta name="apple-mobile-web-app-title" content="Patched.to">
+<meta name="application-name" content="Patched.to">
+
+<base href="https://patched.to/">
+<meta name="generator" content="mybb">
+
+
+
+<meta property="og:title" content="Refunding Services"> 
+<meta property="og:site_name" content="Patched.to"> 
+<meta property="og:type" content="website"> 
+<meta property="og:image" content="https://patched.to/images/patchedtologo.png"> 
+<meta property="og:url" content="https://patched.to/Forum-refunding-services">
+<meta property="og:description" content="">
+
+<link rel="icon" href="https://patched.to/images/favicon.ico" type="image/x-icon">
+
+<style type="text/css">@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/symbols/wght/normal.woff2);unicode-range:U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/math/wght/normal.woff2);unicode-range:U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:300;src:url(/cf-fonts/v/roboto/5.2.10/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/symbols/wght/normal.woff2);unicode-range:U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:400;src:url(/cf-fonts/v/roboto/5.2.10/math/wght/normal.woff2);unicode-range:U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/symbols/wght/normal.woff2);unicode-range:U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/math/wght/normal.woff2);unicode-range:U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:500;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/greek/wght/normal.woff2);unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/symbols/wght/normal.woff2);unicode-range:U+0001-000C,U+000E-001F,U+007F-009F,U+20DD-20E0,U+20E2-20E4,U+2150-218F,U+2190,U+2192,U+2194-2199,U+21AF,U+21E6-21F0,U+21F3,U+2218-2219,U+2299,U+22C4-22C6,U+2300-243F,U+2440-244A,U+2460-24FF,U+25A0-27BF,U+2800-28FF,U+2921-2922,U+2981,U+29BF,U+29EB,U+2B00-2BFF,U+4DC0-4DFF,U+FFF9-FFFB,U+10140-1018E,U+10190-1019C,U+101A0,U+101D0-101FD,U+102E0-102FB,U+10E60-10E7E,U+1D2C0-1D2D3,U+1D2E0-1D37F,U+1F000-1F0FF,U+1F100-1F1AD,U+1F1E6-1F1FF,U+1F30D-1F30F,U+1F315,U+1F31C,U+1F31E,U+1F320-1F32C,U+1F336,U+1F378,U+1F37D,U+1F382,U+1F393-1F39F,U+1F3A7-1F3A8,U+1F3AC-1F3AF,U+1F3C2,U+1F3C4-1F3C6,U+1F3CA-1F3CE,U+1F3D4-1F3E0,U+1F3ED,U+1F3F1-1F3F3,U+1F3F5-1F3F7,U+1F408,U+1F415,U+1F41F,U+1F426,U+1F43F,U+1F441-1F442,U+1F444,U+1F446-1F449,U+1F44C-1F44E,U+1F453,U+1F46A,U+1F47D,U+1F4A3,U+1F4B0,U+1F4B3,U+1F4B9,U+1F4BB,U+1F4BF,U+1F4C8-1F4CB,U+1F4D6,U+1F4DA,U+1F4DF,U+1F4E3-1F4E6,U+1F4EA-1F4ED,U+1F4F7,U+1F4F9-1F4FB,U+1F4FD-1F4FE,U+1F503,U+1F507-1F50B,U+1F50D,U+1F512-1F513,U+1F53E-1F54A,U+1F54F-1F5FA,U+1F610,U+1F650-1F67F,U+1F687,U+1F68D,U+1F691,U+1F694,U+1F698,U+1F6AD,U+1F6B2,U+1F6B9-1F6BA,U+1F6BC,U+1F6C6-1F6CF,U+1F6D3-1F6D7,U+1F6E0-1F6EA,U+1F6F0-1F6F3,U+1F6F7-1F6FC,U+1F700-1F7FF,U+1F800-1F80B,U+1F810-1F847,U+1F850-1F859,U+1F860-1F887,U+1F890-1F8AD,U+1F8B0-1F8BB,U+1F8C0-1F8C1,U+1F900-1F90B,U+1F93B,U+1F946,U+1F984,U+1F996,U+1F9E9,U+1FA00-1FA6F,U+1FA70-1FA7C,U+1FA80-1FA89,U+1FA8F-1FAC6,U+1FACE-1FADC,U+1FADF-1FAE9,U+1FAF0-1FAF8,U+1FB00-1FBFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/math/wght/normal.woff2);unicode-range:U+0302-0303,U+0305,U+0307-0308,U+0310,U+0312,U+0315,U+031A,U+0326-0327,U+032C,U+032F-0330,U+0332-0333,U+0338,U+033A,U+0346,U+034D,U+0391-03A1,U+03A3-03A9,U+03B1-03C9,U+03D1,U+03D5-03D6,U+03F0-03F1,U+03F4-03F5,U+2016-2017,U+2034-2038,U+203C,U+2040,U+2043,U+2047,U+2050,U+2057,U+205F,U+2070-2071,U+2074-208E,U+2090-209C,U+20D0-20DC,U+20E1,U+20E5-20EF,U+2100-2112,U+2114-2115,U+2117-2121,U+2123-214F,U+2190,U+2192,U+2194-21AE,U+21B0-21E5,U+21F1-21F2,U+21F4-2211,U+2213-2214,U+2216-22FF,U+2308-230B,U+2310,U+2319,U+231C-2321,U+2336-237A,U+237C,U+2395,U+239B-23B7,U+23D0,U+23DC-23E1,U+2474-2475,U+25AF,U+25B3,U+25B7,U+25BD,U+25C1,U+25CA,U+25CC,U+25FB,U+266D-266F,U+27C0-27FF,U+2900-2AFF,U+2B0E-2B11,U+2B30-2B4C,U+2BFE,U+3030,U+FF5B,U+FF5D,U+1D400-1D7FF,U+1EE00-1EEFF;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:'Roboto';font-style:normal;font-weight:700;src:url(/cf-fonts/v/roboto/5.2.10/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}</style>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+<link rel="stylesheet" href="https://patched.to/assets/nice-select/nice-select.css">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://patched.to/jscripts/jquery.plugins.min.js?ver=1821"></script>
+<script type="text/javascript" src="https://patched.to/jscripts/general.js?ver=1821"></script>
+<script type="text/javascript" src="https://patched.to/jscripts/patched.js?ver=197"></script>
+<script type="text/javascript" src="https://patched.to/assets/nice-select/jquery.nice-select.min.js"></script>
+
+<style>
+	/* Color settings for guests */
+	.halloween-tab { background: #6674DE }
+	.pagination_current { background: #6674DE }
+	.button { background: #6674DE }
+</style>
+
+ <link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme13/global.min.css?vers=1738002678">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme1/star_ratings.min.css?vers=1644191928">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme3/thread_status.min.css?vers=1611613238">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme10/css3.min.css?vers=1668473314">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme13/patched.min.css?vers=1783111696">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme13/responsive.min.css?vers=1774475740">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme13/alerts.min.css?vers=1697742278">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme10/customcolor.min.css?vers=1668505048">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme3/avatarep.min.css?vers=1618039074">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme13/guestwarn.min.css?vers=1673470988">
+<link type="text/css" rel="stylesheet" href="https://patched.to/cache/themes/theme3/toastr.min.css?vers=1626564498">
+ 
+</head><body><div class="guest_warn"><span style="color:#C0392B;font-size:20px;font-weight:bold;">ALERT!</span><br> <a href="/member.php?action=register" onclick="if (!window.__cfRLUnblockHandlers) return false; return true" rel="registerPane">Click here to register with a few steps and explore all our cool stuff we have to offer!</a></div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $(".guest_warn").fadeIn("slow");
+  $(".guest_warn i.fa.fa-close").click(function() {
+    $(".guest_warn").fadeOut("slow");
+    $.post(document.location.href, {cookie_guestwarn: 1});
+  });
+});                      
+</script>
+ 
+<script type="text/javascript">		
+<!--
+	lang.unknown_error = "An unknown error has occurred.";
+
+	lang.select2_match = "One result is available, press enter to select it.";
+	lang.select2_matches = "{1} results are available, use up and down arrow keys to navigate.";
+	lang.select2_nomatches = "No matches found";
+	lang.select2_inputtooshort_single = "Please enter one or more character";
+	lang.select2_inputtooshort_plural = "Please enter {1} or more characters";
+	lang.select2_inputtoolong_single = "Please delete one character";
+	lang.select2_inputtoolong_plural = "Please delete {1} characters";
+	lang.select2_selectiontoobig_single = "You can only select one item";
+	lang.select2_selectiontoobig_plural = "You can only select {1} items";
+	lang.select2_loadmore = "Loading more results&hellip;";
+	lang.select2_searching = "Searching&hellip;";
+
+	var templates = {
+		modal: '<div class=\"modal\">\
+	<div style=\"overflow-y: auto; max-height: 400px;\">\
+		<table border=\"0\" cellspacing=\"0\" cellpadding=\"5\" class=\"tborder\">\
+			<tr>\
+				<td class=\"thead\" colspan=\"2\"><span class=\"patchedTitle\">__message__</span></td>\
+			</tr>\
+			<tr>\
+				<td colspan=\"2\" class=\"trow1\">\
+				<div style=\"text-align: center\" class=\"modal_buttons\">__buttons__</div></td>\
+			</tr>\
+		</table>\
+	</div>\
+</div>',
+		modal_button: '<input type=\"submit\" class=\"button\" value=\"__title__\"/>&nbsp;'
+	};
+
+	var cookieDomain = ".patched.to";
+	var cookiePath = "/";
+	var cookiePrefix = "";
+	var cookieSecureFlag = "1";
+	var deleteevent_confirm = "Are you sure you want to delete this event?";
+	var removeattach_confirm = "Are you sure you want to remove the selected attachment from this post?";
+	var loading_text = 'Loading. <br />Please Wait&hellip;';
+	var saving_changes = 'Saving changes&hellip;';
+	var use_xmlhttprequest = "1";
+	var my_post_key = "1af84eb1143dd91d358fb43362e16056";
+	var rootpath = "https://patched.to";
+	var imagepath = "https://patched.to/images";
+  	var yes_confirm = "Yes";
+	var no_confirm = "No";
+	var MyBBEditor = null;
+	var spinner_image = "https://patched.to/images/spinner.gif";
+	var spinner = "<img src='" + spinner_image +"' alt='' />";
+	var modal_zindex = 9999;
+// -->
+</script>
+<div class="selectedColor" style="display: none"></div>
+
+
+<link rel="alternate" type="application/rss+xml" title="Latest Threads in Refunding Services (RSS 2.0)" href="https://patched.to/syndication.php?fid=150">
+<link rel="alternate" type="application/atom+xml" title="Latest Threads in Refunding Services (Atom 1.0)" href="https://patched.to/syndication.php?type=atom1.0&amp;fid=150">
+
+<script type="text/javascript">
+<!--
+	lang.no_new_posts = "Forum Contains No New Posts";
+	lang.click_mark_read = "Click to mark this forum as read";
+	lang.inline_edit_description = "(Click and hold to edit)";
+	lang.post_fetch_error = "There was an error fetching the posts.";
+// -->
+</script>
+<!-- jeditable (jquery) -->
+<script type="text/javascript" src="https://patched.to/jscripts/jeditable/jeditable.min.js"></script>
+<script type="text/javascript" src="https://patched.to/jscripts/inline_edit.js?ver=1821"></script>
+
+
+
+<div id="container">
+		<a name="top" id="top"></a>
+		<div id="patched-header">
+			<div class="topBarMenu">
+				<div class="wrapper">
+					<div class="toggleMenu">
+						<i class="fas fa-bars fa-fw"></i>
+					</div>
+					<div class="leftPull">
+						<ul>
+							<li><a href="https://patched.to/" class="index"><i class="fas fa-home fa-fw"></i> Home </a></li>
+                            <li><a href="https://patched.to/upgrade.php" class="upgrade"><i class="fas fa-angle-double-up fa-fw"></i> Upgrade </a></li>
+                            <li><a href="https://patched.to/credits.php" class="credits"><i class="fas fa-coins fa-fw"></i> Credits </a></li>
+							<li><a href="https://patched.to/auth.php" class="auth"><i class="fas fa-key fa-fw"></i> Auth </a></li>
+							<li><a href="https://patched.to/search.php" class="search"><i class="fas fa-search fa-fw"></i> Search </a></li>
+							<li><a href="https://patched.to/vouch.php" class="vouches"><i class="fas fa-handshake fa-fw"></i> Vouches </a></li>
+							<li><a href="https://patched.to/awards.php" class="awards"><i class="fas fa-award fa-fw"></i> Awards </a></li>
+							<li><a href="https://t.me/patchedstatus" target="_blank"><i class="fab fa-telegram fa-fw"></i> Telegram </a></li>
+							<li><a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; return false" class="dropdown"><i class="fas fa-copy fa-fw"></i> Extras &nbsp; <i class="fas fa-angle-down fa-fw" style="font-size: 11px"></i></a>
+								<ul class="dd-list">
+									
+									<li><a href="https://patched.to/features.php"><i class="fas fa-star fa-fw"></i>&nbsp; Features</a></li>
+									<li><a href="https://patched.to/changelogs.php"><i class="fas fa-exchange-alt fa-fw"></i>&nbsp; Changelogs</a></li>
+									<li><a href="https://patched.to/misc.php?action=help"><i class="fas fa-question-circle fa-fw"></i>&nbsp; Help</a></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+					<div class="rightPull">
+						
+<ul class="guest">
+	<li><a href="https://patched.to/member.php?action=login" class="login"><i class="fas fa-key fa-fw"></i> Login</a></li>
+	<li><a href="https://patched.to/member.php?action=register" class="register"><i class="fas fa-user-plus fa-fw"></i> Create Account</a></li>
+</ul>
+
+					</div>
+				</div>
+			</div>
+			<div class="midBar">				
+				<div class="wrapper">
+					<div class="logo">
+						<a href="https://patched.to/">
+							<img src="https://cdn.patched.to/pto_logo.webp" alt="Patched.to" title="Patched.to" class="site-logo">
+						</a>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+		<div class="breadcrumb-bg"></div>
+		<div class="breadcrumb">
+			
+<div class="leftPull">
+	<ol itemscope="" itemtype="https://schema.org/BreadcrumbList">
+		
+<li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+	<a itemprop="item" href="https://patched.to/index.php" class="navLink"><span itemprop="name"><i class="fas fa-home fa-fw"></i> Home</span></a>
+
+
+	<meta itemprop="position" content="1">
+</li>
+
+<li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+	<a itemprop="item" href="Forum-marketplace" class="navLink"><span itemprop="name">Marketplace</span></a>
+
+
+	<meta itemprop="position" content="2">
+</li>
+
+<li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+	<a itemprop="item" href="Forum-premium-sellers" class="navLink"><span itemprop="name">Premium Sellers</span></a>
+	<meta itemprop="position" content="3">
+</li>
+
+
+
+<li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+	<span class="active" itemprop="name">Refunding Services</span>
+	<meta itemprop="position" content="4">
+</li>
+
+	</ol>
+</div>
+
+			<div class="rightPull">
+				<a href="https://patched.to/" class="bc-homeLink">Patched.to</a>
+			</div>
+		</div>
+	<div id="content">
+	<div class="actual-container">
+			
+				
+				
+				
+				
+				
+				
+				
+		<div class="bam_announcements" style="display: block;">
+			<p class="bam_announcement announcement" style="margin-bottom: 0; margin-top: 15px">
+				<a href="https://patched.to/Forum-refunding-services" style="color:rgba(238, 82, 83,1.0);font-weight:bold" rel="noreferrer noopener">REFUNDING SERVICES</a>
+			</p>
+		</div>
+	
+				
+				
+		
+		<!-- BAM -->
+
+<style>
+	.bam_announcement.yellow {
+		background: #FFF6BF;
+		border: 1px solid #FFD324;
+	}
+
+	.bam_announcement.green {
+		background: #D6ECA6;
+		border: 1px solid #8DC93E;
+	}
+
+	.bam_announcement.orange {
+		background: #f58f10;
+		border: 1px solid #926c28;
+		color: #fff;
+	}
+
+	.bam_announcement.blue {
+		background: #ADCBE7;
+		border: 1px solid #0F5C8E;
+	}
+
+	.bam_announcement.red {
+		background: #FBE3E4;
+		border: 1px solid #A5161A;
+	}
+
+	.bam_announcement.magenta {
+		background: #ff64a4;
+		border: 1px solid #46042f;
+		color: #ffffff;
+	}
+
+	.bam_announcement.silver {
+		background: #e9eaea;
+		border: 1px solid #8291ab;
+	}
+
+	.bam_announcement {
+		-moz-border-radius: 5px;
+		-webkit-border-radius: 5px;
+		border-radius: 5px; 
+		text-align: center;
+		margin: 10px auto;
+		padding: 8px 12px;
+		background: #EBEBEB;
+		color: #000000;
+		border: 1px solid #ADADAD;
+	}
+
+	.bam_date {
+		color: #636161;
+		font-size: 0.78em;
+		margin-left: 6px;
+	}	
+
+	.close_bam_announcement {
+		float:right;
+		display:inline-block;
+		padding-right: 2px;
+		padding-left: 2px;
+		margin-right: 6px;
+		font-weight: bold;
+	}
+	
+	.close_bam_announcement:hover {
+		float:right;
+		display:inline-block;
+		color:#000;
+	}
+
+	.bam_nodismiss {
+		display: none !important; 
+	}
+
+	.bam_slidedown {
+		display: none;
+	}
+
+	.bam_round {
+		-webkit-border-radius: 20px;
+		-moz-border-radius: 20px;
+		border-radius: 20px;
+	}
+
+	.bam_wrapper {
+		width: 100%; 
+		display: inline-block;
+		margin-bottom: 10px;
+	}
+	
+	 .bam_announcement.announcement{
+       border: 0;
+       background-color: #292929;
+    }
+
+ .bam_announcement.announcement2{
+       border: 0;
+       background-color: #292929;
+    }
+
+ .bam_announcement.announcement3{
+       border: 0;
+       background-color: #292929;
+    }
+</style>
+	
+	<!-- Don't remove this. Needed for handling announcement dismissals. --> 
+<script type="text/javascript">
+		$(document).ready(function(){
+			$('.bam_slidedown').show();
+		});	
+		// Allow me to give credit. This was great:  https://lifeofadesigner.com/javascript/hide-dismissed-notifications-with-jquery-and-cookies
+	
+	$(document).ready(function () {
+		if (GetCookie("dismissed-notifications")) {
+			$(GetCookie("dismissed-notifications")).hide();
+		}
+		$(".dismiss-notification").click(function () {
+			var alertId = $(this).closest(".bam-unsticky").attr("id"); 
+			var dismissedNotifications = GetCookie("dismissed-notifications") + ",#" + alertId; 
+			$(this).closest(".bam-unsticky").fadeOut("slow"); 
+			SetCookie("dismissed-notifications",dismissedNotifications.replace("null,","")) //update cookie
+		});
+
+		// Same as above, but close only. Don't set a cookie. 
+		$(".bam-close-notification").click(function () {
+			var alertId = $(this).closest(".bam-unsticky").attr("id"); 
+			var dismissedNotifications = GetCookie("dismissed-notifications") + ",#" + alertId; 
+			$(this).closest(".bam-unsticky").fadeOut("slow"); 
+		});
+
+	function SetCookie(sName, sValue) {
+		document.cookie = sName + "=" + escape(sValue);
+		var date = new Date();
+		date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+		document.cookie += ("; expires=" + date.toUTCString()); 
+	}
+
+	function GetCookie(sName) {
+		var aCookie = document.cookie.split("; ");
+		for (var i=0; i < aCookie.length; i++) {
+			var aCrumb = aCookie[i].split("=");
+			if (sName == aCrumb[0]) 
+				return unescape(aCrumb[1]);
+		}
+		return null;
+	}
+	});
+</script>
+<div class="bam_wrapper"><div class="bam_announcements bam_slidedown"></div></div>
+<!-- /BAM -->
+		
+		
+
+
+
+
+<div class="usersBrowsing">
+	<span class="smalltext"><i class="fas fa-eye fa-fw"></i> Users browsing this forum:
+	<a href="https://patched.to/User/luffyrefunds"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>LuffyRefunds</strong></span></a>, <a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><img src="/images/assets/items/crown.gif" alt="" class="lastpost_useritem">, <a href="https://patched.to/User/ogbluey"><span style="color: rgba(255,255,255,0.90);"><strong>OGBluey</strong></span></a>, <a href="https://patched.to/User/zer00ne"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>Zer00ne</strong></span></a>, 47 Guest(s)</span>
+</div>
+<br>
+
+
+
+	
+	
+
+<div class="float_left">
+	
+<div class="pagination">
+<!-- <span class="pages">Pages (8):</span> -->
+	
+	<div class="pages">
+		
+ <span class="pagination_current">1</span>
+
+<a href="Forum-refunding-services?page=2" class="pagination_page">2</a>
+
+<a href="Forum-refunding-services?page=3" class="pagination_page">3</a>
+
+<a href="Forum-refunding-services?page=4" class="pagination_page">4</a>
+
+<a href="Forum-refunding-services?page=5" class="pagination_page">5</a>
+
+
+	<div class="jump2">
+		<a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; return false" class="go_page" style="border-radius: 0" title="Jump to page">… </a> 
+
+		<div class="popup_menu drop_go_page" style="display: none;">
+			<form action="" method="post">
+				<label for="page">Jump to page:</label> <input type="number" class="textbox" name="page" value="1" size="4" min="1" max="8">
+				<input type="submit" class="button" value="Go">
+			</form>
+		</div>
+	</div>
+
+<a href="Forum-refunding-services?page=8" class="pagination_last">8</a>
+	
+	</div>
+	
+<a href="Forum-refunding-services?page=2" class="pagination_next" title="Next Page">Next &nbsp;<i class="fas fa-angle-right"></i></a>
+
+	<script type="text/javascript">
+		$(".jump2 .go_page").off('click').on('click', function(){			
+			$(this).toggleClass('active');
+			$(this).siblings('.drop_go_page').toggleClass('active');
+		});
+	</script>
+</div>
+
+</div>
+<div class="float_right" style="margin-bottom: 10px">
+	<a href="forumdisplay.php?fid=150&amp;sortby=started&amp;order=desc&amp;datecut=9999&amp;prefix=0" class="button new_thread_button" style="margin-left: 10px;">Latest Threads</a>	
+</div>
+
+<table border="0" cellspacing="0" cellpadding="5" class="tborder clear patched">
+	<tbody><tr>
+		<td class="thead" colspan="28">
+			<div class="float_right hide-mobile">
+				<span class="smalltext"><strong></strong></span>
+			</div>
+			<div>
+				<strong class="patchedTitle">Refunding Services</strong>
+			</div>
+		</td>
+	</tr>
+	<tr>
+			
+			<td class="tcat" colspan="2" width="65%"><span class="smalltext"><strong><a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=subject&amp;order=asc">Thread</a>
+		
+		 / <a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=starter&amp;order=asc">Author</a> </strong></span></td>
+		<td class="tcat hide-mobile" align="center" width="55px"><span class="smalltext"><strong><a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=views&amp;order=desc">Views</a> </strong></span></td>
+		<td class="tcat hide-mobile" align="center" width="55px"><span class="smalltext"><strong><a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=replies&amp;order=desc">Replies</a> </strong></span></td>
+		
+		<td class="tcat hide-mobile" align="center" width="55px"><strong>Vouches</strong></td>
+		<td class="tcat hide-mobile" align="center" width="85px"><strong>Last Bump</strong></td>
+		<td class="tcat hide-mobile" width="5%"><span class="smalltext"><strong><a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=lastpost&amp;order=desc">Last Post</a> 
+<span class="smalltext">[<a href="Forum-refunding-services?datecut=9999&amp;prefix=0&amp;sortby=lastpost&amp;order=asc">asc</a>]</span>
+</strong></span></td>
+		
+	</tr> 
+	
+	
+<tr>
+<td class="trow_sep" colspan="8">Important Threads</td>
+</tr>
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status hotfolder" title="No new posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_old" id="tid_237050"><a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here" data-text="AMAZON GOD | HERMES | TOP SELLING REFUND SERVICE  | INTERESTING READ HERE" style="font-size: 14px!important; font-weight: bolder; color: #fff;">AMAZON GOD | HERMES | TOP SELLING REFUND SERVICE  | INTERESTING READ HERE</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here">1</a> 
+
+<a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here?page=2">2</a> 
+
+<a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here?page=3">3</a> 
+
+<a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here?page=4">4</a> 
+
+... <a href="Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here?page=18">18</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/h3rmes"><span style="color: #fd9644;"><strong>H3RMES</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">11 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			<img src="https://patched.to/images/marketplace_medal_bronze.png" alt="Bronze Medal" title="Thread has received 5 or more vouches." style="width: 28px; height: 28px; top: 7px; position: relative;">
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 59,247</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">179 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=237050" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 7</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/spowny" title="SpownY's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="SpownY" data-name="SpownY"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/spowny"><span style="color: rgba(255,255,255,0.90);"><strong>SpownY</strong></span></a><br>1 day ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_125312"><a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support" data-text="HULK REFUNDS | WORLDWIDE STORES | INSIDERS | BOXING | 24/7 SUPPORT" style="font-size: 14px!important; font-weight: bolder; color: #fff;" class="hulkrefs">HULK REFUNDS | WORLDWIDE STORES | INSIDERS | BOXING | 24/7 SUPPORT</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support">1</a> 
+
+<a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support?page=2">2</a> 
+
+<a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support?page=3">3</a> 
+
+<a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support?page=4">4</a> 
+
+... <a href="Thread-hulk-refunds-worldwide-stores-insiders-boxing-24-7-support?page=13">13</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/hulk"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>Hulk</strong></span></a> <img src="/images/assets/items/hulk.gif" alt="Hulk" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			<img src="https://i.imgur.com/QU2NvJV.gif" alt="" style="width: 80px; height: auto"><img src="https://patched.to/images/marketplace_medal_silver.png" alt="Silver Medal" title="Thread has received 20 or more vouches." style="width: 28px; height: 28px; top: 7px; position: relative;">
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 83,911</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold">122 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=125312" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 24</a></td>
+
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/mastone" title="mastone's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="mastone" data-name="mastone"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/mastone"><span style="color: rgba(255,255,255,0.90);"><strong>mastone</strong></span></a><br>3 days ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+<style id="hulkrefs">.hulkrefs{position:relative;-webkit-text-fill-color:#fff0;-webkit-background-clip:border-box,border-box,text;background-image:url(https://cdn.patched.to/hulksparks.gif),url(https://cdn.patched.to/MREpH8PQxPx2z4aaZM.gif),linear-gradient(15deg,#0e6119,#2ee947,#2ce144);background-size:16em,10em,15em;animation:hulk-anim 2.5s linear infinite;font-weight:900}.hulkrefs::before{content:"";position:absolute;top:50%;left:-3.2em;transform:translateY(-50%) scaleX(-1);width:4em;aspect-ratio:1 / 1;background-image:url(https://cdn.patched.to/o8bhbskmwy1ri065t.gif);background-size:contain;background-repeat:no-repeat;background-position:center;animation:hulk-walk-lr var(--walk-duration,15s) linear infinite}@keyframes hulk-anim{0%{background-position:0%,0%,-15em;text-shadow:0 0 10px #0f2}50%{text-shadow:0 1.5px 25px #0f2}100%{background-position:0%,0%,15em;text-shadow:0 0 10px #2ce144}}@keyframes hulk-walk-lr{0%{left:-3.2em}100%{left:calc(100% + .6em)}}</style>
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_128679"><a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA" data-text="↪⎝🔺〚SONIC REFUNDS〛🔺⎠ 965+ HOT STORES🔺250+ MEMBERS MENTORSHIP🔺№1 HEAVILY VOUCHED🔺" style="font-size: 14px!important; font-weight: bolder; color: #fff;" class="SonicRefs">↪⎝🔺〚SONIC REFUNDS〛🔺⎠ 965+ HOT STORES🔺250+ MEMBERS MENTORSHIP🔺№1 HEAVILY VOUCHED🔺</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA">1</a> 
+
+<a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%86%AA%E2%8E%9D%F0%9F%94%BA%E3%80%9Asonic-refunds%E3%80%9B%F0%9F%94%BA%E2%8E%A0-965-hot-stores%F0%9F%94%BA250-members-mentorship%F0%9F%94%BA%E2%84%961-heavily-vouched%F0%9F%94%BA?page=30">30</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/sonicrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>SonicRefs</strong></span></a> <img src="/images/assets/items/crown.gif" alt="Crown" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			<img src="https://i.imgur.com/rsshtjg.gif" alt="" style="width: 80px; height: auto"><img src="https://patched.to/images/marketplace_medal_silver.png" alt="Silver Medal" title="Thread has received 20 or more vouches." style="width: 28px; height: 28px; top: 7px; position: relative;">
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 188,559</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">293 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=128679" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 48</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/zynolix" title="Zynolix's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="Zynolix" data-name="Zynolix"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/zynolix"><span style="color: rgba(255,255,255,0.90);"><strong>Zynolix</strong></span></a><br>19 hours ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+<style id="SonicRefs">.SonicRefs {    font-size: 15px;    font-weight: bolder;    color: #fff;    letter-spacing: .1em;    padding: 0.7em;    font-weight: 600;    -webkit-text-fill-color: #fff;    -webkit-background-clip: border-box, border-box, text;    background-image: url(https://cdn.patched.to/sonic.gif),                       url(https://cdn.patched.to/sonic2.gif),                       linear-gradient(#fff, #f00);    background-size: 100%, 10em, 25em;    background-position-y: center, center, 0%;    animation: sonicanimation 0.4s ease-in-out infinite alternate;}@keyframes sonicanimation {    0% {        text-shadow: 0 0 5px #0077ff, 0 0 10px #0077ff, 0 0 15px #0077ff,                      0 0 20px #0077ff, 0 0 25px #0077ff, 0 0 30px #0077ff;    }    100% {        text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 15px #ffffff,                      0 0 20px #ffffff, 0 0 25px #ffffff, 0 0 30px #ffffff;    }}</style>
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_267795"><a href="Thread-royal-refunds-brand-new-worlwide-refund-boxing-service" data-text="Royal Refunds - BRAND NEW WORLWIDE REFUND/BOXING SERVICE" style="font-size: 14px!important; font-weight: bolder; color: #fff;">Royal Refunds - BRAND NEW WORLWIDE REFUND/BOXING SERVICE</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-royal-refunds-brand-new-worlwide-refund-boxing-service">1</a> 
+
+<a href="Thread-royal-refunds-brand-new-worlwide-refund-boxing-service?page=2">2</a> 
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/royalrefunds"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>RoyalRefunds</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">7 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 16,499</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold">16 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=267795" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/77m77" title="77M77's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="77M77" data-name="77M77"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/77m77"><span style="color: rgba(255,255,255,0.90);"><strong>77M77</strong></span></a><br>4 days ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_135498"><a href="Thread-learn-refunding-for-25-only" data-text="LEARN REFUNDING FOR $25 ONLY!!!" style="font-size: 14px!important; font-weight: bolder; color: #fff;">LEARN REFUNDING FOR $25 ONLY!!!</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-learn-refunding-for-25-only">1</a> 
+
+<a href="Thread-learn-refunding-for-25-only?page=2">2</a> 
+
+<a href="Thread-learn-refunding-for-25-only?page=3">3</a> 
+
+<a href="Thread-learn-refunding-for-25-only?page=4">4</a> 
+
+... <a href="Thread-learn-refunding-for-25-only?page=7">7</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/novaref"><span style="color: #fd9644;"><strong>NovaRef</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 55,136</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">61 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=135498" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 1</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/fleska" title="fleska's Avatar"><img src="https://patched.to/uploads/avatars/avatar_507692.jpg?dateline=1786203900" class="avatarep_img avatarep_forumdisplay_img" alt="fleska" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/fleska"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>fleska</strong></span></a><br>3 weeks ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_125183"><a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90" data-text="⭐⭐AGELESS REFUND | AMZN, INSIDER'S, INSTANT, MANY STORES | 24/7 SUPPORT | WORLDWIDE⭐⭐" style="font-size: 14px!important; font-weight: bolder; color: #fff;">⭐⭐AGELESS REFUND | AMZN, INSIDER'S, INSTANT, MANY STORES | 24/7 SUPPORT | WORLDWIDE⭐⭐</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90">1</a> 
+
+<a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%AD%90%E2%AD%90ageless-refund-amzn-insider-s-instant-many-stores-24-7-support-worldwide%E2%AD%90%E2%AD%90?page=6">6</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/ageles"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>Ageles</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 43,236</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold">53 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=125183" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 1</a></td>
+
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>1 month ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_125126"><a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0" data-text="⎝🐋[CA$HALOT REFUNDS] AMAZON ALL DOMAINS NO PR | PERSONAL MENTORSHIP | MANY STORES🐋⎠" style="font-size: 14px!important; font-weight: bolder; color: #fff;">⎝🐋[CA$HALOT REFUNDS] AMAZON ALL DOMAINS NO PR | PERSONAL MENTORSHIP | MANY STORES🐋⎠</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0">1</a> 
+
+<a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%8E%9D%F0%9F%90%8B-ca-halot-refunds-amazon-all-domains-no-pr-personal-mentorship-many-stores%F0%9F%90%8B%E2%8E%A0?page=26">26</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/cashalot"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>CaShAlot</strong></span></a> <img src="/images/assets/items/trusted.png" alt="Trusted" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			<img src="https://patched.to/images/marketplace_medal.png" alt="Gold Medal" title="Thread has received 50 or more vouches." style="width: 28px; height: 28px; top: 7px; position: relative;">
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 89,018</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">257 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=125126" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 51</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/cashalot" title="CaShAlot's Avatar"><img src="https://patched.to/uploads/avatars/avatar_432272.jpg?dateline=1744058446" class="avatarep_img avatarep_forumdisplay_img" alt="CaShAlot" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/cashalot"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>CaShAlot</strong></span></a><br>1 week ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-nova">NOVA</span>&nbsp;<span class=" subject_new" id="tid_280996"><a href="Thread-nova-50-off-all-fees-real-n1-most-vouched-service-amazon-double-dips-apple-triple-dip" data-text="50% OFF ALL FEES | REAL N1 MOST VOUCHED SERVICE | AMAZON DOUBLE DIPS/APPLE TRIPLE DIP" style="font-size: 14px!important; font-weight: bolder; color: #fff;">50% OFF ALL FEES | REAL N1 MOST VOUCHED SERVICE | AMAZON DOUBLE DIPS/APPLE TRIPLE DIP</a></span>&nbsp; </span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/futurerefs"><span style="color: #fd9644;"><strong>FutureRefs</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">6 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 9,895</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold">9 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=280996" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/confed" title="ConFeD's Avatar"><img src="https://patched.to/uploads/avatars/avatar_221092.jpg?dateline=1770364838" class="avatarep_img avatarep_forumdisplay_img" alt="ConFeD" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/confed"><span style="color: #fd9644;"><strong>ConFeD</strong></span></a><br>2 weeks ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_127713"><a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores" data-text="⚡#1 REFUND TEAM⚡INSIDERS FOR ASUS,SAKS,ALO,FARFETCH,BLOOMINGDALES⚡INSTANT⚡999+ STORES" style="font-size: 14px!important; font-weight: bolder; color: #fff;" class="sda">⚡#1 REFUND TEAM⚡INSIDERS FOR ASUS,SAKS,ALO,FARFETCH,BLOOMINGDALES⚡INSTANT⚡999+ STORES</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores">1</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%9A%A1-1-refund-team%E2%9A%A1insiders-for-asus-saks-alo-farfetch-bloomingdales%E2%9A%A1instant%E2%9A%A1999-stores?page=11">11</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/refunders"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>REFUNDERS</strong></span></a> <img src="/images/assets/items/bitcoin.gif" alt="Bitcoin" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 57,921</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">103 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=127713" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 3</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/limitlessio" title="Limitlessio's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="Limitlessio" data-name="Limitlessio"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/limitlessio"><span style="color: rgba(255,255,255,0.90);"><strong>Limitlessio</strong></span></a><br>1 week ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+<style id="sda"> url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');body {  background-color: #212121;  font-family: 'Roboto', sans-serif;  display: flex;  align-items: center;  justify-content: center;  height: 100vh;  text-align: center;}.sda {  text-shadow: 1px 1px 8px rgb(178 209 0);  letter-spacing: .02em;  font-weight: 400;  -webkit-text-fill-color: transparent;  -webkit-background-clip: border-box,border-box,text;  background-image: url(https://cdn.patched.sh/YnBXYzaV.gif),url(https://cdn.patched.sh/wMobmlXb.gif), linear-gradient( 15deg,rgba(212,175,55,1) 20%,rgba(58,147,74,1) 30%,rgba(58,147,74,1) 40%,rgba(212,175,55,1) 50%,rgba(212,175,55,1) 60%,rgba(58,147,74,1) 70%,rgba(58,147,74,1) 80%);background-size: 11em, 11em, auto;background-position-y: center, center, 0%;   animation: hue 0.5s linear infinite;}  @keyframes hue {  0% {    filter: hue-rotate(60deg);  }  100% {    filter: hue-rotate(360deg);  }}</style>
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_169008"><a href="Thread-jiggy-funds-instant-worldwide-repeatable-stores-low-fees-24-7-support" data-text="JIGGY FUNDS | INSTANT WORLDWIDE REPEATABLE STORES | LOW FEES | 24/7 SUPPORT" style="font-size: 14px!important; font-weight: bolder; color: #fff;">JIGGY FUNDS | INSTANT WORLDWIDE REPEATABLE STORES | LOW FEES | 24/7 SUPPORT</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-jiggy-funds-instant-worldwide-repeatable-stores-low-fees-24-7-support">1</a> 
+
+<a href="Thread-jiggy-funds-instant-worldwide-repeatable-stores-low-fees-24-7-support?page=2">2</a> 
+
+<a href="Thread-jiggy-funds-instant-worldwide-repeatable-stores-low-fees-24-7-support?page=3">3</a> 
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/jiggyfunds"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>JiggyFunds</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 27,324</td>
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="font-weight: bold">28 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=169008" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow2 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/luffyrefunds" title="LuffyRefunds's Avatar"><img src="https://patched.to/uploads/avatars/avatar_643688.gif?dateline=1785978798" class="avatarep_img avatarep_forumdisplay_img" alt="LuffyRefunds" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/luffyrefunds"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>LuffyRefunds</strong></span></a><br>2 weeks ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_sticky" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_sticky">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_243048"><a href="Thread-diamond-guss-refunds-%E2%AD%90-reliable-%E2%AD%90-fast-%E2%AD%90-vouched-%E2%AD%90-instant-refunds-%E2%AD%90-hottest-storelist%E2%AD%90" data-text="GUSS REFUNDS ⭐ RELIABLE ⭐ FAST ⭐ VOUCHED ⭐ INSTANT REFUNDS ⭐ HOTTEST STORELIST⭐" style="font-size: 14px!important; font-weight: bolder; color: #fff;">GUSS REFUNDS ⭐ RELIABLE ⭐ FAST ⭐ VOUCHED ⭐ INSTANT REFUNDS ⭐ HOTTEST STORELIST⭐</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-guss-refunds-%E2%AD%90-reliable-%E2%AD%90-fast-%E2%AD%90-vouched-%E2%AD%90-instant-refunds-%E2%AD%90-hottest-storelist%E2%AD%90">1</a> 
+
+<a href="Thread-diamond-guss-refunds-%E2%AD%90-reliable-%E2%AD%90-fast-%E2%AD%90-vouched-%E2%AD%90-instant-refunds-%E2%AD%90-hottest-storelist%E2%AD%90?page=2">2</a> 
+
+<a href="Thread-diamond-guss-refunds-%E2%AD%90-reliable-%E2%AD%90-fast-%E2%AD%90-vouched-%E2%AD%90-instant-refunds-%E2%AD%90-hottest-storelist%E2%AD%90?page=3">3</a> 
+
+<a href="Thread-diamond-guss-refunds-%E2%AD%90-reliable-%E2%AD%90-fast-%E2%AD%90-vouched-%E2%AD%90-instant-refunds-%E2%AD%90-hottest-storelist%E2%AD%90?page=4">4</a> 
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/gusservices"><span style="color: #f1c40f;"><strong>gusservices</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">10 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold"> 10,664</td>
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="font-weight: bold">30 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=243048" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 1</a></td>
+
+	<td align="center" class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap"><span class="smalltext">-</span></td>
+		<td class="trow1 forumdisplay_sticky hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>1 month ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr>
+<td class="trow_sep" colspan="19">Normal Threads</td>
+</tr>
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_319828"><a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828" data-text="⚡$150⚡LIFETIME MENTORSHIP⚡450+ STORES 2026 METHODS⚡WORLDWIDE⚡EXCLUSIVE AMAZON METHOD⚡" style="font-size: 14px!important; font-weight: bolder; color: #fff;">⚡$150⚡LIFETIME MENTORSHIP⚡450+ STORES 2026 METHODS⚡WORLDWIDE⚡EXCLUSIVE AMAZON METHOD⚡</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828">1</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%9A%A1-150%E2%9A%A1lifetime-mentorship%E2%9A%A1450-stores-2026-methods%E2%9A%A1worldwide%E2%9A%A1exclusive-amazon-method%E2%9A%A1-319828?page=9">9</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a> <img src="/images/assets/items/crown.gif" alt="Crown" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">2 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold"> 7,100</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold">85 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=319828" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 2</a></td>
+
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">1 hour ago</span></td>
+		<td class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>2 days ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_308941"><a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr" data-text="⚡#1 FRANCE REFUND⚡INSIDER⚡APPLE | AMAZON | 99+ STORES⚡BOXING⚡MENTORSHIP⚡24/7⚡FR" style="font-size: 14px!important; font-weight: bolder; color: #fff;">⚡#1 FRANCE REFUND⚡INSIDER⚡APPLE | AMAZON | 99+ STORES⚡BOXING⚡MENTORSHIP⚡24/7⚡FR</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr">1</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr?page=2">2</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr?page=3">3</a> 
+
+<a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr?page=4">4</a> 
+
+... <a href="Thread-diamond-%E2%9A%A1-1-france-refund%E2%9A%A1insider%E2%9A%A1apple-amazon-99-stores%E2%9A%A1boxing%E2%9A%A1mentorship%E2%9A%A124-7%E2%9A%A1fr?page=14">14</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a> <img src="/images/assets/items/crown.gif" alt="Crown" class="lastpost_useritem"> </span>
+				<span class="thread_start_datetime smalltext">3 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold"> 12,836</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold">133 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=308941" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 2</a></td>
+
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">1 hour ago</span></td>
+		<td class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>2 days ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-diamond">DIAMOND</span>&nbsp;<span class=" subject_new" id="tid_264353"><a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops" data-text="EU-SPECIALIST 21+ Countries FTID|LIT|RTS|FTIDNA|PlanetExpress Boxing|Fast Drops" style="font-size: 14px!important; font-weight: bolder; color: #fff;">EU-SPECIALIST 21+ Countries FTID|LIT|RTS|FTIDNA|PlanetExpress Boxing|Fast Drops</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops">1</a> 
+
+<a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops?page=2">2</a> 
+
+<a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops?page=3">3</a> 
+
+<a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops?page=4">4</a> 
+
+<a href="Thread-diamond-eu-specialist-21-countries-ftid-lit-rts-ftidna-planetexpress-boxing-fast-drops?page=5">5</a> 
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/fryplanet"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>fryplanet</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">8 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold"> 4,344</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold">44 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=264353" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 1</a></td>
+
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">3 hours ago</span></td>
+		<td class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>1 month ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-nova">NOVA</span>&nbsp;<span class=" subject_new" id="tid_127341"><a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched" data-text="8% FEE - EXLA REFUNDS | REFUNDING SERVICE | 24/7 SUPPORT | FIXING FAILS | VOUCHED" style="font-size: 14px!important; font-weight: bolder; color: #fff;">8% FEE - EXLA REFUNDS | REFUNDING SERVICE | 24/7 SUPPORT | FIXING FAILS | VOUCHED</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched">1</a> 
+
+<a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched?page=2">2</a> 
+
+<a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched?page=3">3</a> 
+
+<a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched?page=4">4</a> 
+
+... <a href="Thread-nova-8-fee-exla-refunds-refunding-service-24-7-support-fixing-fails-vouched?page=22">22</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/exla"><span style="color: #fd9644;"><strong>EXLA</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold"> 22,350</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold">212 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=127341" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">12 hours ago</span></td>
+		<td class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/ozp99" title="ozp99's Avatar"><img src="https://patched.to/images/default_avatar.png" class="avatarep_bg avatarep_forumdisplay_img" alt="ozp99" data-name="ozp99"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/ozp99"><span style="color: rgba(255,255,255,0.90);"><strong>ozp99</strong></span></a><br>1 week ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_276384"><a href="Thread-sale-amazon-9-10-year-s-old-buyers-account-with-product-purchase-history-account" data-text="sale Amazon 9/10 year s old buyers account With product purchase history account" style="font-size: 14px!important; font-weight: bolder; color: #fff;">sale Amazon 9/10 year s old buyers account With product purchase history account</a></span>&nbsp; </span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/aonestore"><span style="color: #fd9644;"><strong>Aonestore</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">6 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold"> 1,223</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold">7 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=276384" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">13 hours ago</span></td>
+		<td class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>2 months ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-nova">NOVA</span>&nbsp;<span class=" subject_new" id="tid_129318"><a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response" data-text="8% AMAZON REFUND 💸 COM CA AU 💸 LOWEST FEE 💸 FAST RESPONSE" style="font-size: 14px!important; font-weight: bolder; color: #fff;">8% AMAZON REFUND 💸 COM CA AU 💸 LOWEST FEE 💸 FAST RESPONSE</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response">1</a> 
+
+<a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response?page=2">2</a> 
+
+<a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response?page=3">3</a> 
+
+<a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response?page=4">4</a> 
+
+... <a href="Thread-nova-8-amazon-refund-%F0%9F%92%B8-com-ca-au-%F0%9F%92%B8-lowest-fee-%F0%9F%92%B8-fast-response?page=22">22</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/hauntedrfnd"><span style="color: #fd9644;"><strong>HAUNTEDRFND</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold"> 18,596</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold">218 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=129318" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">15 hours ago</span></td>
+		<td class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>1 month ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-nova">NOVA</span>&nbsp;<span class=" subject_new" id="tid_125558"><a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref" data-text="8% AMAZON REFUND | INSTANT REFUND | COM CO UK CA AU | LOWEST FEE | 24/7 | HAUNTEDREF" style="font-size: 14px!important; font-weight: bolder; color: #fff;">8% AMAZON REFUND | INSTANT REFUND | COM CO UK CA AU | LOWEST FEE | 24/7 | HAUNTEDREF</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref">1</a> 
+
+<a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref?page=2">2</a> 
+
+<a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref?page=3">3</a> 
+
+<a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref?page=4">4</a> 
+
+... <a href="Thread-nova-8-amazon-refund-instant-refund-com-co-uk-ca-au-lowest-fee-24-7-hauntedref?page=23">23</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/hauntedrfnd"><span style="color: #fd9644;"><strong>HAUNTEDRFND</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold"> 24,594</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold">224 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=125558" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">15 hours ago</span></td>
+		<td class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/napoleonrefs" title="NapoleonRefs's Avatar"><img src="https://patched.to/uploads/avatars/avatar_630064.gif?dateline=1785725538" class="avatarep_img avatarep_forumdisplay_img" alt="NapoleonRefs" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/napoleonrefs"><span style="color: #00cec9; background: url(./images/sparkles.gif); text-shadow: 0px 0px 4px #00bcd4;"><strong>NapoleonRefs</strong></span></a><br>1 month ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow1 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow1 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class=" subject_new" id="tid_283494"><a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch" data-text="📦BOXING 🇺🇸US 🇪🇺EU 🇨🇦CA SERVICE | 🔥HELL BOXING🔥 l ALWAYS IN TOUCH" style="font-size: 14px!important; font-weight: bolder; color: #fff;">📦BOXING 🇺🇸US 🇪🇺EU 🇨🇦CA SERVICE | 🔥HELL BOXING🔥 l ALWAYS IN TOUCH</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch">1</a> 
+
+<a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch?page=2">2</a> 
+
+<a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch?page=3">3</a> 
+
+<a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch?page=4">4</a> 
+
+... <a href="Thread-%F0%9F%93%A6boxing-%F0%9F%87%BA%F0%9F%87%B8us-%F0%9F%87%AA%F0%9F%87%BAeu-%F0%9F%87%A8%F0%9F%87%A6ca-service-%F0%9F%94%A5hell-boxing%F0%9F%94%A5-l-always-in-touch?page=25">25</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/hellservice"><span style="color: #fd9644;"><strong>HellService</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">6 months ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold"> 15,393</td>
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="font-weight: bold">249 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=283494" class="vouch_forumbit neutral"><i class="fas fa-handshake fa-fw"></i> 0</a></td>
+
+	<td align="center" class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">16 hours ago</span></td>
+		<td class="trow1 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/hellservice" title="HellService's Avatar"><img src="https://patched.to/uploads/avatars/avatar_437301.jpg?dateline=1740764034" class="avatarep_img avatarep_forumdisplay_img" alt="HellService" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/hellservice"><span style="color: #fd9644;"><strong>HellService</strong></span></a><br>3 hours ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+<tr class="inline_row">
+	<td align="center" class="trow2 forumdisplay_regular" width="2%"><span class="thread_status newhotfolder" title="New posts. Hot thread."></span></td>
+	<td class="trow2 forumdisplay_regular">
+		
+		<div style="display: inline-block;">
+			<span style="display: flex; align-items:center"> <span class="pprefix pprefix-nova">NOVA</span>&nbsp;<span class=" subject_new" id="tid_138751"><a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon" data-text="🔥 CHEAPEST PRICE 🔥 HELL SERVICE 🔥 INSTANT REFUND 🔥 EXTENSIVE STORE LIST 🔥 AMAZON" style="font-size: 14px!important; font-weight: bolder; color: #fff;">🔥 CHEAPEST PRICE 🔥 HELL SERVICE 🔥 INSTANT REFUND 🔥 EXTENSIVE STORE LIST 🔥 AMAZON</a></span>&nbsp; 
+ <span class="smalltext">(Pages: 
+<a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon">1</a> 
+
+<a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon?page=2">2</a> 
+
+<a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon?page=3">3</a> 
+
+<a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon?page=4">4</a> 
+
+... <a href="Thread-nova-%F0%9F%94%A5-cheapest-price-%F0%9F%94%A5-hell-service-%F0%9F%94%A5-instant-refund-%F0%9F%94%A5-extensive-store-list-%F0%9F%94%A5-amazon?page=98">98</a>
+)</span>
+</span>
+			<div style="display: inline-block;"><span class="author smalltext">Started by <a href="https://patched.to/User/hellservice"><span style="color: #fd9644;"><strong>HellService</strong></span></a> </span>
+				<span class="thread_start_datetime smalltext">1 year ago</span></div>
+			</div>
+
+		<div class="float_right" style="display: flex; align-items: center">
+			
+		</div>
+	</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold"> 108,092</td>
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="font-weight: bold">977 </td> 
+	
+	
+<td align="center" class="trow1 hide-mobile"><a href="https://patched.to/vouch.php?action=view&amp;tid=138751" class="vouch_forumbit positive"><i class="fas fa-handshake fa-fw"></i> 1</a></td>
+
+	<td align="center" class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap"><span class="smalltext">16 hours ago</span></td>
+		<td class="trow2 forumdisplay_regular hide-mobile" style="white-space: nowrap; text-align: left;">
+			<span class="lastpost smalltext" style="text-align: left"><div style="display: inline-flex; align-items: center">
+				<div class="avatarep_fd avatarep_forumdisplay"><a href="User/hellservice" title="HellService's Avatar"><img src="https://patched.to/uploads/avatars/avatar_437301.jpg?dateline=1740764034" class="avatarep_img avatarep_forumdisplay_img" alt="HellService" onerror="this.src=\'images/default_avatar.png\'"></a></div>	
+				<div class="last-poster_data" style="margin-left: 5px;">
+					<a href="https://patched.to/User/hellservice"><span style="color: #fd9644;"><strong>HellService</strong></span></a><br>3 hours ago
+				</div>
+			</div>
+		</span></td>	
+	
+</tr>
+
+
+</tbody></table>
+<br>
+<div class="float_left">
+	
+<div class="pagination">
+<!-- <span class="pages">Pages (8):</span> -->
+	
+	<div class="pages">
+		
+ <span class="pagination_current">1</span>
+
+<a href="Forum-refunding-services?page=2" class="pagination_page">2</a>
+
+<a href="Forum-refunding-services?page=3" class="pagination_page">3</a>
+
+<a href="Forum-refunding-services?page=4" class="pagination_page">4</a>
+
+<a href="Forum-refunding-services?page=5" class="pagination_page">5</a>
+
+
+	<div class="jump2">
+		<a href="#" onclick="if (!window.__cfRLUnblockHandlers) return false; return false" class="go_page" style="border-radius: 0" title="Jump to page">… </a> 
+
+		<div class="popup_menu drop_go_page" style="display: none;">
+			<form action="" method="post">
+				<label for="page">Jump to page:</label> <input type="number" class="textbox" name="page" value="1" size="4" min="1" max="8">
+				<input type="submit" class="button" value="Go">
+			</form>
+		</div>
+	</div>
+
+<a href="Forum-refunding-services?page=8" class="pagination_last">8</a>
+	
+	</div>
+	
+<a href="Forum-refunding-services?page=2" class="pagination_next" title="Next Page">Next &nbsp;<i class="fas fa-angle-right"></i></a>
+
+	<!--<script type="text/javascript">
+		$(".jump2 .go_page").off('click').on('click', function(){			
+			$(this).toggleClass('active');
+			$(this).siblings('.drop_go_page').toggleClass('active');
+		});
+	</script>-->
+</div>
+
+</div>
+<div class="float_right" style="margin-top: 4px;">
+	 
+</div>
+<br class="clear">
+<br>
+<div class="float_left">
+	<div class="float_left">
+		<dl class="thread_legend smalltext">
+			<dd><span class="thread_status newfolder" title="New Posts">&nbsp;</span> &nbsp; New Posts</dd>
+			<dd><span class="thread_status newhotfolder" title="Hot Thread (New)">&nbsp;</span> &nbsp; Hot Thread (New)</dd>
+			<dd><span class="thread_status hotfolder" title="Hot Thread (No New)">&nbsp;</span> &nbsp; Hot Thread (No New)</dd>
+		</dl>
+	</div>
+	<div class="float_left">
+		<dl class="thread_legend smalltext">
+			<dd><span class="thread_status folder" title="No New Posts">&nbsp;</span> &nbsp; No New Posts</dd>
+			<dd><span class="thread_status dot_folder" title="Contains Posts by You">&nbsp;</span> &nbsp; Contains Posts by You</dd>
+			<dd><span class="thread_status closefolder" title="Closed Thread">&nbsp;</span> &nbsp; Closed Thread</dd>
+		</dl>
+	</div>
+	<br class="clear">
+</div>
+<div class="float_right" style="text-align: right;">
+	
+	
+	
+</div>
+<br class="clear">
+
+
+
+	</div>
+</div>
+<div id="footer">
+	<div class="wrapper">
+		<div class="footerGrid">
+			<section class="about">
+				<img src="https://cdn.patched.to/pto_logo.webp" class="footerLogo" alt="Footer Site Logo">
+				<br>
+				<span class="about">
+					Patched.to is a community that offers many content suitable for you. Within our community you can find leaks, cracked tools, marketplace and many great things.
+				</span>
+			</section>
+
+			<section class="nav">
+				<span class="footerTitle">NAVIGATION</span>
+				<div class="menu">
+					<ul>
+						<li><a href="staff.php"><i class="fas fa-user-tie fa-fw"></i> Staff </a></li>
+						<li><a href="memberlist.php"><i class="fas fa-users fa-fw"></i> Memberlist </a></li>
+						<li><a href="search.php"><i class="fas fa-search fa-fw"></i> Search </a></li>
+						<li><a href="misc.php?action=help&amp;hid=14"><i class="fas fa-book fa-fw"></i> ToS </a></li>
+					</ul>
+				</div>
+			</section>
+
+			<section class="extras">
+				<span class="footerTitle">EXTRAS</span>
+				<div class="menu">
+					<ul>
+						<li><a href="stats.php"> <i class="fas fa-chart-bar fa-fw"></i> Statistics </a> </li>
+						<li><a href="bans.php"> <i class="fas fa-ban fa-fw"></i> Ban List </a> </li>
+						<li><a href="awards.php"> <i class="fas fa-award fa-fw"></i> Awards </a> </li>
+						<li><a href="credits.php"> <i class="fas fa-coins fa-fw"></i> Credits </a> </li>
+					</ul>
+				</div>
+			</section>
+
+			<section class="docs">
+				<span class="footerTitle">HELP </span>
+				<div class="menu">
+					<ul>
+						<li><a href="misc.php?action=help"><i class="fas fa-info-circle fa-fw"></i> Help Documents </a></li>
+						<li><a href="misc.php?action=help&amp;hid=21"><i class="fas fa-copyright fa-fw"></i> DMCA </a></li>
+						<li><a href="misc.php?action=help&amp;hid=19"><i class="fas fa-question-circle fa-fw"></i> F.A.Q</a></li>
+                        <li><a href="misc.php?action=help&amp;hid=22"><i class="fas fa-scroll fa-fw"></i> Advertising</a></li>
+					</ul>
+				</div>
+			</section>
+
+			<section class="account">
+				<span class="footerTitle">ACCOUNT</span>
+				<div class="menu">
+					<ul>
+						<li><a href="usercp.php"><i class="fas fa-users-cog fa-fw"></i> Control Panel </a></li>
+						<li><a href="upgrade.php"><i class="fas fa-angle-double-up fa-fw"></i> Upgrade</a></li>
+						<li><a href="auth.php"><i class="fas fa-key fa-fw"></i> Auth</a></li>
+						<li><a href="credits.php?action=items"><i class="fas fa-star fa-fw"></i> Items</a></li>
+					</ul>
+				</div>
+			</section>
+		</div>
+	</div>
+	
+	<div id="end">
+		<div class="wrapper">
+			<div class="leftPull">
+				<span class="copyright"><a href="#" class="endLink"> Patched.to</a>, © 2021-2026 All rights reserved. || Provides links to other sites on the internet and doesn't host any files itself.</span>
+			</div>
+			<div class="rightPull">
+				<span class="poweredBy"> Theme: <a href="https://patched.to/member.php?action=profile&amp;uid=1">Ashen</a>&nbsp; | &nbsp;Modified <a href="https://mybb.com" target="_blank" rel="noopener" class="endLink">MyBB</a> Forum Software.</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;07088981c829405cbbe12126664f1ab0&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a36d683479e8c6bf',t:'MTc4ODY5NzAwOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+</div><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; visibility: hidden;"></iframe></body></html>

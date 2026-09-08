@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://darkwebfeed.local/darkweb-forum-tracker/schemas/incident.schema.json",
+  "title": "ForumIncident",
+  "description": "Darkweb Forum Tracker'ın çıktı sözleşmesi. DarkWebFeed'in ortak Incident zarfıyla aynı şekli kullanır (bkz. ../../darkwebfeed/schemas/incident.schema.json), daraltılmış bir alt kümesiyle: bu modül forum'ları (RSS + tarayıcı) ve gated Telegram kanallarını (tg.i-c-a.su köprüsü üzerinden) kapsar.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "incident_id",
+    "detected_at",
+    "published_at",
+    "source",
+    "threat_actor",
+    "victim",
+    "category",
+    "title",
+    "description",
+    "evidence",
+    "confidence",
+    "tags",
+    "extra"
+  ],
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$",
+      "description": "sha256(source.name|threat_actor.name|victim.name|published_at)[:16] - deterministik, aynı thread tekrar çekilirse aynı id üretilir (dedup anahtarı)."
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Tracker'ın bu gönderiyi ilk gördüğü an (ISO 8601, UTC)."
+    },
+    "published_at": {
+      "type": ["string", "null"],
+      "description": "Forumdaki orijinal gönderi zamanı (RSS pubDate, ISO 8601'e çevrilmiş)."
+    },
+    "source": { "$ref": "#/$defs/source" },
+    "threat_actor": { "$ref": "#/$defs/threatActor" },
+    "victim": { "$ref": "#/$defs/victim" },
+    "category": {
+      "type": "string",
+      "enum": ["forum_post", "data_leak", "data_breach", "ransomware_leak", "phishing", "defacement"],
+      "description": "underground_forums.py/browser_forum.py her zaman 'forum_post' üretir. telegram_bridge.py, kaynak kanalın kendi 'Type' alanını eşler (ör. 'Data leak' -> 'data_leak') - bkz. telegram_bridge.py _CATEGORY_MAP."
+    },
+    "title": {
+      "type": "string",
+      "description": "Thread başlığı."
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Forum kaynaklarında thread'in GERÇEK ilk mesaj metni (sadece başlık değil). telegram_bridge.py'de kanal gönderisinin 'Content' alanı."
+    },
+    "evidence": { "$ref": "#/$defs/evidence" },
+    "confidence": {
+      "type": "string",
+      "const": "claimed",
+      "description": "Forum gönderileri ve Telegram'da relay edilen iddialar her zaman doğrulanmamış niteliktedir."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "['forum', <site_name>, ...] ya da ['telegram', <channel>] şeklinde."
+    },
+    "extra": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name", "url"],
+      "properties": {
+        "type": { "type": "string", "enum": ["forum", "telegram"] },
+        "name": {
+          "type": "string",
+          "pattern": "^(forum:.+|t\\.me/.+)$",
+          "description": "ör. 'forum:turkhackteam' (FORUM_POOL/BROWSER_FORUM_POOL anahtarı) ya da 't.me/breachdetect' (TELEGRAM_BRIDGE_POOL anahtarı)."
+        },
+        "url": { "type": ["string", "null"], "format": "uri" }
+      }
+    },
+    "threatActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "aliases"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Gönderiyi paylaşan forum kullanıcı adı ('unknown' RSS'te yazar bilgisi yoksa kullanılır)."
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "victim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "website", "country_code", "sector"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Bu modülde 'victim' kavramı gevşek kullanılır: genelde thread başlığının kendisidir (forum gönderileri her zaman net bir mağdur/kurum belirtmez)."
+        },
+        "website": { "type": ["string", "null"] },
+        "country_code": { "type": ["string", "null"] },
+        "sector": {
+          "type": ["string", "null"],
+          "description": "RSS <category> alanından - forumun alt bölüm/kategori adı (ör. 'Fake ID Documents & Passports')."
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["post_url", "screenshot_url"],
+      "properties": {
+        "post_url": { "type": ["string", "null"] },
+        "screenshot_url": {
+          "type": ["string", "null"],
+          "description": "browser_forum.py sadece is_alert_worthy() ile eşleşen thread'lerde doldurur - şu an bir görsel host bağlı olmadığı için yerel bir dosya yoludur, web'den erişilebilir bir URL değil."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "detected_at": "2026-09-06T12:20:14.317007+00:00",
+    "published_at": null,
+    "source": {
+      "type": "forum",
+      "name": "forum:patched.to",
+      "url": "https://patched.to/Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here"
+    },
+    "threat_actor": {
+      "name": "H3RMES",
+      "aliases": []
+    },
+    "victim": {
+      "name": "AMAZON GOD | HERMES | TOP SELLING REFUND SERVICE  | INTERESTING READ HERE",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "AMAZON GOD | HERMES | TOP SELLING REFUND SERVICE  | INTERESTING READ HERE",
+    "description": "Hello everyone Welcome to Hermes Refunds ​​​​ Proud to be #1 top selling and fastest growing refund service on Patched Update November 2025 : Hey people! Thanks for the trust and all the good comments! We are now the fastest growing and top selling refund service on Patched! Check vouches on all pages of this thread! More coming! October 2025: My name is Hermes For the last year I’ve been working in the shadows for all your favorite and biggest refunders as a worker completing refunds From now on I am going to run my own refunding service. I can confidently say I am one of the most experienced people here when it comes to actually doing refunds :D I’ve been through all the ups and downs of refunding world I am in touch with all the insiders and an active and known member of the refunding…",
+    "evidence": {
+      "post_url": "https://patched.to/Thread-amazon-god-hermes-top-selling-refund-service-interesting-read-here",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "patched.to"
+    ],
+    "extra": {},
+    "incident_id": "2f5512fa70d308d1"
+  }
+]

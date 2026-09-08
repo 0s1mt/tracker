@@ -1,0 +1,439 @@
+[
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T21:12:14+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:turkhackteam",
+      "url": "https://www.turkhackteam.org/konular/visual-studio-code-down.2086298/"
+    },
+    "threat_actor": {
+      "name": "Egemen.",
+      "aliases": []
+    },
+    "victim": {
+      "name": "Visual Studio Code #DOWN",
+      "website": null,
+      "country_code": null,
+      "sector": "DoS & DDoS"
+    },
+    "category": "forum_post",
+    "title": "Visual Studio Code #DOWN",
+    "description": "HEDEF: VİSUAL STUDİO CODE WAF: Microsoft Corporation / Azure YÖNTEM: Special HTTP FLOOD (L7) SALDIRI SÜRESİ: 900 saniye CHECK HOST",
+    "evidence": {
+      "post_url": "https://www.turkhackteam.org/konular/visual-studio-code-down.2086298/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "turkhackteam",
+      "dos & ddos"
+    ],
+    "extra": {},
+    "incident_id": "6a85a3f4986ce0b4"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T22:25:02+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:spyhackerz",
+      "url": "https://spyhackerz.org/forum/threads/takipsiz-para-nasil-harcanir-adim-adim-detayli-anlatim.164255/"
+    },
+    "threat_actor": {
+      "name": "Nanchew",
+      "aliases": []
+    },
+    "victim": {
+      "name": "Takipsiz Para Nasıl Harcanır? Adım Adım Detaylı Anlatım",
+      "website": null,
+      "country_code": null,
+      "sector": "Crypto Hack & Para Hüpletme Teknikleri!"
+    },
+    "category": "forum_post",
+    "title": "Takipsiz Para Nasıl Harcanır? Adım Adım Detaylı Anlatım",
+    "description": "Arkadaşlar selamlar, bir yıldır kullandığım bir methodu size aktaracağım. Yöntemleri; neden takip edilemediğini ve en güvenli yolun neden bu olduğunu anlatıyorum. To view the content, you need to Sign In or Register . Devamını Oku",
+    "evidence": {
+      "post_url": "https://spyhackerz.org/forum/threads/takipsiz-para-nasil-harcanir-adim-adim-detayli-anlatim.164255/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "spyhackerz",
+      "crypto hack & para hüpletme teknikleri!"
+    ],
+    "extra": {},
+    "incident_id": "ba699a48a797a535"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T15:38:44+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:sinister.ly",
+      "url": "https://sinister.ly/Thread-%F0%9F%94%A5-YOUTUBE-%E2%80%A2-TESLA-%E2%98%91%EF%B8%8FGEMINI-%E2%80%A2-GROK-%F0%9F%9A%80-NETFLIX-%E2%80%A2-CRUNCHY%F0%9F%9A%80-SPOTIFY-%E2%80%A2-HBO-%E2%80%A2-ADOBE-etc%F0%9F%92%8E"
+    },
+    "threat_actor": {
+      "name": "Magictouch",
+      "aliases": []
+    },
+    "victim": {
+      "name": "🔥 YOUTUBE • TESLA ☑️GEMINI • GROK 🚀 NETFLIX • CRUNCHY🚀 SPOTIFY • HBO • ADOBE etc💎",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "🔥 YOUTUBE • TESLA ☑️GEMINI • GROK 🚀 NETFLIX • CRUNCHY🚀 SPOTIFY • HBO • ADOBE etc💎",
+    "description": "SHIBA SHOP The best and fastest store on Sinisterly 💙 ABOUT US 💙 Trusted seller! Fast delivery The highest quality support and service Only the best offers and real deals More than 7000 positive reviews, returning customers, and no scam reports If you need something that isn't listed contact me, and I can check if I can provide it DISCORD : SHIBASHOP 📩 shibaservices@outlook.com 📩 BTC , LTC , ETH , BNB , USDT , USDC , DOGE , SHIB , PYUSD , PAYPAL LIMITED TIME OFFER GEMINI AI Pro with 5 TB storage 1.5 YEARS - $55 or PayPal 65€ ☑️Original license, purchased officially 📧 Activation on your desired Google account 📅 Duration: 18 Months 🤖Gemini 3.1 Pro – Smartest AI 💎1000 AI Credits Monthly 🍌Nano Banana Pro image generation 🪐Google Antigravity 🎬Veo 3.1 – AI Video Generator 📹50 Videos Monthly…",
+    "evidence": {
+      "post_url": "https://sinister.ly/Thread-%F0%9F%94%A5-YOUTUBE-%E2%80%A2-TESLA-%E2%98%91%EF%B8%8FGEMINI-%E2%80%A2-GROK-%F0%9F%9A%80-NETFLIX-%E2%80%A2-CRUNCHY%F0%9F%9A%80-SPOTIFY-%E2%80%A2-HBO-%E2%80%A2-ADOBE-etc%F0%9F%92%8E",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "sinister.ly"
+    ],
+    "extra": {},
+    "incident_id": "b436b3cd60769b0c"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T19:50:43+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:bdfclub",
+      "url": "https://bdfclub.com/threads/lookup-ssn-24-7-ssn-dob-dl-cr-cs-bg-mvr-auto-best-price.158212/"
+    },
+    "threat_actor": {
+      "name": "SSN247",
+      "aliases": []
+    },
+    "victim": {
+      "name": "LOOKUP💥💥💥SSN 24/7💥💥💥 SSN/DOB | DL | CR | CS | BG | MVR | AUTO 💲BEST PRICE 💲",
+      "website": null,
+      "country_code": null,
+      "sector": "SSN/DOB/MMN и пробив"
+    },
+    "category": "forum_post",
+    "title": "LOOKUP💥💥💥SSN 24/7💥💥💥 SSN/DOB | DL | CR | CS | BG | MVR | AUTO 💲BEST PRICE 💲",
+    "description": "SSN/DOB - 4$ DOB only - 2$ DL number - 6$ DL iss-exp - 15$ FULL MVR - 35$ Credit report - 5$ Credit score - 2$ Background report - 2$ Phone, address, e-mail - 2$ Car search - 3$ Revers SSN - 6$ Revers phone - 3$ Revers e-mail - 3$ Revers address - 3$ EIN - 10$ ========== You must be registered for see links [COLOR=rgb(184, 49...[/B] Читать далее",
+    "evidence": {
+      "post_url": "https://bdfclub.com/threads/lookup-ssn-24-7-ssn-dob-dl-cr-cs-bg-mvr-auto-best-price.158212/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "bdfclub",
+      "ssn/dob/mmn и пробив"
+    ],
+    "extra": {},
+    "incident_id": "5d787cbab25ff9c3"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T11:31:32+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:carders.biz",
+      "url": "https://carders.biz/threads/top-trending-seller-carder-forum-western-union-money-gram-bank-pay-pal-cash-app-skrill-mobile-load-transferring-worldwide-mtcn-in-instant.552/"
+    },
+    "threat_actor": {
+      "name": "File_closed07",
+      "aliases": []
+    },
+    "victim": {
+      "name": "Top Trending SELLER Carder Forum Western Union, Money Gram, Bank - Pay Pal, Cash App, Skrill, Mobile Load- Transferring -WorldWide [ MTCN in Instant ]",
+      "website": null,
+      "country_code": null,
+      "sector": "VERIFIED AND TRUSTED SELLERS"
+    },
+    "category": "forum_post",
+    "title": "Top Trending SELLER Carder Forum Western Union, Money Gram, Bank - Pay Pal, Cash App, Skrill, Mobile Load- Transferring -WorldWide [ MTCN in Instant ]",
+    "description": "Hello Fraudsters , I'am a old and experienced carder,i have much data of western union,hacked Paypal accounts,bank logins and fullz infos . I'am doing this business since last 9 years . I have many customers and buyers all over the world and they trust me and i promised to never break this... Top Trending SELLER Carder Forum Western Union, Money Gram, Bank - Pay Pal, Cash App, Skrill, Mobile Load- Transferring -WorldWide [ MTCN in Instant ]",
+    "evidence": {
+      "post_url": "https://carders.biz/threads/top-trending-seller-carder-forum-western-union-money-gram-bank-pay-pal-cash-app-skrill-mobile-load-transferring-worldwide-mtcn-in-instant.552/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "carders.biz",
+      "verified and trusted sellers"
+    ],
+    "extra": {},
+    "incident_id": "e9182bebbb69ca3e"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-08-27T03:42:33+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:bhcforums",
+      "url": "https://bhcforums.cc/Thread-35-000-MIXED-EU-MAIL-PASSWORD-FRESHLY-DUMPED-ULTRA-HIGH-QUALITY"
+    },
+    "threat_actor": {
+      "name": "ImLupin",
+      "aliases": []
+    },
+    "victim": {
+      "name": "+35.000 MIXED EU MAIL:PASSWORD | FRESHLY DUMPED | ULTRA HIGH QUALITY.",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "+35.000 MIXED EU MAIL:PASSWORD | FRESHLY DUMPED | ULTRA HIGH QUALITY.",
+    "description": "+35.000 MIXED EU MAIL ASSWORD | FRESHLY DUMPED | ULTRA HIGH QUALITY. NEW CHANNEL ➜ @LupinIsHere [hide] [To see content please register here ] [/hide]",
+    "evidence": {
+      "post_url": "https://bhcforums.cc/Thread-35-000-MIXED-EU-MAIL-PASSWORD-FRESHLY-DUMPED-ULTRA-HIGH-QUALITY",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "bhcforums"
+    ],
+    "extra": {},
+    "incident_id": "ac7234d05b98c81d"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T20:29:56+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:leetforums",
+      "url": "https://leetforums.cc/threads/usa-uk-canada-ssn-sin-nin-dl-photos.27251/"
+    },
+    "threat_actor": {
+      "name": "Deerek332",
+      "aliases": []
+    },
+    "victim": {
+      "name": "USA UK CANADA | SSN | SIN | NIN | DL PHOTOS",
+      "website": null,
+      "country_code": null,
+      "sector": "Fake ID Documents & Passports"
+    },
+    "category": "forum_post",
+    "title": "USA UK CANADA | SSN | SIN | NIN | DL PHOTOS",
+    "description": "NEW 2026 USA FULLZ SSN/DOB/DL/CS FRESH DATABASE BULK PRICES ── FRESH FULLZ 2026 ── USA: SSN + DOB + DL + MMN + CS + PHONE + EMAIL UK: NIN + SORT + ACC + DL + DOB + ADDRESS CA: SIN + DOB + DL + MMN + POSTAL DL SCAN + SELFIE HIGH CS SSNDOB FULL INFO ALL STATES SSNDOB DL FULL INFO ALL STATES SSNDOB DL + ISS/EXP LIMITED STATES(KYC) DL PHOTOS FRONT & BACK (REAL) DL PHOTOS FRONT & BACK + SELFIE + SSN ALL STATES YOUNG-AGE SSNDOB FULL INFO(2000-2019) DEATH FULLZ STARTING FROM... USA UK CANADA | SSN | SIN | NIN | DL PHOTOS",
+    "evidence": {
+      "post_url": "https://leetforums.cc/threads/usa-uk-canada-ssn-sin-nin-dl-photos.27251/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "leetforums",
+      "fake id documents & passports"
+    ],
+    "extra": {},
+    "incident_id": "87f77a370f8bfca4"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T22:37:59+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:mmgp",
+      "url": "https://mmgp.com/threads/cryptox-cryptox-ltd.783937/"
+    },
+    "threat_actor": {
+      "name": "SQMonitor",
+      "aliases": []
+    },
+    "victim": {
+      "name": "Cryptox - cryptox.ltd",
+      "website": null,
+      "country_code": null,
+      "sector": "HYIP от 61% в месяц"
+    },
+    "category": "forum_post",
+    "title": "Cryptox - cryptox.ltd",
+    "description": "Название: Cryptox Старт: 13.07.2026 Особенности: Надёжная защита от DDoS | SSL-шифрование | Лицензионный GC скрипт | Уникальный дизайн | Онлайн-чат Описание Проекта (машинный перевод): Step into the future of crypto trading! AI-optimized sales teams with human-grade decision-making. Нажмите для раскрытия... ... Читать далее",
+    "evidence": {
+      "post_url": "https://mmgp.com/threads/cryptox-cryptox-ltd.783937/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "mmgp",
+      "hyip от 61% в месяц"
+    ],
+    "extra": {},
+    "incident_id": "6261c15c726e8093"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T23:01:32+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:probiv",
+      "url": "https://probiv.work/threads/ischu-ljudej-dlja-oflajn-raboty-na-territorii-ukrainy.201809/"
+    },
+    "threat_actor": {
+      "name": "gastergangster",
+      "aliases": []
+    },
+    "victim": {
+      "name": "Ищу людей для офлайн работы на территории Украины!",
+      "website": null,
+      "country_code": null,
+      "sector": "Предлагаю работу"
+    },
+    "category": "forum_post",
+    "title": "Ищу людей для офлайн работы на территории Украины!",
+    "description": "Ищу людей со всей Украины! Онлайн и офлайн работа! Оплата: от $200 до $5000 в зависимости... Читать далее",
+    "evidence": {
+      "post_url": "https://probiv.work/threads/ischu-ljudej-dlja-oflajn-raboty-na-territorii-ukrainy.201809/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "probiv",
+      "предлагаю работу"
+    ],
+    "extra": {},
+    "incident_id": "07cb6770cbda71b1"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T23:11:26+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:xreactor",
+      "url": "https://xreactor.org/threads/44-452-lines-mixed-combolist-fresh-mail-pass.46908/"
+    },
+    "threat_actor": {
+      "name": "BestCombo",
+      "aliases": []
+    },
+    "victim": {
+      "name": "[44.452 lines] mixed Combolist Fresh  Mail:Pass",
+      "website": null,
+      "country_code": null,
+      "sector": "Combolists"
+    },
+    "category": "forum_post",
+    "title": "[44.452 lines] mixed Combolist Fresh  Mail:Pass",
+    "description": "To view the content, you need to Sign In or Register .",
+    "evidence": {
+      "post_url": "https://xreactor.org/threads/44-452-lines-mixed-combolist-fresh-mail-pass.46908/",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "xreactor",
+      "combolists"
+    ],
+    "extra": {},
+    "incident_id": "4ce16e80a6ef180c"
+  },
+  {
+    "detected_at": "2026-09-05T23:12:20.262735+00:00",
+    "published_at": "2026-09-05T23:05:13+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:leakforum.io",
+      "url": "https://leakforum.io/Thread-Leak-20362x-MIX-MAIL-ACCESS-HITS--30087"
+    },
+    "threat_actor": {
+      "name": "folix121",
+      "aliases": []
+    },
+    "victim": {
+      "name": "20362x MIX MAIL ACCESS HITS",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "20362x MIX MAIL ACCESS HITS",
+    "description": "MIXMAIL VALID || PRIVATE CLOUD || MIX MAILS CONTACT - folixison GET ACCESS - folixison DOWNLOAD MIX MAIL https://pasteview.com/Ytw4g69 FOLIX CLOUD Private Cloud Prices: CONTACT - folixison Trial Sub – $5 for 3 days Weekly Access – $12 per week Monthly Access – $35 per month Contact: folixison to purchase",
+    "evidence": {
+      "post_url": "https://leakforum.io/Thread-Leak-20362x-MIX-MAIL-ACCESS-HITS--30087",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "leakforum.io"
+    ],
+    "extra": {},
+    "incident_id": "a9b8eb58ebb191d3"
+  },
+  {
+    "detected_at": "2026-09-06T12:08:46.960925+00:00",
+    "published_at": "2026-09-06T09:16:45+00:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:breachforums",
+      "url": "https://bf.st/Thread-SELLING-750M-China-JD-com-2026"
+    },
+    "threat_actor": {
+      "name": "ShinyHunters",
+      "aliases": []
+    },
+    "victim": {
+      "name": "750M - China JD.com 2026",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "750M - China JD.com 2026",
+    "description": "Greetings. - ShinyHunters Today we are selling company data from China, namely JD.com. This data comes from the previous year, and we have included the sample with data for 2026. And you can verify the authenticity of this, and this is still Useful. JD.com is one of China’s largest e-commerce and technology companies, operating a major online retail marketplace for electronics, appliances, groceries, fashion and many other products. It is especially known for its extensive in-house logistics and delivery network, which allows it to offer fast and reliable fulfillment across China. The company also provides marketplace services, supply-chain technology, cloud solutions, healthcare and other digital services to consumers and businesses Sample…",
+    "evidence": {
+      "post_url": "https://bf.st/Thread-SELLING-750M-China-JD-com-2026",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "breachforums"
+    ],
+    "extra": {},
+    "incident_id": "6b17ea9885586dcc"
+  },
+  {
+    "detected_at": "2026-09-06T12:08:46.960925+00:00",
+    "published_at": "2026-09-06T12:36:05+01:00",
+    "source": {
+      "type": "forum",
+      "name": "forum:darkforums",
+      "url": "https://darkforums.as/Thread-DATABASE-250k-https-www-snu-gouv-fr-5k"
+    },
+    "threat_actor": {
+      "name": "LunarisSec",
+      "aliases": []
+    },
+    "victim": {
+      "name": "250k https://www.snu.gouv.fr/ (5k)",
+      "website": null,
+      "country_code": null,
+      "sector": null
+    },
+    "category": "forum_post",
+    "title": "250k https://www.snu.gouv.fr/ (5k)",
+    "description": "Hello Darkforums community, today I'm announcing that we have breached By the website https://www.snu.gouv.fr/ We infiltrated one of the Snus.gov.fr portals, a portal under which we were able to find an IDOR vulnerability that exposes all users, including admin users. We identified 270,021 relevant user IDs that we scraped and 5k of the personal member of the role What could have given us access to the user was that the roles were poorly managed, and the permissions too, in short ID : 270,021 ID Staff member : 5062 Total user : Scrap : 275 083 When I talk about roles, I mean staff members, whether they are managers, dictators, etc. from which we scraped the following information Staff User Code:…",
+    "evidence": {
+      "post_url": "https://darkforums.as/Thread-DATABASE-250k-https-www-snu-gouv-fr-5k",
+      "screenshot_url": null
+    },
+    "confidence": "claimed",
+    "tags": [
+      "forum",
+      "darkforums"
+    ],
+    "extra": {},
+    "incident_id": "6335de40793dac00"
+  }
+]
