@@ -9,6 +9,7 @@ from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore, backfill_from_feed
+from .member_directory import MemberDirectoryStore, crawl_batch
 from .pipeline import DATA_DIR, OUTPUT_FEED, build_sources, loop, open_stores, run_full_cycle
 from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
@@ -16,6 +17,7 @@ from .sources.underground_forums import FORUM_POOL
 HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
 IDENTITY_DB = DATA_DIR / "identity.sqlite3"
+MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
 
 
 def run_health_check() -> dict:
@@ -84,6 +86,52 @@ def run_identity_report(backfill: bool = False) -> dict:
         store.close()
 
 
+def run_member_crawl(pages_per_forum: int = 3) -> dict:
+    """Advances the resumable member-directory crawl by up to
+    `pages_per_forum` pages per pool forum (see member_directory.py) and
+    reports every username currently registered on 2+ crawled forums -
+    weaker evidence than --identity's matches (registration only, not a
+    confirmed post), kept separate on purpose.
+    """
+    store = MemberDirectoryStore(MEMBER_DIRECTORY_DB)
+    try:
+        crawl_report = crawl_batch(store, pages_per_forum=pages_per_forum)
+        return {
+            "crawl": crawl_report,
+            "total_members": store.total_count(),
+            "registered_cross_forum": store.cross_forum_registered(),
+        }
+    finally:
+        store.close()
+
+
+def run_db_stats() -> dict:
+    """Reports how many users/forums are currently on disk in each store,
+    without touching the network - member_directory (registered, weaker
+    signal) and identity (confirmed posted, stronger signal) are kept
+    separate on purpose, see each module's docstring.
+    """
+    member_store = MemberDirectoryStore(MEMBER_DIRECTORY_DB)
+    identity_store = IdentityStore(IDENTITY_DB)
+    try:
+        return {
+            "member_directory": {
+                "total_users": member_store.total_count(),
+                "forums": len(member_store.counts_by_forum()),
+                "by_forum": member_store.counts_by_forum(),
+            },
+            "identity": {
+                "total_users": identity_store.total_usernames(),
+                "forums": len(identity_store.counts_by_forum()),
+                "by_forum": identity_store.counts_by_forum(),
+                "cross_forum_matches": len(identity_store.all_matches()),
+            },
+        }
+    finally:
+        member_store.close()
+        identity_store.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Darkweb Forum Tracker ingestion pipeline")
     parser.add_argument("--once", action="store_true", help="run a single fetch cycle and print new incidents")
@@ -107,6 +155,19 @@ def main() -> None:
         "--identity-backfill", action="store_true",
         help="with --identity, first seed the identity store from the existing incidents.jsonl",
     )
+    parser.add_argument(
+        "--crawl-members", action="store_true",
+        help="advance the resumable member-directory crawl (see member_directory.py) and report "
+             "usernames registered on 2+ forums",
+    )
+    parser.add_argument(
+        "--crawl-pages", type=int, default=3,
+        help="with --crawl-members, max pages to fetch per forum this run (default 3)",
+    )
+    parser.add_argument(
+        "--db-stats", action="store_true",
+        help="report how many users/forums are currently stored (member_directory + identity), no network calls",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -123,25 +184,34 @@ def main() -> None:
         print(json.dumps(run_identity_report(backfill=args.identity_backfill), ensure_ascii=False, indent=2))
         return
 
+    if args.crawl_members:
+        print(json.dumps(run_member_crawl(pages_per_forum=args.crawl_pages), ensure_ascii=False, indent=2))
+        return
+
+    if args.db_stats:
+        print(json.dumps(run_db_stats(), ensure_ascii=False, indent=2))
+        return
+
     if args.loop:
         loop(poll_seconds=args.interval)
         return
 
     # Default action (also `--once`): one full cycle - ingest, alert,
-    # identity-correlate, health-check, stats-snapshot - via the same
-    # run_full_cycle() a --loop iteration uses, so a one-shot CI/scheduled
-    # run and a long-lived local loop never drift apart. See
-    # pipeline.run_full_cycle's docstring.
+    # identity-correlate, health-check, stats-snapshot, member-directory
+    # crawl increment - via the same run_full_cycle() a --loop iteration
+    # uses, so a one-shot CI/scheduled run and a long-lived local loop
+    # never drift apart. See pipeline.run_full_cycle's docstring.
     sources = build_sources()
-    store, health_store, stats_store, identity_store = open_stores()
+    store, health_store, stats_store, identity_store, member_directory_store = open_stores()
     try:
-        summary = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+        summary = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     finally:
         store.close()
         health_store.close()
         stats_store.close()
         identity_store.close()
+        member_directory_store.close()
 
 
 if __name__ == "__main__":

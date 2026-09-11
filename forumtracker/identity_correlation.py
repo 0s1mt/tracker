@@ -189,6 +189,16 @@ class IdentityStore:
             out.append(CrossMatch(username_norm, forums, display_names, first_matched_at))
         return out
 
+    def total_usernames(self) -> int:
+        return self._conn.execute("SELECT COUNT(DISTINCT username_norm) FROM username_forums").fetchone()[0]
+
+    def counts_by_forum(self) -> dict[str, int]:
+        rows = self._conn.execute(
+            "SELECT forum, COUNT(DISTINCT username_norm) FROM username_forums GROUP BY forum "
+            "ORDER BY COUNT(DISTINCT username_norm) DESC"
+        ).fetchall()
+        return {forum: count for forum, count in rows}
+
     def close(self) -> None:
         self._conn.close()
 

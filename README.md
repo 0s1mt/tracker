@@ -427,6 +427,96 @@ karşılaşınca hata loglamaya çalışırken kendisi patlıyordu; artık tip
 kontrolüyle en baştan atlanıyor. İkisi de kendi testlerimizle yakalandı
 (`tests/test_identity_correlation.py`).
 
+## Küresel kullanıcı havuzu — `member_directory.py`
+
+Kullanıcı talebi (threatactorusernames.com referans alınarak): "önce bir db
+oluşturucaz ve ordan global bütün forumlar üzerinden kullanıcı db çekicez,
+elimizde bir tehdit aktör havuzu oluşturucaz". `identity_correlation.py`
+zaten aktif member-*search*'ün çalışmadığını kanıtlamıştı — ama bu, farklı
+bir şey: her forumun herkese açık üye **listesi/dizini** (login gerektiren
+arama değil, sade "tüm üyeleri gör" sayfası). Canlı test edildi
+(2026-09-11), gerçekten farklı bir sonuç çıktı:
+
+```
+/members/ (XenForo)         8/15 forum 200 döndü, gerçek alfabetik üye listesi
+                             (carders.biz, leetforums, xreactor, blackhatpakistan,
+                              forumteam.top, niflheim, piratebuhta, warriors)
+                             kalan 7'si (turkhackteam, spyhackerz, bdfclub, mmgp,
+                             probiv, blackbones, nodo313) 403
+memberlist.php (MyBB)       leakforum.io: varsayılan sayfa boş bir arama formu,
+                             gerçek liste için harf başına sorgu göndermek gerekiyor
+                             (4119 sayfa tek harf için) - kapsam dışı bırakıldı,
+                             yanlış/eksik implementasyon yapmaktansa dürüstçe not düşüldü
+```
+
+**Neden yeniden başlatılabilir (resumable) olmak zorunda:** çalışan 8
+forumun üye sayısı birkaç yüzden (xreactor) 179.007'ye (piratebuhta) kadar
+değişiyor — en büyüklerin tam taraması binlerce sayfa. `MemberDirectoryStore`
+her forum için (alfa harfi, sayfa) checkpoint'i tutuyor; `crawl_batch()`
+her `--loop` cycle'ında/CI çalıştırmasında sınırlı sayıda sayfa (varsayılan
+3/forum) ilerletip kaldığı yerden devam ediyor — `forum_stats.py`'nin
+snapshot yaklaşımıyla aynı "her cycle küçük, sınırlı bir artış" deseni,
+CI'nin zaman bütçesine sığmak için.
+
+**Canlı doğrulandı:** ilk çalıştırmada (2 sayfa/forum) 8 forumdan **245
+gerçek kullanıcı adı** çekildi tek seferde.
+
+**İki farklı güven seviyesi, bilinçli olarak ayrı tutuluyor:**
+- `identity_correlation.IdentityStore` — **güçlü**: kullanıcı gerçekten bir
+  şey PAYLAŞMIŞ (bizim zaten topladığımız incident'lerden).
+- `member_directory.MemberDirectoryStore.cross_forum_registered()` —
+  **zayıf**: kullanıcının hesabı var ama hiç post attığını görmemiş
+  olabiliriz (sadece kayıtlı).
+
+İkisi birleştirilmiyor — bir çağıran hangi tür kanıta baktığını her zaman
+biliyor.
+
+**Kullanım:** `python -m forumtracker.cli --crawl-members` (varsayılan 3
+sayfa/forum, `--crawl-pages N` ile ayarlanabilir). `--loop`/`--once` her
+cycle'da otomatik bir artış yapıyor (`pipeline.run_full_cycle()`'a
+eklendi).
+
+**Bunun somut sonucu — `mrpink` profili:** `identity_correlation` + mevcut
+`incidents.jsonl` üzerinden gerçek bir örnek: `mrpink` kullanıcısı
+bdfclub.com + probiv.work'te 19 farklı ilan paylaşmış (kimlik hırsızlığı,
+devlet kurumlarından veri sorgulama, sahte belge, banka/devlet
+çalışanlarına içeriden veri sızdırma teklifi), hepsi ekran görüntüsüyle
+kayıtlı, ilanlardan birinde kendi Telegram/e-posta bilgileri bile
+görünüyor. threatactorusernames.com'un verdiği tek bilgi `{"username":
+"mrpink", "forum": "..."}` iken, bizimki tarih + tam içerik + kanıt
+sağlıyor.
+
+### Global genişleme batch'i (2026-09-12)
+
+Kullanıcı talebi: "bu forumlar çok az, bize global bütün darkforumlar
+lazım". Bir araştırma turu ~28 aday domain'i (deface/carding/leak
+forumları, threat-intel yazılarından ve forum dizinlerinden toplandı)
+gerçek HTTP isteğiyle canlı test etti — hem araştırma turunda hem burada
+ayrıca bağımsız olarak. Sonuç:
+
+- **6 yeni forum `FORUM_POOL`'a eklendi** (RSS 200 + gerçek `<item>` içeriği
+  doğrulandı): `darknetarmy`, `carding.pw`, `validmarket`, `cardinggame`,
+  `darkwebmafias`, `antichat` (bu sonuncusu standart
+  `/forums/-/index.rss` yerine kendi `/news.rss` yolunu kullanıyor —
+  `FORUM_POOL`'un `rss` değeri düz bir URL olduğu için kod değişikliği
+  gerekmedi). RSS havuzu **22 → 28** forum oldu.
+- **1 yeni forum `MEMBER_DIRECTORY_POOL`'a eklendi**: `cardinggame.site`
+  (`/members/` 200 + gerçek alfabetik liste). Diğer 5 yeni forum ya 403
+  (`carding.pw`, `validmarket.io`, `darkwebmafias.net`) ya 404
+  (`forum.antichat.io`) ya da alfa-indeksli listeleme yerine farklı bir
+  "notable members" şablonu (`darknetarmy.st`) döndürdüğü için eklenmedi —
+  hepsi canlı test edilip elendi, tahmin edilmedi.
+- **Bilinçli olarak eklenmeyenler** (gerçek/aktif ama uygun değil):
+  Cloudflare/bot-duvarı arkasında olup bu ortamdan erişilemeyen
+  (`hackforums.net`, `ezcarder.is`, `procrd.cc`, `dublikat.cc`,
+  `exploit.in`), RSS'i olmayan gerçek forumlar (`cracked.st`,
+  `wwh-club.net`, `omerta.cc`, `greysec.net`, `carder.uk`,
+  `cardingsecrets.is`), el konulmuş/ölü/squat edilmiş domainler
+  (`leakbase.la`, `nulled.cc`, `omerta.vc`, `xss.is`/`.ac`), ve
+  `crdpro.at` — RSS gövdesi gerçek ve geçerli ama endpoint sürekli 404
+  döndürüyor (200 değil), bu yüzden havuzun kendi canlılık barını
+  geçemedi; 200 dönmeye başlarsa eklenebilir.
+
 ## Ransomware takibi — `ransomware_intel.py` + `entity_extraction.py`
 
 Roadmap'in 3. maddesi: "ransomware forumlarını özel olarak takip etmek".

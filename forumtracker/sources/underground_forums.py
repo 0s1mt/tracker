@@ -119,6 +119,25 @@ FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
     "spear": {"homepage": "https://spear.cx", "rss": "https://spear.cx/syndication.php"},
     "toolbase": {"homepage": "https://www.toolbase.bz", "rss": "https://www.toolbase.bz/board/rss/forums/1-tools/"},
     "warriors": {"homepage": "https://warriors.to", "rss": "https://warriors.to/forums/-/index.rss"},
+    # --- global expansion batch (2026-09-12): candidates sourced from threat-intel
+    # write-ups/forum directories, each live-verified twice (once by research, once
+    # independently here) with a real 200 + genuine <item>-bearing RSS body before
+    # being added. Dropped from this same research pass, and NOT added: forums that
+    # were live but had no working RSS (cracked.st, wwh-club.net, omerta.cc, greysec.net,
+    # carder.uk, cardingsecrets.is), forums blocked by Cloudflare/bot-check from this
+    # environment (hackforums.net, ezcarder.is, procrd.cc, dublikat.cc, exploit.in),
+    # forums seized/dead/squatted (leakbase.la, nulled.cc, omerta.vc, xss.is/.ac), and
+    # crdpro.at (RSS body is genuine but the endpoint 404s instead of returning 200 -
+    # fails this pool's own liveness bar, revisit if it starts returning 200).
+    "darknetarmy": {"homepage": "https://darknetarmy.st", "rss": "https://darknetarmy.st/forums/-/index.rss"},
+    "carding.pw": {"homepage": "https://carding.pw", "rss": "https://carding.pw/forums/-/index.rss"},
+    "validmarket": {"homepage": "https://validmarket.io", "rss": "https://validmarket.io/forums/-/index.rss"},
+    "cardinggame": {"homepage": "https://cardinggame.site", "rss": "https://cardinggame.site/forums/-/index.rss"},
+    "darkwebmafias": {"homepage": "https://darkwebmafias.net", "rss": "https://darkwebmafias.net/forums/-/index.rss"},
+    # antichat.io doesn't follow the XenForo `/forums/-/index.rss` convention -
+    # its real feed is at `/news.rss` (found via the homepage's own <link> tag).
+    # FORUM_POOL's rss value is just fetched literally, no code change needed.
+    "antichat": {"homepage": "https://forum.antichat.io", "rss": "https://forum.antichat.io/news.rss"},
 }
 
 

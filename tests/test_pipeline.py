@@ -4,6 +4,7 @@ from forumtracker.dedup import SeenStore
 from forumtracker.forum_stats import StatsStore
 from forumtracker.health import HealthStore
 from forumtracker.identity_correlation import IdentityStore
+from forumtracker.member_directory import MemberDirectoryStore
 from forumtracker.pipeline import _apply_ransomware_intel, build_alerts, run_full_cycle
 from forumtracker.schema import Evidence, Incident, ThreatActor, Victim
 from forumtracker.schema import Source as SourceMeta
@@ -116,25 +117,32 @@ def _stores(tmp_path):
         HealthStore(tmp_path / "health.sqlite3"),
         StatsStore(tmp_path / "stats.sqlite3"),
         IdentityStore(tmp_path / "identity.sqlite3"),
+        MemberDirectoryStore(tmp_path / "member_directory.sqlite3"),
     )
 
 
-def test_run_full_cycle_wires_identity_correlation(tmp_path, monkeypatch):
-    # health/stats both touch real forums over the network - stub them out
-    # so this test stays offline and fast, same discipline as
-    # test_discover.py's _FakeSource for TelegramBridgeSource.
+def _stub_network_touching_steps(monkeypatch, tmp_path):
+    # health/stats/member-directory all touch real forums over the network
+    # - stub them out so these tests stay offline and fast, same discipline
+    # as test_discover.py's _FakeSource for TelegramBridgeSource.
     monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
     monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
+    monkeypatch.setattr(pipeline, "crawl_batch", lambda store, pool=None, pages_per_forum=3: {})
     monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
     monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+
+
+def test_run_full_cycle_wires_identity_correlation(tmp_path, monkeypatch):
+    _stub_network_touching_steps(monkeypatch, tmp_path)
 
     sources = [_FakeSource([
         _forum_incident("post-a", "darkforums", "EvilGhost"),
         _forum_incident("post-b", "carders.biz", "EvilGhost"),
     ])]
-    store, health_store, stats_store, identity_store = _stores(tmp_path)
+    stores = _stores(tmp_path)
+    store, health_store, stats_store, identity_store, member_directory_store = stores
 
-    summary = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+    summary = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
 
     assert summary["new_incidents"] == 2
     assert len(summary["new_identity_matches"]) == 1
@@ -146,30 +154,28 @@ def test_run_full_cycle_wires_identity_correlation(tmp_path, monkeypatch):
     assert summary["identity_matches"][0]["username"] == ["EvilGhost"]
     assert summary["newly_dead_forums"] == []
     assert summary["health_report"] == []
+    assert summary["member_directory_crawl"] == {}
+    assert summary["member_directory_total"] == 0
+    assert summary["registered_cross_forum"] == []
 
 
 def test_run_full_cycle_second_call_does_not_duplicate_incidents(tmp_path, monkeypatch):
-    monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
-    monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
-    monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
-    monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+    _stub_network_touching_steps(monkeypatch, tmp_path)
 
     incidents = [_forum_incident("post-a", "darkforums", "EvilGhost")]
     sources = [_FakeSource(incidents)]
-    store, health_store, stats_store, identity_store = _stores(tmp_path)
+    stores = _stores(tmp_path)
+    store, health_store, stats_store, identity_store, member_directory_store = stores
 
-    first = run_full_cycle(sources, store, health_store, stats_store, identity_store)
-    second = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+    first = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
+    second = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
 
     assert first["new_incidents"] == 1
     assert second["new_incidents"] == 0  # SeenStore dedup, same as before this refactor
 
 
 def test_run_full_cycle_survives_a_broken_source(tmp_path, monkeypatch):
-    monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
-    monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
-    monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
-    monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+    _stub_network_touching_steps(monkeypatch, tmp_path)
 
     class _BrokenSource:
         name = "broken"
@@ -177,7 +183,10 @@ def test_run_full_cycle_survives_a_broken_source(tmp_path, monkeypatch):
         def fetch(self):
             raise RuntimeError("network exploded")
 
-    store, health_store, stats_store, identity_store = _stores(tmp_path)
-    summary = run_full_cycle([_BrokenSource()], store, health_store, stats_store, identity_store)
+    stores = _stores(tmp_path)
+    store, health_store, stats_store, identity_store, member_directory_store = stores
+    summary = run_full_cycle(
+        [_BrokenSource()], store, health_store, stats_store, identity_store, member_directory_store
+    )
 
     assert summary["new_incidents"] == 0

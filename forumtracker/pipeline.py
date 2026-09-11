@@ -19,6 +19,7 @@ from .entity_extraction import extract_victim_domain
 from .forum_stats import StatsStore, collect_snapshots
 from .health import HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore
+from .member_directory import MemberDirectoryStore, crawl_batch
 from .notify_telegram import notify_alerts, notify_health_alert, notify_identity_match
 from .ransomware_intel import classify as classify_ransomware
 from .sources.base import Source
@@ -33,6 +34,7 @@ SEEN_DB = DATA_DIR / "seen.sqlite3"
 HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
 IDENTITY_DB = DATA_DIR / "identity.sqlite3"
+MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 
@@ -155,17 +157,19 @@ def run_full_cycle(
     health_store: HealthStore,
     stats_store: StatsStore,
     identity_store: IdentityStore,
+    member_directory_store: MemberDirectoryStore,
 ) -> dict:
     """One complete cycle: ingest -> dedup -> alert -> identity-correlate ->
-    health-check -> stats-snapshot. This is the single source of truth for
-    "what does one tracker cycle do" - `loop()` calls it repeatedly with a
-    sleep between calls, and a CI/scheduled-job run (no long-lived process,
-    one Python invocation per workflow run) calls it exactly once via
-    `cli.py`'s default action. Before this refactor those two entrypoints
-    had started to drift (identity/health/stats were wired into `loop()`
-    only, so a one-shot CI run would have silently skipped all three) -
-    one function used by both closes that gap for good instead of needing
-    the next feature to remember to wire itself into two places.
+    health-check -> stats-snapshot -> member-directory crawl increment.
+    This is the single source of truth for "what does one tracker cycle
+    do" - `loop()` calls it repeatedly with a sleep between calls, and a
+    CI/scheduled-job run (no long-lived process, one Python invocation per
+    workflow run) calls it exactly once via `cli.py`'s default action.
+    Before this refactor those two entrypoints had started to drift
+    (identity/health/stats were wired into `loop()` only, so a one-shot CI
+    run would have silently skipped all three) - one function used by both
+    closes that gap for good instead of needing the next feature to
+    remember to wire itself into two places.
 
     Every sub-step is independently try/excepted (already true before this
     refactor, preserved here) so one failing piece - e.g. the health check
@@ -205,6 +209,18 @@ def run_full_cycle(
     except Exception:
         log.exception("forum_stats snapshot raised, skipping this cycle")
 
+    member_crawl_report: dict = {}
+    try:
+        member_crawl_report = crawl_batch(member_directory_store)
+    except Exception:
+        log.exception("member_directory crawl raised, skipping this cycle")
+
+    try:
+        registered_cross_forum = member_directory_store.cross_forum_registered()
+    except Exception:
+        log.exception("member_directory cross-forum read raised")
+        registered_cross_forum = []
+
     # Full current-state reads below are local SQLite queries, not new
     # network calls - cheap enough to include every cycle so this one
     # return value is a complete rollup a CI job can write straight to
@@ -234,22 +250,32 @@ def run_full_cycle(
         "health_report": health_report,
         "identity_matches": identity_matches,
         "stats_snapshots": stats_snapshots,
+        "member_directory_crawl": member_crawl_report,
+        "member_directory_total": member_directory_store.total_count(),
+        "registered_cross_forum": registered_cross_forum,
     }
 
 
-def open_stores() -> tuple[SeenStore, HealthStore, StatsStore, IdentityStore]:
-    return SeenStore(SEEN_DB), HealthStore(HEALTH_DB), StatsStore(STATS_DB), IdentityStore(IDENTITY_DB)
+def open_stores() -> tuple[SeenStore, HealthStore, StatsStore, IdentityStore, MemberDirectoryStore]:
+    return (
+        SeenStore(SEEN_DB),
+        HealthStore(HEALTH_DB),
+        StatsStore(STATS_DB),
+        IdentityStore(IDENTITY_DB),
+        MemberDirectoryStore(MEMBER_DIRECTORY_DB),
+    )
 
 
 def loop(poll_seconds: int = 900) -> None:
     sources = build_sources()
-    store, health_store, stats_store, identity_store = open_stores()
+    store, health_store, stats_store, identity_store, member_directory_store = open_stores()
     try:
         while True:
-            run_full_cycle(sources, store, health_store, stats_store, identity_store)
+            run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
             time.sleep(poll_seconds)
     finally:
         store.close()
         health_store.close()
         stats_store.close()
         identity_store.close()
+        member_directory_store.close()
