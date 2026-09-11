@@ -16,6 +16,7 @@ from .alerting import is_alert_worthy, to_alert_card
 from .dedup import SeenStore
 from .discover import find_mirror_candidates
 from .entity_extraction import extract_victim_domain
+from .forum_stats import StatsStore, collect_snapshots
 from .health import HealthStore, check_all, pool_urls
 from .notify_telegram import notify_alerts, notify_health_alert
 from .ransomware_intel import classify as classify_ransomware
@@ -29,6 +30,7 @@ log = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SEEN_DB = DATA_DIR / "seen.sqlite3"
 HEALTH_DB = DATA_DIR / "health.sqlite3"
+STATS_DB = DATA_DIR / "forum_stats.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 
@@ -149,6 +151,7 @@ def loop(poll_seconds: int = 900) -> None:
     sources = build_sources()
     store = SeenStore(SEEN_DB)
     health_store = HealthStore(HEALTH_DB)
+    stats_store = StatsStore(STATS_DB)
     try:
         while True:
             new_incidents = run_once(sources, store)
@@ -166,7 +169,13 @@ def loop(poll_seconds: int = 900) -> None:
             except Exception:
                 log.exception("health check raised, skipping this cycle")
 
+            try:
+                collect_snapshots(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL), stats_store)
+            except Exception:
+                log.exception("forum_stats snapshot raised, skipping this cycle")
+
             time.sleep(poll_seconds)
     finally:
         store.close()
         health_store.close()
+        stats_store.close()

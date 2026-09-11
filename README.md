@@ -235,6 +235,70 @@ düşme, reply_count'un skoru yukarı çekmesi, 1-10 sınırlaması) +
 `tests/test_pipeline.py` (yeni dosya, 2 test: sıralama + alarm-değeri
 filtresi).
 
+## Forum-seviyesi aktivite skoru — `forum_stats.py`
+
+Yukarıdaki `compute_popularity_score()` bir **thread**'in ne kadar önemli
+olduğunu puanlıyor, forumun kendisinin ne kadar aktif/büyük olduğunu değil
+— bu, kullanıcının "forumların popülaritesini neye göre skalıyorsun"
+sorusuyla ortaya çıkan gerçek bir boşluktu. Yeni dış kaynağa gerek yok:
+`underground_forums._discover_rss_url` zaten her cycle'da forum ana
+sayfasını RSS keşfi için çekiyor — o HTML'in içinde XenForo'nun standart
+"Forum İstatistikleri" widget'ı (`data-widget-definition="forum_statistics"`
+veya temaya göre `forumStatistics`/`live_forum_statistics`) gerçek,
+kümülatif Thread/Mesaj/Üye sayılarını `<dt>etiket</dt><dd>sayı</dd>`
+çiftleri olarak zaten taşıyor.
+
+Canlı doğrulandı — 23 forumun 10'unda widget var (kalan 13'ü ya MyBB/farklı
+tema ya da widget'ı ana sayfada göstermiyor, `no_stats_widget_found` bunu
+şeffafça raporluyor):
+
+```
+turkhackteam      threads=1,463,872  messages=7,931,265  members=927,937
+mmgp              threads=737,650    messages=17,493,825 members=406,071
+probiv            threads=162,658    messages=1,203,467  members=148,616
+niflheim          threads=170,173    messages=396,996    members=60,699
+piratebuhta       threads=36,518     messages=306,923    members=179,007
+forumteam.top     threads=71,003     messages=272,570    members=162,087
+bdfclub           threads=153,298    messages=326,731    members=72,916
+carders.biz       threads=14,077     messages=68,487      members=64,642
+leetforums        threads=17,062     messages=34,471      members=106,637
+blackhatpakistan  threads=869        messages=1,761       members=3,470
+```
+
+Etiketler dile/temaya göre değişiyor (Konular/Threads/Темы,
+Mesajlar/Messages/Сообщения, Kullanıcılar/Members/Users/пользователи) —
+`extract_stats()` tek bir sabit string yerine küçük çok-dilli bir
+anahtar-kelime tablosuna göre eşleştiriyor. Sayı formatı da değişiyor:
+turkhackteam `1,463,871` (virgülle binlik), bdfclub `153.298` (noktayla) —
+`_parse_count()` metindeki tüm rakamları birleştirip int'e çeviriyor,
+ayraç ne olursa olsun çalışıyor.
+
+**Canlı bulunan gerçek bug:** İlk implementasyon `soup.find()` ile "ilk
+`data-widget-definition` içinde 'statistic' geçen eleman"ı alıyordu.
+bdfclub'da bu, sayıları hiç taşımayan bir "en çok mesaj atan üyeler"
+karuseliydi (`live_forum_statistics` anahtarı "statistics" kelimesini
+taşıyor ama `dt`/`dd` çifti sıfır) — gerçek sayılar ondan SONRA gelen ikinci
+`forumStatistics` widget'ındaydı, yani bdfclub hep `None` dönüyordu.
+Düzeltme: tüm adaylar (`find_all`) sırayla denenip ilk gerçek sonuç veren
+kullanılıyor — bkz. `tests/test_forum_stats.py::
+test_extract_stats_skips_an_earlier_empty_statistics_widget`.
+
+**Tek anlık görüntü sadece büyüklük verir, aktivite vermez** — "şu an ne
+kadar hareketli" için en az iki snapshot gerekiyor. `StatsStore.
+activity_per_day()` bunu, forumun kendi 24-saatlik "bugün X mesaj"
+alanına güvenmek yerine (bunu sadece bdfclub'ın bir varyantı gösteriyor,
+tutarlı bir alan değil), iki snapshot arasındaki gerçek mesaj-sayısı
+farkından türetiyor — 1 saatten kısa aralıkta veya sayaç geriye
+gittiğinde (site sıfırlama/yanlış-scrape) `None` döner, uydurma bir oran
+üretmez.
+
+**Kullanım:** `python -m forumtracker.cli --stats` (tek seferlik snapshot
++ o ana kadar biriken geçmişten aktivite oranı), `--loop` modunda her
+cycle otomatik snapshot alınıyor (`pipeline.py`, `STATS_DB`). Bu oranın
+`compute_popularity_score()`'a nasıl karışacağı (ya da karışıp
+karışmayacağı) henüz karar verilmedi — bu bilinçli olarak ayrı bırakıldı,
+mevcut thread-seviyesi skoru sessizce değiştirmemek için.
+
 ## Ransomware takibi — `ransomware_intel.py` + `entity_extraction.py`
 
 Roadmap'in 3. maddesi: "ransomware forumlarını özel olarak takip etmek".
