@@ -34,6 +34,73 @@ pip install -r requirements-dev.txt
 python -m pytest tests -q
 ```
 
+## CI/CD — `.github/workflows/`
+
+Kullanıcı talebi: "sürdürülebilir kıl, CI/CD uygun olacak şekilde" — yerel
+bir oturuma/makineye bağımlı kalmadan tracker'ın kendi kendine çalışması.
+İki ayrı workflow, iki ayrı amaç:
+
+**`ci.yml`** — her push/PR'da testler (`pytest`, Python 3.11 + 3.12
+matrix'i). Ağ gerektirmiyor, tüm testler kayıtlı fixture/mock veriyle
+çalışıyor (bu README'nin her bölümünde tekrar eden disiplin: "canlı
+doğrulandı" ayrı, "testte mock'landı" ayrı).
+
+**`pipeline.yml`** — asıl "sürdürülebilirlik" kısmı. 30 dakikada bir
+(`workflow_dispatch` ile elle de tetiklenebilir) `python -m
+forumtracker.cli --once` çalıştırıyor — bu artık `pipeline.run_full_cycle()`
+çağırıyor (aşağıdaki "run_full_cycle refactor" bölümüne bakın), yani tek
+bir workflow adımı ingest + alarm + kimlik-eşleştirme + sağlık-kontrolü +
+istatistik-snapshot'ının **hepsini** yapıyor.
+
+**Durum kalıcılığı gerçek bir problem — GitHub Actions runner'ları
+ephemeral.** `data/` (dedup DB, health/stats/identity SQLite'ları,
+büyüyen `incidents.jsonl`/`alerts.jsonl`) `.gitignore`'da — SQLite
+dosyalarını her çalıştırmada commit'lemek git diff'lerini anlamsız
+büyütür. Çözüm: `actions/cache` her çalıştırmadan sonra `data/`'yı yeni
+bir cache key'e (`tracker-state-${{ github.run_id }}`) kaydediyor, bir
+sonraki çalıştırma `restore-keys: tracker-state-` prefix eşleşmesiyle en
+son cache'i geri yüklüyor — cache entry'leri immutable olduğu için "her
+zaman yeni key ile kaydet, prefix ile geri yükle" GitHub Actions'ın kendi
+önerdiği büyüyen-state deseni.
+
+**Görünür/kalıcı olan tek şey `reports/latest_cycle.json`** —
+`run_full_cycle()`'ın döndürdüğü özet (yeni incident sayısı, yeni kimlik
+eşleşmeleri, sağlık raporu, stats snapshot'ları) her çalıştırmadan sonra
+bota commit'leniyor (`[skip ci]` ile, kendi kendini tetiklemesin diye).
+Bu, repo'ya girip hiçbir şey çalıştırmadan tracker'ın son durumunu görmeyi
+sağlıyor.
+
+**`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`** repo secret'ı olarak
+tanımlanırsa `notify_alerts`/`notify_health_alert`/`notify_identity_match`
+otomatik çalışır; tanımlanmazsa `notify_telegram.py`'nin zaten var olan
+sessiz no-op sözleşmesi gereği hiçbir şey kırılmaz.
+
+**`run_full_cycle()` refactor'ı:** Bu iş sırasında gerçek bir mimari boşluk
+bulundu — `identity_correlation`/`health`/`forum_stats` sadece
+`pipeline.loop()`'a bağlıydı, `cli.py`'nin tek seferlik (`--once`/varsayılan)
+yoluna değil. Yani CI'nin çalıştıracağı tek seferlik bir invocation bu
+üçünü **sessizce atlardı**. Düzeltme: hepsini tek bir
+`pipeline.run_full_cycle()`'a topladım; `loop()` artık bunu döngüde
+çağıran ince bir sarmalayıcı, `cli.py`'nin varsayılan yolu da aynı
+fonksiyonu bir kez çağırıyor — iki giriş noktası artık birbirinden
+sapamaz. `tests/test_pipeline.py`'a 3 yeni test (kimlik eşleştirmenin
+gerçekten tetiklendiğini, ikinci çağrının dedup sayesinde tekrar
+etmediğini, bir kaynağın çökmesinin tüm döngüyü düşürmediğini doğruluyor).
+
+**`forum_stats.collect_snapshots()` de bu turda paralelleştirildi** —
+önceden 23 forumu sırayla (`for` döngüsü) çekiyordu, worst-case ~23×12s.
+`health.check_all()`'la aynı desene geçti: `ThreadPoolExecutor` ile
+paralel fetch, ama `store.record()` çağrıları ana thread'de kalıyor
+(SQLite bağlantısı `check_same_thread=True` ile açıldığı için worker
+thread'den yazmak hataya düşerdi) — bu, CI job'ının 20 dakikalık zaman
+sınırını (`timeout-minutes: 20`) güvenle karşılaması için gerekliydi, sadece
+yerel kullanım kolaylığı değil.
+
+**Bilinçli olarak yapılmayan:** `incidents.jsonl`/`alerts.jsonl`'i git
+history'sine commit'lemek — sürekli büyüyen dosyaları her 30 dakikada bir
+commit'lemek repo'yu şişirir. Cache'te kalıyorlar, git'e giren sadece
+küçük, insan-okunur `reports/latest_cycle.json` rollup'ı.
+
 ## Mimari
 
 ```

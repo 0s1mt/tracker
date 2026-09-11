@@ -5,13 +5,11 @@ import argparse
 import json
 import logging
 
-from .dedup import SeenStore
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore, backfill_from_feed
-from .notify_telegram import notify_alerts
-from .pipeline import DATA_DIR, OUTPUT_FEED, SEEN_DB, build_alerts, build_sources, emit, emit_alerts, loop, run_once
+from .pipeline import DATA_DIR, OUTPUT_FEED, build_sources, loop, open_stores, run_full_cycle
 from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
 
@@ -129,17 +127,21 @@ def main() -> None:
         loop(poll_seconds=args.interval)
         return
 
+    # Default action (also `--once`): one full cycle - ingest, alert,
+    # identity-correlate, health-check, stats-snapshot - via the same
+    # run_full_cycle() a --loop iteration uses, so a one-shot CI/scheduled
+    # run and a long-lived local loop never drift apart. See
+    # pipeline.run_full_cycle's docstring.
     sources = build_sources()
-    store = SeenStore(SEEN_DB)
+    store, health_store, stats_store, identity_store = open_stores()
     try:
-        new_incidents = run_once(sources, store)
-        emit(new_incidents)
-        alerts = build_alerts(new_incidents)
-        emit_alerts(alerts)
-        sent = notify_alerts(alerts)
-        print(json.dumps({"incidents": new_incidents, "alerts": alerts, "telegram_sent": sent}, ensure_ascii=False, indent=2))
+        summary = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
     finally:
         store.close()
+        health_store.close()
+        stats_store.close()
+        identity_store.close()
 
 
 if __name__ == "__main__":

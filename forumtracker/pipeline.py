@@ -149,41 +149,104 @@ def check_forum_health(health_store: HealthStore) -> list[str]:
     return sorted(after - before)
 
 
+def run_full_cycle(
+    sources: list[Source],
+    store: SeenStore,
+    health_store: HealthStore,
+    stats_store: StatsStore,
+    identity_store: IdentityStore,
+) -> dict:
+    """One complete cycle: ingest -> dedup -> alert -> identity-correlate ->
+    health-check -> stats-snapshot. This is the single source of truth for
+    "what does one tracker cycle do" - `loop()` calls it repeatedly with a
+    sleep between calls, and a CI/scheduled-job run (no long-lived process,
+    one Python invocation per workflow run) calls it exactly once via
+    `cli.py`'s default action. Before this refactor those two entrypoints
+    had started to drift (identity/health/stats were wired into `loop()`
+    only, so a one-shot CI run would have silently skipped all three) -
+    one function used by both closes that gap for good instead of needing
+    the next feature to remember to wire itself into two places.
+
+    Every sub-step is independently try/excepted (already true before this
+    refactor, preserved here) so one failing piece - e.g. the health check
+    can't reach the network - never blocks incident ingestion or vice
+    versa. Returns a small JSON-able summary, used both for `--once`'s
+    printed output and as the basis for the CI workflow's committed
+    reports/*.json.
+    """
+    new_incidents = run_once(sources, store)
+    emit(new_incidents)
+    alerts = build_alerts(new_incidents)
+    emit_alerts(alerts)
+    telegram_sent = notify_alerts(alerts)
+
+    new_identity_matches: list[dict] = []
+    try:
+        for match in identity_store.record_incidents(new_incidents):
+            log.info("identity: %s matched across %s", match.username_norm, match.forums)
+            notify_identity_match(match)
+            new_identity_matches.append({"username": match.display_names, "forums": match.forums})
+    except Exception:
+        log.exception("identity correlation raised, skipping this cycle")
+
+    newly_dead: list[str] = []
+    try:
+        newly_dead = check_forum_health(health_store)
+        for name in newly_dead:
+            log.warning("health: %s crossed the dead-mirror threshold", name)
+            candidates = find_mirror_candidates(name)
+            notify_health_alert(name, candidates)
+    except Exception:
+        log.exception("health check raised, skipping this cycle")
+
+    stats_snapshots: dict = {}
+    try:
+        stats_snapshots = collect_snapshots(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL), stats_store)
+    except Exception:
+        log.exception("forum_stats snapshot raised, skipping this cycle")
+
+    # Full current-state reads below are local SQLite queries, not new
+    # network calls - cheap enough to include every cycle so this one
+    # return value is a complete rollup a CI job can write straight to
+    # reports/*.json without a second pass over --health/--stats/--identity.
+    try:
+        health_report = health_store.report()
+    except Exception:
+        log.exception("health report read raised")
+        health_report = []
+
+    try:
+        identity_matches = [
+            {"username": m.display_names, "forums": m.forums, "first_matched_at": m.first_matched_at}
+            for m in identity_store.all_matches()
+        ]
+    except Exception:
+        log.exception("identity report read raised")
+        identity_matches = []
+
+    return {
+        "new_incidents": len(new_incidents),
+        "alerts": len(alerts),
+        "telegram_sent": telegram_sent,
+        "new_identity_matches": new_identity_matches,
+        "newly_dead_forums": newly_dead,
+        "stats_forums_found": sum(1 for v in stats_snapshots.values() if v),
+        "health_report": health_report,
+        "identity_matches": identity_matches,
+        "stats_snapshots": stats_snapshots,
+    }
+
+
+def open_stores() -> tuple[SeenStore, HealthStore, StatsStore, IdentityStore]:
+    return SeenStore(SEEN_DB), HealthStore(HEALTH_DB), StatsStore(STATS_DB), IdentityStore(IDENTITY_DB)
+
+
 def loop(poll_seconds: int = 900) -> None:
     sources = build_sources()
-    store = SeenStore(SEEN_DB)
-    health_store = HealthStore(HEALTH_DB)
-    stats_store = StatsStore(STATS_DB)
-    identity_store = IdentityStore(IDENTITY_DB)
+    store, health_store, stats_store, identity_store = open_stores()
     try:
         while True:
-            new_incidents = run_once(sources, store)
-            emit(new_incidents)
-            alerts = build_alerts(new_incidents)
-            emit_alerts(alerts)
-            notify_alerts(alerts)
-
-            try:
-                for match in identity_store.record_incidents(new_incidents):
-                    log.info("identity: %s matched across %s", match.username_norm, match.forums)
-                    notify_identity_match(match)
-            except Exception:
-                log.exception("identity correlation raised, skipping this cycle")
-
-            try:
-                newly_dead = check_forum_health(health_store)
-                for name in newly_dead:
-                    log.warning("health: %s crossed the dead-mirror threshold", name)
-                    candidates = find_mirror_candidates(name)
-                    notify_health_alert(name, candidates)
-            except Exception:
-                log.exception("health check raised, skipping this cycle")
-
-            try:
-                collect_snapshots(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL), stats_store)
-            except Exception:
-                log.exception("forum_stats snapshot raised, skipping this cycle")
-
+            run_full_cycle(sources, store, health_store, stats_store, identity_store)
             time.sleep(poll_seconds)
     finally:
         store.close()

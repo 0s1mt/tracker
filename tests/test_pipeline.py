@@ -1,5 +1,12 @@
 """Offline tests for pipeline-level orchestration logic (no network)."""
-from forumtracker.pipeline import _apply_ransomware_intel, build_alerts
+import forumtracker.pipeline as pipeline
+from forumtracker.dedup import SeenStore
+from forumtracker.forum_stats import StatsStore
+from forumtracker.health import HealthStore
+from forumtracker.identity_correlation import IdentityStore
+from forumtracker.pipeline import _apply_ransomware_intel, build_alerts, run_full_cycle
+from forumtracker.schema import Evidence, Incident, ThreatActor, Victim
+from forumtracker.schema import Source as SourceMeta
 
 
 def _incident(incident_id, reply_count=None, category="ransomware_leak"):
@@ -68,3 +75,109 @@ def test_apply_ransomware_intel_noop_on_unrelated_forum_post():
 
     assert incident["category"] == "forum_post"
     assert "ransomware_group" not in incident["extra"]
+
+
+class _FakeSource:
+    """Minimal Source stand-in - no real Source.fetch() ever touches the
+    network for one item, but run_full_cycle must work against the real
+    Source contract (fetch/enrich_batch), not a shortcut."""
+    name = "fake_forum"
+
+    def __init__(self, incidents):
+        self._incidents = incidents
+
+    def fetch(self):
+        return self._incidents
+
+    def enrich_batch(self, incidents):
+        return incidents
+
+
+def _forum_incident(incident_id_seed, forum, author):
+    return Incident(
+        detected_at="2026-09-11T00:00:00+00:00",
+        published_at=None,
+        source=SourceMeta(type="forum", name=f"forum:{forum}", url=f"https://{forum}/{incident_id_seed}"),
+        threat_actor=ThreatActor(name=author),
+        victim=Victim(name=incident_id_seed),
+        category="forum_post",
+        title=incident_id_seed,
+        description="irrelevant body text",
+        evidence=Evidence(post_url=f"https://{forum}/{incident_id_seed}"),
+        confidence="claimed",
+        tags=["forum", forum],
+        extra={},
+    )
+
+
+def _stores(tmp_path):
+    return (
+        SeenStore(tmp_path / "seen.sqlite3"),
+        HealthStore(tmp_path / "health.sqlite3"),
+        StatsStore(tmp_path / "stats.sqlite3"),
+        IdentityStore(tmp_path / "identity.sqlite3"),
+    )
+
+
+def test_run_full_cycle_wires_identity_correlation(tmp_path, monkeypatch):
+    # health/stats both touch real forums over the network - stub them out
+    # so this test stays offline and fast, same discipline as
+    # test_discover.py's _FakeSource for TelegramBridgeSource.
+    monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
+    monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
+    monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
+    monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+
+    sources = [_FakeSource([
+        _forum_incident("post-a", "darkforums", "EvilGhost"),
+        _forum_incident("post-b", "carders.biz", "EvilGhost"),
+    ])]
+    store, health_store, stats_store, identity_store = _stores(tmp_path)
+
+    summary = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+
+    assert summary["new_incidents"] == 2
+    assert len(summary["new_identity_matches"]) == 1
+    assert summary["new_identity_matches"][0]["username"] == ["EvilGhost"]
+    assert set(summary["new_identity_matches"][0]["forums"]) == {"darkforums", "carders.biz"}
+    # identity_matches is the full current-state rollup (adds
+    # first_matched_at); new_identity_matches is just this cycle's delta.
+    assert len(summary["identity_matches"]) == 1
+    assert summary["identity_matches"][0]["username"] == ["EvilGhost"]
+    assert summary["newly_dead_forums"] == []
+    assert summary["health_report"] == []
+
+
+def test_run_full_cycle_second_call_does_not_duplicate_incidents(tmp_path, monkeypatch):
+    monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
+    monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
+    monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
+    monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+
+    incidents = [_forum_incident("post-a", "darkforums", "EvilGhost")]
+    sources = [_FakeSource(incidents)]
+    store, health_store, stats_store, identity_store = _stores(tmp_path)
+
+    first = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+    second = run_full_cycle(sources, store, health_store, stats_store, identity_store)
+
+    assert first["new_incidents"] == 1
+    assert second["new_incidents"] == 0  # SeenStore dedup, same as before this refactor
+
+
+def test_run_full_cycle_survives_a_broken_source(tmp_path, monkeypatch):
+    monkeypatch.setattr(pipeline, "check_forum_health", lambda health_store: [])
+    monkeypatch.setattr(pipeline, "collect_snapshots", lambda urls, store: {})
+    monkeypatch.setattr(pipeline, "OUTPUT_FEED", tmp_path / "incidents.jsonl")
+    monkeypatch.setattr(pipeline, "ALERTS_FEED", tmp_path / "alerts.jsonl")
+
+    class _BrokenSource:
+        name = "broken"
+
+        def fetch(self):
+            raise RuntimeError("network exploded")
+
+    store, health_store, stats_store, identity_store = _stores(tmp_path)
+    summary = run_full_cycle([_BrokenSource()], store, health_store, stats_store, identity_store)
+
+    assert summary["new_incidents"] == 0

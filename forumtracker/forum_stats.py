@@ -30,6 +30,7 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -206,11 +207,27 @@ class StatsStore:
         self._conn.close()
 
 
-def collect_snapshots(urls: dict[str, str], store: StatsStore) -> dict[str, Optional[dict]]:
+def collect_snapshots(urls: dict[str, str], store: StatsStore, max_workers: int = 8) -> dict[str, Optional[dict]]:
+    """Fetches every forum's homepage concurrently (network I/O only -
+    `fetch_stats` touches nothing shared) and writes each result to `store`
+    back on the calling thread, same split as `health.check_all`: a
+    sqlite3 connection opened with the default `check_same_thread=True`
+    would raise if `store.record()` ran inside a worker thread. Sequential
+    fetching here used to mean up to ~23 * 12s worst-case in a row - real
+    enough to matter for a CI job with a time budget (see
+    .github/workflows/pipeline.yml), not just a local-run nicety.
+    """
     results: dict[str, Optional[dict]] = {}
-    for name, url in urls.items():
-        stats = fetch_stats(url)
-        results[name] = stats
-        if stats:
-            store.record(name, stats)
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(fetch_stats, url): name for name, url in urls.items()}
+        for future in as_completed(futures):
+            name = futures[future]
+            try:
+                stats = future.result()
+            except Exception:
+                log.exception("forum_stats: fetch crashed for %s", name)
+                stats = None
+            results[name] = stats
+            if stats:
+                store.record(name, stats)
     return results
