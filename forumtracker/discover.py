@@ -15,6 +15,7 @@ Usage: `python -m forumtracker.discover`
 """
 from __future__ import annotations
 
+import difflib
 import logging
 from collections import Counter
 from urllib.parse import urlparse
@@ -60,6 +61,37 @@ def discover_candidates(source: TelegramBridgeSource | None = None) -> list[dict
         {"hostname": host, "mentions": n, "example_url": examples[host]}
         for host, n in counts.most_common()
     ]
+
+
+def find_mirror_candidates(
+    dead_name: str, candidates: list[dict] | None = None, min_similarity: float = 0.45
+) -> list[dict]:
+    """Given a forum name flagged by `health.HealthStore.probably_dead()`,
+    ranks `discover_candidates()` (Telegram-mentioned hostnames not yet in
+    any pool) by textual similarity to the dead forum's own pool name - a
+    mirror almost always keeps the brand in its new hostname (e.g.
+    "darkforums" dying and "darkforums.st" or "darkforums-official.cc"
+    turning up in Telegram chatter). Adds a "similarity" field (0-1) to
+    each returned candidate dict; a hostname that literally contains (or
+    is contained by) the dead name is floored at 0.8 regardless of the
+    fuzzy-match score, since that's the strongest real-world signal.
+
+    Pure suggestion list for a human to live-review - never auto-adopted
+    into FORUM_POOL/BROWSER_FORUM_POOL, same discipline as
+    `discover_candidates()` itself (see this module's docstring).
+    """
+    candidates = discover_candidates() if candidates is None else candidates
+    needle = dead_name.lower().replace(".", "").replace("-", "")
+    scored = []
+    for c in candidates:
+        haystack = c["hostname"].lower().replace(".", "").replace("-", "")
+        ratio = difflib.SequenceMatcher(None, needle, haystack).ratio()
+        if needle and (needle in haystack or haystack in needle):
+            ratio = max(ratio, 0.8)
+        if ratio >= min_similarity:
+            scored.append({**c, "similarity": round(ratio, 2)})
+    scored.sort(key=lambda c: c["similarity"], reverse=True)
+    return scored
 
 
 def main() -> None:

@@ -14,18 +14,21 @@ from urllib.parse import urlparse
 
 from .alerting import is_alert_worthy, to_alert_card
 from .dedup import SeenStore
+from .discover import find_mirror_candidates
 from .entity_extraction import extract_victim_domain
-from .notify_telegram import notify_alerts
+from .health import HealthStore, check_all, pool_urls
+from .notify_telegram import notify_alerts, notify_health_alert
 from .ransomware_intel import classify as classify_ransomware
 from .sources.base import Source
-from .sources.browser_forum import BrowserForumSource
+from .sources.browser_forum import BROWSER_FORUM_POOL, BrowserForumSource
 from .sources.telegram_bridge import TelegramBridgeSource
-from .sources.underground_forums import UndergroundForumSource
+from .sources.underground_forums import FORUM_POOL, UndergroundForumSource
 
 log = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SEEN_DB = DATA_DIR / "seen.sqlite3"
+HEALTH_DB = DATA_DIR / "health.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 
@@ -128,9 +131,24 @@ def emit_alerts(alerts: list[dict]) -> None:
             f.write(json.dumps(alert, ensure_ascii=False) + "\n")
 
 
+def check_forum_health(health_store: HealthStore) -> list[str]:
+    """Runs one liveness pass over FORUM_POOL + BROWSER_FORUM_POOL and
+    returns only the forum names that *just* crossed
+    `health.DEAD_THRESHOLD` consecutive unreachable checks this cycle -
+    i.e. forums already past the threshold before this call are excluded,
+    so a caller notifying on the return value fires once per outage
+    instead of every cycle the forum stays down.
+    """
+    before = set(health_store.probably_dead())
+    check_all(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL), health_store)
+    after = set(health_store.probably_dead())
+    return sorted(after - before)
+
+
 def loop(poll_seconds: int = 900) -> None:
     sources = build_sources()
     store = SeenStore(SEEN_DB)
+    health_store = HealthStore(HEALTH_DB)
     try:
         while True:
             new_incidents = run_once(sources, store)
@@ -138,6 +156,17 @@ def loop(poll_seconds: int = 900) -> None:
             alerts = build_alerts(new_incidents)
             emit_alerts(alerts)
             notify_alerts(alerts)
+
+            try:
+                newly_dead = check_forum_health(health_store)
+                for name in newly_dead:
+                    log.warning("health: %s crossed the dead-mirror threshold", name)
+                    candidates = find_mirror_candidates(name)
+                    notify_health_alert(name, candidates)
+            except Exception:
+                log.exception("health check raised, skipping this cycle")
+
             time.sleep(poll_seconds)
     finally:
         store.close()
+        health_store.close()

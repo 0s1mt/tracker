@@ -423,28 +423,80 @@ sonra gerçek gönderiyi görünür alana kaydırıyor
 şeritleri çekilirdi. `_save_screenshot()`'ın docstring'i bu sırayı
 açıklıyor.
 
-## Bilinen kısıt: gerçek .onion forumlarına erişim yok
+## .onion forumlarına erişim — güncelleme
 
-Bu ortamdan Tor ağı bootstrap edilemiyor (Tor relay'lerine gereken ham TCP
-bağlantıları — ör. port 9001 — engelleniyor), bu yüzden bu modül sadece
-clearnet'te (deep web) yaşayan forumları kapsıyor, gerçek .onion (dark web)
-forumları değil. Çözüm yolu — bu ortamın dışında, kullanıcının kendi
-makinesinde:
+**Düzeltme (2026-09):** Önceki turda "bu ortamdan Tor bootstrap edilemiyor"
+diye yazmıştık. Bu artık yanlış — bu makinede portable Tor Expert Bundle
+(admin hakkı gerektirmeden `dist.torproject.org`'dan indirilip
+çıkarılabiliyor) ile gerçek bir Tor süreci canlı bootstrap edildi ve gerçek
+`.onion` adreslerine (arama motorları, dizinler, en az bir ransomware-grup
+sitesi) SOCKS5 (`127.0.0.1:9050`) üzerinden başarıyla bağlanıldığı
+doğrulandı — bkz. `health.py`'nin Tor-aware `check_one()`'ı, bu keşfin
+doğrudan sonucu. Aşağıdaki eski liste hâlâ geçerli, sadece 1. madde artık
+gerekli değil (bootstrap otomatik yapılabiliyor):
 
-1. Tor Browser'ı (veya bağımsız `tor.exe`'yi) kullanıcı kendi başlatır —
-   bootstrap işlemi bu şekilde bizim sandbox'ımızın ağ kısıtından etkilenmez.
-2. Tor Browser varsayılan olarak `127.0.0.1:9150`'de bir SOCKS5 proxy açar
-   (bağımsız `tor` servisi kullanılırsa `127.0.0.1:9050`). Loopback bağlantı
-   bu sandbox'tan çalışıyor (test edildi) — sadece dışa dönük ham TCP
-   engelli.
-3. `pip install pysocks` sonrası `requests`'e
-   `proxies={"http": "socks5h://127.0.0.1:9150", "https": "socks5h://127.0.0.1:9150"}`
+1. `pip install pysocks` sonrası `requests`'e
+   `proxies={"http": "socks5h://127.0.0.1:9050", "https": "socks5h://127.0.0.1:9050"}`
    verilerek aynı `Source` arayüzüyle bir `darkweb_onion.py` yazılabilir —
-   deepdarkCTI listesindeki ONLINE .onion adresleri hedef havuzu olur.
-4. Önemli sınır: ciddi carding/cybercrime forumlarının çoğu misafir
+   deepdarkCTI listesindeki ONLINE .onion adresleri hedef havuzu olur. Henüz
+   yazılmadı — bu bir sonraki adım, `health.py`'nin adres-değişikliği
+   altyapısı bunun üstüne kurulacak şekilde tasarlandı (bkz. aşağıdaki
+   bölüm).
+2. Önemli sınır: ciddi carding/cybercrime forumlarının çoğu misafir
    görünümünü çok kısıtlı tutar — gerçek "sohbet" kapsamı için çoğunlukla
    kayıtlı (bazen vouch edilmiş) bir hesap gerekir; bu otomatik
    kurulamayacak bir adım.
+
+## Forum canlılık takibi ve adres değişikliği tespiti — `health.py`
+
+Dark/underground forumlar sık adres değiştirir (takedown, DDoS, gönüllü
+taşınma) — bir mirror rotasyonu, "bakımda" hatasından farklı olarak, eski
+adresin tamamen çözümlenmez/bağlanılamaz hale gelmesiyle kendini belli eder
+(hata sayfası değil, DNS/bağlantı hatası). `health.py` bu ikisini ayırt
+ediyor:
+
+- **`up`** — HTTP yanıtı geldi, status < 500 (adres yaşıyor)
+- **`degraded`** — HTTP yanıtı geldi ama 5xx (sunucu hatası, adres yine de
+  yaşıyor — mirror avına gerek yok)
+- **`unreachable`** — DNS/bağlantı/timeout hatası (adres muhtemelen artık
+  yok)
+
+`HealthStore` (SQLite, `dedup.py`'nin `SeenStore`'uyla aynı "tek dosya, ekstra
+altyapı yok" felsefesi) her forum için ardışık `unreachable` sayısını
+tutuyor; `DEAD_THRESHOLD` (3) art arda geçildiğinde forum "muhtemelen adres
+değiştirdi" olarak işaretleniyor — tek seferlik bir kesinti (yeniden başlatma,
+geçici DDoS-Guard) eşiği geçmez, sadece sürdürülen bir kesinti geçer. `.onion`
+homepage'ler otomatik olarak Tor SOCKS proxy'sinden geçiyor (yukarıdaki
+bölümde doğrulanan kurulumla aynı).
+
+**Yeni adres keşfi `discover.py`'yi yeniden kullanıyor:** Bir forum
+`DEAD_THRESHOLD`'u geçtiğinde, `discover.find_mirror_candidates(dead_name)`
+zaten var olan "Telegram'da bahsedilen ama havuzda olmayan hostname"
+sinyalini (`discover_candidates()`) alıp, ölü forumun ismiyle metin
+benzerliğine göre sıralıyor (`difflib.SequenceMatcher` + isim
+içerme/içerilme durumunda benzerlik 0.8'e sabitleniyor — bir mirror hemen
+her zaman markayı yeni hostname'de de taşır, ör. "darkforums" ölünce
+Telegram'da "darkforums-official.cc" belirmesi gibi). **Otomatik hiçbir şeyi
+`FORUM_POOL`/`BROWSER_FORUM_POOL`'a eklemiyor** — `discover_candidates()`
+için zaten var olan "önce canlı içerik incelemesi" disiplini burada da
+geçerli, bu sadece bir öneri listesi.
+
+**Kullanım:**
+
+```bash
+python -m forumtracker.cli --health
+```
+
+Tek seferlik tam rapor (her forumun durumu + varsa mirror önerileri) JSON
+olarak basılır. `--loop` modunda her döngüde otomatik çalışır
+(`pipeline.check_forum_health()`); bir forum o döngüde eşiği **yeni**
+geçtiyse (önceki döngüde zaten geçmemişse) `notify_telegram.
+notify_health_alert()` ile Telegram'a düz metin uyarı + bulunan mirror
+adayları gönderilir — aynı forum için her döngüde tekrar tekrar spam
+atmıyor, sadece kesinti başladığı anda bir kez.
+
+Bu oturumda canlı doğrulandı: 23 havuz forumunun tamamı `up` döndü, sıfır
+yanlış pozitif.
 
 ## Telegram kaynağı — `telegram_bridge.py` + `discover.py`
 

@@ -1,6 +1,6 @@
 """Offline test for forum-candidate discovery - no network, a fake source
 stub stands in for TelegramBridgeSource.fetch()."""
-from forumtracker.discover import discover_candidates
+from forumtracker.discover import discover_candidates, find_mirror_candidates
 from forumtracker.schema import Evidence, Incident, ThreatActor, Victim
 from forumtracker.schema import Source as SourceMeta
 
@@ -56,3 +56,26 @@ def test_discover_handles_missing_referenced_url():
     incident.extra = {}
     candidates = discover_candidates(_FakeSource([incident]))
     assert candidates == []
+
+
+def test_find_mirror_candidates_ranks_lookalike_hostname_first():
+    candidates = [
+        {"hostname": "darkforums-official.cc", "mentions": 4, "example_url": "https://darkforums-official.cc/t1"},
+        {"hostname": "totally-unrelated.example", "mentions": 10, "example_url": "https://totally-unrelated.example/t1"},
+    ]
+    ranked = find_mirror_candidates("darkforums", candidates=candidates)
+    assert ranked[0]["hostname"] == "darkforums-official.cc"
+    assert ranked[0]["similarity"] >= 0.8
+
+
+def test_find_mirror_candidates_excludes_unrelated_hostnames():
+    candidates = [{"hostname": "totally-unrelated.example", "mentions": 10, "example_url": "https://x/y"}]
+    ranked = find_mirror_candidates("darkforums", candidates=candidates)
+    assert ranked == []
+
+
+def test_find_mirror_candidates_uses_discover_candidates_by_default(monkeypatch):
+    fake = [{"hostname": "bdfclub-new.net", "mentions": 2, "example_url": "https://bdfclub-new.net/t"}]
+    monkeypatch.setattr("forumtracker.discover.discover_candidates", lambda: fake)
+    ranked = find_mirror_candidates("bdfclub")
+    assert ranked and ranked[0]["hostname"] == "bdfclub-new.net"

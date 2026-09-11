@@ -66,6 +66,51 @@ def send_alert(card: dict, token: Optional[str] = None, chat_id: Optional[str] =
     return True
 
 
+def notify_health_alert(
+    forum_name: str, mirror_candidates: list[dict], token: Optional[str] = None, chat_id: Optional[str] = None
+) -> bool:
+    """Plain-text ping for a pool forum that just crossed
+    `health.DEAD_THRESHOLD` consecutive unreachable checks - a probable
+    address rotation, not a content alert, so it's a hand-built message
+    rather than going through `render_telegram_message` (built for
+    Incident alert cards). Same env-var/no-op contract as
+    `notify_alerts()`: silently does nothing if Telegram isn't configured.
+    """
+    token = token or os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = chat_id or os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        return False
+
+    lines = [
+        f"⚠️ Forum muhtemelen adres degistirdi: {forum_name}",
+        "Art arda birden fazla kontrolde ulasilamadi (DNS/baglanti hatasi, sunucu hatasi degil).",
+    ]
+    if mirror_candidates:
+        lines.append("\nOlasi yeni adresler (Telegram'da bahsedilen, henuz dogrulanmadi - manuel incele):")
+        for c in mirror_candidates[:5]:
+            lines.append(f"  - {c['hostname']} (benzerlik={c['similarity']}, mentions={c['mentions']})")
+    else:
+        lines.append("\nHenuz olasi bir mirror bulunamadi.")
+    text = "\n".join(lines)
+
+    try:
+        resp = requests.post(
+            API_URL.format(token=token),
+            json={"chat_id": chat_id, "text": text, "disable_web_page_preview": True},
+            timeout=TIMEOUT_SECONDS,
+        )
+    except requests.RequestException:
+        log.exception("telegram health alert failed for %s", forum_name)
+        return False
+
+    if resp.status_code != 200:
+        log.warning(
+            "telegram health alert non-200 for %s: %s %s", forum_name, resp.status_code, resp.text[:300]
+        )
+        return False
+    return True
+
+
 def notify_alerts(alerts: list[dict]) -> int:
     """Sends every alert card in `alerts` to Telegram. Silent no-op if
     TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID aren't set. Returns the number of
