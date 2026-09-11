@@ -299,6 +299,67 @@ cycle otomatik snapshot alınıyor (`pipeline.py`, `STATS_DB`). Bu oranın
 karışmayacağı) henüz karar verilmedi — bu bilinçli olarak ayrı bırakıldı,
 mevcut thread-seviyesi skoru sessizce değiştirmemek için.
 
+## Çapraz-forum kullanıcı adı eşleştirme (v2) — `identity_correlation.py`
+
+Kullanıcı talebi: bir platformdaki tüm kullanıcı isimlerini çekip diğer
+forumlarda aratıp eşleştirmek — aynı nickname birden fazla forumda
+görülüyorsa bunu tek bir gerçek aktörün çapraz-platform varlığı olarak
+işaretlemek.
+
+**Aktif arama canlı test edildi ve çalışmıyor — bu bir varsayım değil,
+ölçülmüş sonuç.** 21 forumun (15 XenForo + 6 MyBB) tamamında misafir
+member-search denendi:
+
+- XenForo `/search/member?q=` — 14/15 forumda 404 (route kapalı), 1
+  forumda (turkhackteam) gerçek login duvarına düşüyor.
+- XenForo'nun otomatik-tamamlama endpoint'i `/find-member?q=` — denenen
+  4 forumun tamamında 404 (login + CSRF token gerektiriyor).
+- MyBB `member.php?action=search` — 6 forumun tamamı 200 dönüyor ama
+  gövde tamamen boş (gerçek CSRF token'lı bir POST + oturum gerektiriyor).
+
+Yani forumlar üye aramasını bilerek login arkasına kilitlemiş — bu tam da
+bu tür otomatik enumerasyona karşı bir önlem, bypass edilecek bir bug
+değil.
+
+**Gerçekten çalışan ve yeni ağ isteği gerektirmeyen kısım:** zaten her
+incident `threat_actor.name` (yazan kişinin forum kullanıcı adı) ve
+`source.name` (`forum:<site_name>`) taşıyor. `IdentityStore` bunları
+(kullanıcı_adı, forum) çiftleri olarak biriktiriyor; bir kullanıcı adı
+2+ farklı forumda görülünce **çapraz-platform eşleşmesi** olarak
+işaretleniyor. Bu, aktif bir aramadan daha güçlü bir yaklaşım — her yeni
+`--loop` cycle'ı veriyi büyütüyor, tek seferlik bir taramanın
+göremeyeceği eşleşmeleri zamanla ortaya çıkarıyor.
+
+`backfill_from_feed()` ile mevcut `incidents.jsonl`'den (2362 kayıt)
+geriye dönük dolduruldu — **canlı sonuç: 59 gerçek çapraz-forum eşleşmesi**,
+örnekler:
+
+```
+Aisus        -> bdfclub, forumteam.top, spyhackerz, xreactor
+Angedaniya   -> blackbones, forumteam.top, leetforums
+stevee       -> darkforums, leakforum.io, niflheim
+```
+
+Genel rol isimleri (`admin`, `unknown`, `moderator`, `system`, ...)
+kasıtlı olarak dışlanıyor — aksi halde her forumda trivial olarak
+"eşleşirlerdi". Eşleştirme büyük/küçük harf duyarsız (case-insensitive).
+
+**Kullanım:** `python -m forumtracker.cli --identity` (mevcut eşleşmeleri
+raporlar), `--identity --identity-backfill` (önce `incidents.jsonl`'den
+doldurur, sonra raporlar). `--loop` modunda her cycle'ın yeni incident'leri
+otomatik olarak kaydediliyor; bir kullanıcı adı o cycle'da **ilk kez** 2.
+foruma geçtiğinde (her görülüşte değil, sadece keşif anında)
+`notify_telegram.notify_identity_match()` ile Telegram'a bildiriliyor.
+
+**Canlı bulunan iki gerçek bug (düzeltildi):** (1) `IdentityStore.
+all_matches()` bir kullanıcının forum listesini ilk eşleşme anındaki
+donmuş bir JSON snapshot'tan okuyordu — 3./4. forum sonradan eklendiğinde
+rapor güncellenmiyordu; artık her zaman `username_forums` tablosundan canlı
+hesaplanıyor. (2) `record_incidents()` `None`/dict-olmayan bir kayıtla
+karşılaşınca hata loglamaya çalışırken kendisi patlıyordu; artık tip
+kontrolüyle en baştan atlanıyor. İkisi de kendi testlerimizle yakalandı
+(`tests/test_identity_correlation.py`).
+
 ## Ransomware takibi — `ransomware_intel.py` + `entity_extraction.py`
 
 Roadmap'in 3. maddesi: "ransomware forumlarını özel olarak takip etmek".

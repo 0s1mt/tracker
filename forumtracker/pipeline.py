@@ -18,7 +18,8 @@ from .discover import find_mirror_candidates
 from .entity_extraction import extract_victim_domain
 from .forum_stats import StatsStore, collect_snapshots
 from .health import HealthStore, check_all, pool_urls
-from .notify_telegram import notify_alerts, notify_health_alert
+from .identity_correlation import IdentityStore
+from .notify_telegram import notify_alerts, notify_health_alert, notify_identity_match
 from .ransomware_intel import classify as classify_ransomware
 from .sources.base import Source
 from .sources.browser_forum import BROWSER_FORUM_POOL, BrowserForumSource
@@ -31,6 +32,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SEEN_DB = DATA_DIR / "seen.sqlite3"
 HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
+IDENTITY_DB = DATA_DIR / "identity.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 
@@ -152,6 +154,7 @@ def loop(poll_seconds: int = 900) -> None:
     store = SeenStore(SEEN_DB)
     health_store = HealthStore(HEALTH_DB)
     stats_store = StatsStore(STATS_DB)
+    identity_store = IdentityStore(IDENTITY_DB)
     try:
         while True:
             new_incidents = run_once(sources, store)
@@ -159,6 +162,13 @@ def loop(poll_seconds: int = 900) -> None:
             alerts = build_alerts(new_incidents)
             emit_alerts(alerts)
             notify_alerts(alerts)
+
+            try:
+                for match in identity_store.record_incidents(new_incidents):
+                    log.info("identity: %s matched across %s", match.username_norm, match.forums)
+                    notify_identity_match(match)
+            except Exception:
+                log.exception("identity correlation raised, skipping this cycle")
 
             try:
                 newly_dead = check_forum_health(health_store)
@@ -179,3 +189,4 @@ def loop(poll_seconds: int = 900) -> None:
         store.close()
         health_store.close()
         stats_store.close()
+        identity_store.close()

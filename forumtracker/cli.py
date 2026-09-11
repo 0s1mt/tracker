@@ -9,13 +9,15 @@ from .dedup import SeenStore
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
+from .identity_correlation import IdentityStore, backfill_from_feed
 from .notify_telegram import notify_alerts
-from .pipeline import DATA_DIR, SEEN_DB, build_alerts, build_sources, emit, emit_alerts, loop, run_once
+from .pipeline import DATA_DIR, OUTPUT_FEED, SEEN_DB, build_alerts, build_sources, emit, emit_alerts, loop, run_once
 from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
 
 HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
+IDENTITY_DB = DATA_DIR / "identity.sqlite3"
 
 
 def run_health_check() -> dict:
@@ -61,6 +63,29 @@ def run_stats_snapshot() -> dict:
         store.close()
 
 
+def run_identity_report(backfill: bool = False) -> dict:
+    """Reports every username currently known to have posted on 2+ pool
+    forums (see identity_correlation.py). `--identity-backfill` seeds this
+    from the existing incidents.jsonl first - otherwise the report only
+    reflects whatever --once/--loop runs have recorded since IdentityStore
+    was first created.
+    """
+    store = IdentityStore(IDENTITY_DB)
+    try:
+        if backfill:
+            backfill_from_feed(store, OUTPUT_FEED)
+        matches = store.all_matches()
+        return {
+            "cross_forum_matches": len(matches),
+            "matches": [
+                {"username": m.display_names, "forums": m.forums, "first_matched_at": m.first_matched_at}
+                for m in matches
+            ],
+        }
+    finally:
+        store.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Darkweb Forum Tracker ingestion pipeline")
     parser.add_argument("--once", action="store_true", help="run a single fetch cycle and print new incidents")
@@ -76,6 +101,14 @@ def main() -> None:
         help="snapshot each pool forum's own thread/message/member counters and report real "
              "messages/day activity once enough history has accumulated",
     )
+    parser.add_argument(
+        "--identity", action="store_true",
+        help="report every username currently matched across 2+ pool forums",
+    )
+    parser.add_argument(
+        "--identity-backfill", action="store_true",
+        help="with --identity, first seed the identity store from the existing incidents.jsonl",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -86,6 +119,10 @@ def main() -> None:
 
     if args.stats:
         print(json.dumps(run_stats_snapshot(), ensure_ascii=False, indent=2))
+        return
+
+    if args.identity:
+        print(json.dumps(run_identity_report(backfill=args.identity_backfill), ensure_ascii=False, indent=2))
         return
 
     if args.loop:

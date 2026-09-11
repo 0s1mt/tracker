@@ -111,6 +111,40 @@ def notify_health_alert(
     return True
 
 
+def notify_identity_match(match, token: Optional[str] = None, chat_id: Optional[str] = None) -> bool:
+    """Plain-text ping for a newly discovered cross-forum username match
+    (see identity_correlation.py) - `match` is an identity_correlation.
+    CrossMatch. Same env-var/no-op contract as the other notify_* helpers.
+    """
+    token = token or os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = chat_id or os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        return False
+
+    names = "/".join(sorted(set(match.display_names))) or match.username_norm
+    text = (
+        f"🔗 Capraz platform eslesmesi: {names}\n"
+        f"Forumlar: {', '.join(sorted(match.forums))}"
+    )
+    try:
+        resp = requests.post(
+            API_URL.format(token=token),
+            json={"chat_id": chat_id, "text": text, "disable_web_page_preview": True},
+            timeout=TIMEOUT_SECONDS,
+        )
+    except requests.RequestException:
+        log.exception("telegram identity-match alert failed for %s", match.username_norm)
+        return False
+
+    if resp.status_code != 200:
+        log.warning(
+            "telegram identity-match alert non-200 for %s: %s %s",
+            match.username_norm, resp.status_code, resp.text[:300],
+        )
+        return False
+    return True
+
+
 def notify_alerts(alerts: list[dict]) -> int:
     """Sends every alert card in `alerts` to Telegram. Silent no-op if
     TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID aren't set. Returns the number of
