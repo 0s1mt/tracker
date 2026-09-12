@@ -517,6 +517,34 @@ ayrıca bağımsız olarak. Sonuç:
   döndürüyor (200 değil), bu yüzden havuzun kendi canlılık barını
   geçemedi; 200 dönmeye başlarsa eklenebilir.
 
+### deepdarkCTI birleştirme batch'i (2026-09-12)
+
+Kullanıcı talebi: bu modülün orijinal seed listesi zaten deepdarkCTI'den
+türetilmişti (bkz. dosya başındaki docstring) — güncel
+`github.com/fastfire/deepdarkCTI/forum.md`'yi tekrar çekip mevcut
+havuzla mutabakat sağlamak istendi. Listedeki 300+ satırdan (çoğu .onion
+veya OFFLINE/seized mirror) clearnet + "ONLINE" etiketli, zaten
+havuzda/elenmiş olmayan **134 aday** kaldı; hepsi canlı test edildi
+(RSS 200 + gerçek `<item>` + konu-uygunluğu örneklemesi):
+
+- **3 gerçekten yeni forum eklendi**: `0x00sec` (Ghost/RSS, güvenlik
+  araştırması topluluğu), `nulledbb` (MyBB, credential/mail-access
+  dump'ları), `voided` (MyBB, aynı tür). RSS havuzu **28 → 31**.
+- **2 aday, zaten havuzdaki bir forumun ayna (mirror) domaini çıktı** —
+  yeniden eklenmedi: `leakforum.st`, zaten havuzdaki `leakforum.io` ile
+  bayt-bayt aynı feed'i veriyor (aynı linkler, aynı guid); `toolba.se`,
+  zaten havuzdaki `www.toolbase.bz`'e 301 yönlendiriyor.
+- **43 aday** erişilebilir ama çalışan bir RSS'i yok (ör. `lolz.guru` bot
+  duvarı, `dumped.to` boş JS yönlendirmesi, `cracked.sh` kendi ilan
+  ettiği RSS linki 404 veriyor).
+- **80 aday** erişilemez/ölü/parklanmış (~40'ı artık kayıtlı bile değil,
+  geri kalanı Cloudflare/DDoS-Guard duvarı, squat edilmiş domain, veya
+  DNS-sinkhole).
+- **3 aday, RSS çalışıyor ama konu dışı olduğu için eklenmedi**:
+  `thejavasea.com` (yetişkin içerik ağırlıklı), `skynetzone.pw` (Vietnam
+  bahis sitesine squat edilmiş), `4cheat.org`/`4cheat.ru` (oyun hile
+  topluluğu, underground/CTI'yle ilgisiz).
+
 ## Ransomware takibi — `ransomware_intel.py` + `entity_extraction.py`
 
 Roadmap'in 3. maddesi: "ransomware forumlarını özel olarak takip etmek".

@@ -138,6 +138,18 @@ FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
     # its real feed is at `/news.rss` (found via the homepage's own <link> tag).
     # FORUM_POOL's rss value is just fetched literally, no code change needed.
     "antichat": {"homepage": "https://forum.antichat.io", "rss": "https://forum.antichat.io/news.rss"},
+    # --- deepdarkCTI merge batch (2026-09-12): user asked to reconcile the
+    # project's original deepdarkCTI-derived seed list (see module docstring)
+    # against the CURRENT github.com/fastfire/deepdarkCTI/forum.md. Of 134
+    # clearnet "ONLINE"-labeled candidates not already in this pool or already
+    # excluded, 2 turned out to be mirror domains of forums already here
+    # (leakforum.st serves byte-identical content to leakforum.io; toolba.se
+    # 301-redirects to the already-pooled www.toolbase.bz) - not re-added.
+    # These 3 are genuinely new, live-verified (RSS 200 + real <item> content,
+    # on-topic sampled) forums:
+    "0x00sec": {"homepage": "https://0x00sec.org", "rss": "https://0x00sec.org/rss/"},
+    "nulledbb": {"homepage": "https://nulledbb.com", "rss": "https://nulledbb.com/syndication.php"},
+    "voided": {"homepage": "https://voided.to", "rss": "https://voided.to/syndication.php"},
 }
 
 
