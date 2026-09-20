@@ -5,6 +5,7 @@ import argparse
 import json
 import logging
 
+from .dashboard import build_dashboard
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
@@ -168,6 +169,11 @@ def main() -> None:
         "--db-stats", action="store_true",
         help="report how many users/forums are currently stored (member_directory + identity), no network calls",
     )
+    parser.add_argument(
+        "--build-dashboard", action="store_true",
+        help="render the master dashboard (forum health, incidents, alerts, identity - with a unified "
+             "search box) from the current data/ state to reports/dashboard.html, no network calls",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -190,6 +196,11 @@ def main() -> None:
 
     if args.db_stats:
         print(json.dumps(run_db_stats(), ensure_ascii=False, indent=2))
+        return
+
+    if args.build_dashboard:
+        out_path = build_dashboard(DATA_DIR, DATA_DIR.parent / "reports" / "dashboard.html")
+        print(json.dumps({"dashboard_written_to": str(out_path)}, ensure_ascii=False, indent=2))
         return
 
     if args.loop:

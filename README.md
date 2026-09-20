@@ -101,6 +101,42 @@ history'sine commit'lemek — sürekli büyüyen dosyaları her 30 dakikada bir
 commit'lemek repo'yu şişirir. Cache'te kalıyorlar, git'e giren sadece
 küçük, insan-okunur `reports/latest_cycle.json` rollup'ı.
 
+## Master dashboard — `dashboard.py`
+
+Kullanıcı talebi: "full darkweb forum tracker son halini full + full
+görmek istiyorum... görsel olarak bütün herşeyi bir arayüze aktar... bir
+arama butonu ekle". Bu ana kadarki her özelliğin (health, forum_stats,
+identity_correlation, member_directory) kendi ayrı raporu vardı — bu
+modül hepsini **tek bir statik HTML sayfasında** birleştirip üstüne
+gerçek bir arama kutusu koyuyor.
+
+**Nasıl çalışıyor:** `python -m forumtracker.cli --build-dashboard`,
+`data/`'daki mevcut duruma (tüm SQLite store'lar + `incidents.jsonl` +
+`alerts.jsonl`) bakıp `reports/dashboard.html`'i üretiyor — sunucu yok,
+görüntülerken hiçbir ağ isteği yok, o anki state JSON olarak sayfaya
+gömülüyor (`forumtracker/templates/dashboard.html` şablonu +
+`__DATA_JSON__` yer tutucusu). Ağ gerektirmediği için testleri de
+(`tests/test_dashboard.py`) sahte `data/` durumuyla çalışıyor.
+
+**Sayfada ne var:** KPI şeridi (izlenen forum/kayıt/alarm/kimlik
+eşleşmesi sayıları), 32 forumun sağlık durumu + gerçek
+`forum_stats.py` geçmişinden çizilen mini aktivite grafiği (sparkline),
+en yüksek riskli 25 alarm, çapraz-forum kimlik eşleşmeleri tablosu
+(`identity_correlation`) ve çapraz-forum kayıtlı hesaplar tablosu
+(`member_directory`) — üstte tek bir arama kutusu, yazdıkça bunların
+**hepsinde birden** (kayıt başlığı, kullanıcı adı, forum adı, etiket)
+aynı anda arıyor, sonuçları kategoriye göre gruplayıp gösteriyor.
+
+**Bilinçli olarak `pipeline.yml`'e bağlanmadı:** bu sayfa tüm
+incidents/alerts geçmişini gömüyor (büyüyor, şu an ~1.5 MB) —
+`reports/latest_cycle.json`'ın aksine, bunu her 30 dakikada bir otomatik
+commit'lemek repo'yu sürekli MB'larca diff ile şişirir. Talep üzerine
+elle (`--build-dashboard`) veya istenirse ayrı, daha seyrek bir
+workflow'la üretilmesi düşünülebilir — şimdilik bilinçli olarak elle.
+
+**Yayınlanan canlı örnek** (12 Eylül 2026 verisiyle, statik snapshot):
+https://claude.ai/code/artifact/36d6fc46-a557-4c38-84a3-72c008d34da1
+
 ## Mimari
 
 ```

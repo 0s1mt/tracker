@@ -1,0 +1,401 @@
+<title>Forum Tracker Konsolu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#0a0d12; --surface:#12161d; --surface-2:#171c24; --surface-3:#1c222b;
+  --border:#232a35; --border-soft:#1a2029;
+  --text:#e7ecf1; --text-dim:#8b97a8; --text-faint:#4f5968;
+  --accent:#45d4e8; --accent-dim:#2a9aab; --accent-soft:rgba(69,212,232,0.12);
+  --good:#4fb87c; --good-soft:rgba(79,184,124,0.14);
+  --warn:#dba54b; --warn-soft:rgba(219,165,75,0.14);
+  --bad:#e0685f; --bad-soft:rgba(224,104,95,0.14);
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f3f6f8; --surface:#ffffff; --surface-2:#eef2f5; --surface-3:#e4e9ed;
+    --border:#d7dfe5; --border-soft:#e3e9ed;
+    --text:#10151b; --text-dim:#54606d; --text-faint:#8a96a3;
+    --accent:#0e8fa3; --accent-dim:#0a6b7a; --accent-soft:rgba(14,143,163,0.10);
+    --good:#1f8f52; --good-soft:rgba(31,143,82,0.10);
+    --warn:#96731f; --warn-soft:rgba(150,115,31,0.10);
+    --bad:#b8412e; --bad-soft:rgba(184,65,46,0.10);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f3f6f8; --surface:#ffffff; --surface-2:#eef2f5; --surface-3:#e4e9ed;
+  --border:#d7dfe5; --border-soft:#e3e9ed;
+  --text:#10151b; --text-dim:#54606d; --text-faint:#8a96a3;
+  --accent:#0e8fa3; --accent-dim:#0a6b7a; --accent-soft:rgba(14,143,163,0.10);
+  --good:#1f8f52; --good-soft:rgba(31,143,82,0.10);
+  --warn:#96731f; --warn-soft:rgba(150,115,31,0.10);
+  --bad:#b8412e; --bad-soft:rgba(184,65,46,0.10);
+}
+:root[data-theme="dark"]{
+  --bg:#0a0d12; --surface:#12161d; --surface-2:#171c24; --surface-3:#1c222b;
+  --border:#232a35; --border-soft:#1a2029;
+  --text:#e7ecf1; --text-dim:#8b97a8; --text-faint:#4f5968;
+  --accent:#45d4e8; --accent-dim:#2a9aab; --accent-soft:rgba(69,212,232,0.12);
+  --good:#4fb87c; --good-soft:rgba(79,184,124,0.14);
+  --warn:#dba54b; --warn-soft:rgba(219,165,75,0.14);
+  --bad:#e0685f; --bad-soft:rgba(224,104,95,0.14);
+}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);margin:0;padding:0 0 60px;}
+::selection{background:var(--accent-soft);}
+a{color:inherit;}
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px;}
+button,input{font-family:inherit;}
+
+/* ---- topbar ---- */
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 0;}
+.topbar-inner{max-width:1280px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good);flex:none;}
+.search-shell{flex:1;min-width:220px;position:relative;display:flex;align-items:center;}
+.search-shell svg{position:absolute;left:13px;width:15px;height:15px;stroke:var(--text-faint);pointer-events:none;}
+#searchInput{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px 10px 38px;color:var(--text);font-size:13.5px;outline:none;transition:border-color .12s;}
+#searchInput:focus{border-color:var(--accent-dim);}
+#searchInput::placeholder{color:var(--text-faint);}
+.search-count{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);white-space:nowrap;}
+.clear-btn{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:7px;padding:7px 11px;color:var(--text-dim);cursor:pointer;white-space:nowrap;}
+.clear-btn:hover{color:var(--text);border-color:var(--accent-dim);}
+.clear-btn[hidden]{display:none;}
+
+/* ---- kpi strip ---- */
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:22px 0;}
+@media (max-width:960px){.kpi-strip{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:520px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+.kpi-tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 14px 12px;}
+.kpi-num{font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;}
+.kpi-label{font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.35;}
+.kpi-tile.accent .kpi-num{color:var(--accent);}
+
+section{margin-bottom:30px;}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+h2{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--text-faint);margin:0;}
+.section-sub{font-size:11.5px;color:var(--text-faint);font-family:var(--mono);}
+
+.ops-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start;}
+@media (max-width:920px){.ops-grid{grid-template-columns:1fr;}}
+
+/* ---- forum health grid ---- */
+.forum-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;}
+.forum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 12px;}
+.forum-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:7px;}
+.forum-name{font-family:var(--mono);font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.status-pill{font-family:var(--mono);font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em;flex:none;}
+.status-up{background:var(--good-soft);color:var(--good);}
+.status-dead{background:var(--bad-soft);color:var(--bad);}
+.status-unknown{background:var(--surface-3);color:var(--text-faint);}
+.forum-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);display:flex;justify-content:space-between;align-items:center;}
+.spark{display:block;margin-top:6px;}
+.spark path{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.spark circle{fill:var(--accent);}
+.mdir-badge{color:var(--accent);}
+
+/* ---- alerts list ---- */
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.alert-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px;}
+.alert-title{font-size:12.5px;line-height:1.4;color:var(--text);}
+.alert-title a{text-decoration:none;}
+.alert-title a:hover{color:var(--accent);}
+.sev-pill{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.04em;flex:none;white-space:nowrap;}
+.sev-HIGH{background:var(--bad-soft);color:var(--bad);}
+.sev-MEDIUM{background:var(--warn-soft);color:var(--warn);}
+.sev-LOW{background:var(--surface-3);color:var(--text-dim);}
+.alert-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);display:flex;gap:10px;flex-wrap:wrap;}
+.alert-meta b{color:var(--text-dim);}
+.entity-chip{background:var(--accent-soft);color:var(--accent-dim);border-radius:10px;padding:1px 7px;font-size:9.5px;}
+
+/* ---- tables ---- */
+.table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:11px;background:var(--surface);}
+table{border-collapse:collapse;width:100%;font-size:12.5px;}
+thead th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:9px 13px;color:var(--text-faint);font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap;}
+tbody td{padding:9px 13px;border-bottom:1px solid var(--border-soft);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--surface-2);}
+.mono-cell{font-family:var(--mono);font-size:11.5px;}
+.forum-chip{display:inline-block;background:var(--surface-3);border:1px solid var(--border-soft);border-radius:6px;padding:1px 7px;font-family:var(--mono);font-size:10.5px;margin:1px 3px 1px 0;color:var(--text-dim);}
+
+/* ---- search results ---- */
+.result-group{margin-bottom:20px;}
+.result-group-head{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.result-group-head .count{color:var(--text-faint);}
+.result-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px;}
+.result-row:last-child{border-bottom:none;}
+.result-row .rr-main{flex:1;min-width:0;}
+.result-row .rr-title{color:var(--text);line-height:1.4;}
+.result-row .rr-title a{text-decoration:none;}
+.result-row .rr-title a:hover{color:var(--accent);}
+.result-row .rr-sub{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:3px;}
+.result-row .rr-side{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);flex:none;text-align:right;}
+.empty-note{font-family:var(--mono);font-size:12px;color:var(--text-faint);padding:24px 0;text-align:center;}
+[hidden]{display:none!important;}
+
+footer{margin-top:8px;padding-top:18px;border-top:1px solid var(--border-soft);font-family:var(--mono);font-size:11px;color:var(--text-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+</style>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="dot"></span>DARKWEB FORUM TRACKER</div>
+    <div class="search-shell">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="searchInput" type="text" placeholder="incident, alarm, kullanıcı adı veya forum ara…" autocomplete="off">
+    </div>
+    <span class="search-count" id="searchCount"></span>
+    <button class="clear-btn" id="clearBtn" hidden>Temizle</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <section id="searchResults" hidden>
+    <div class="section-head"><h2>Arama sonuçları</h2></div>
+    <div id="resultGroups"></div>
+  </section>
+
+  <div id="defaultView">
+    <section class="ops-grid">
+      <div>
+        <div class="section-head">
+          <h2>Forum sağlığı ve aktivite</h2>
+          <span class="section-sub" id="forumSub"></span>
+        </div>
+        <div class="forum-grid" id="forumGrid"></div>
+      </div>
+      <div>
+        <div class="section-head">
+          <h2>En yüksek riskli alarmlar</h2>
+          <span class="section-sub" id="alertSub"></span>
+        </div>
+        <div class="alert-list" id="alertList"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Çapraz-forum kimlik eşleşmeleri</h2>
+        <span class="section-sub">gerçekten post atmış, 2+ forumda görülmüş kullanıcılar — identity_correlation.py</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Kullanıcı</th><th>Forumlar</th><th>İlk eşleşme</th></tr></thead>
+          <tbody id="identityBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Çapraz-forum kayıtlı hesaplar</h2>
+        <span class="section-sub">sadece hesabı var, post attığı görülmemiş olabilir — member_directory.py</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Kullanıcı</th><th>Forumlar</th></tr></thead>
+          <tbody id="memberBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span id="footMeta"></span>
+    <span>forumtracker · deterministic, no-LLM pipeline</span>
+  </footer>
+</div>
+
+<script id="dashboard-data" type="application/json">__DATA_JSON__</script>
+<script>
+const DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
+
+function fmt(n){ return (n ?? 0).toLocaleString("tr-TR"); }
+function fmtDate(iso){
+  if(!iso) return "—";
+  try{
+    const d = new Date(iso);
+    return d.toLocaleDateString("tr-TR",{day:"2-digit",month:"short",year:"numeric"}) + " " +
+           d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){ return iso; }
+}
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function forumLabel(src){
+  if(!src) return "—";
+  const parts = src.split(":");
+  return parts.length > 1 ? parts.slice(1).join(":") : src;
+}
+
+// ---- KPI strip ----
+const kpi = DATA.kpi;
+const kpiTiles = [
+  [kpi.forums_monitored, "İzlenen forum (" + kpi.forums_up + " aktif)", true],
+  [kpi.total_incidents, "Toplanan kayıt (incident)", false],
+  [kpi.total_alerts, "Risk-skoru geçen alarm", false],
+  [kpi.identity_cross_forum, "Çapraz-forum kimlik eşleşmesi", false],
+  [kpi.identity_total_users, "Post atmış benzersiz kullanıcı", false],
+  [kpi.member_directory_total, "Üye-listesinden çekilen kayıt", false],
+];
+document.getElementById("kpiStrip").innerHTML = kpiTiles.map(([n,label,accent]) =>
+  `<div class="kpi-tile${accent?' accent':''}"><div class="kpi-num">${fmt(n)}</div><div class="kpi-label">${label}</div></div>`
+).join("");
+
+// ---- forum grid + sparklines ----
+function sparkPath(history, key){
+  if(!history || history.length < 2) return null;
+  const vals = history.map(h => h[key]);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = (max - min) || 1;
+  const w = 100, h = 24, pad = 2;
+  const pts = vals.map((v,i) => {
+    const x = pad + (i/(vals.length-1)) * (w - pad*2);
+    const y = h - pad - ((v-min)/span) * (h - pad*2);
+    return [x,y];
+  });
+  const d = pts.map((p,i) => (i===0?"M":"L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const last = pts[pts.length-1];
+  return `<svg class="spark" viewBox="0 0 100 24" width="100%" height="24" preserveAspectRatio="none"><path d="${d}"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2"/></svg>`;
+}
+
+const sortedForums = [...DATA.forums].sort((a,b) => (b.incident_count||0) - (a.incident_count||0));
+document.getElementById("forumSub").textContent = kpi.forums_up + " çalışıyor · " + kpi.forums_dead + " düşmüş";
+document.getElementById("forumGrid").innerHTML = sortedForums.map(f => {
+  const statusCls = f.status === "up" ? "status-up" : f.status === "unknown" ? "status-unknown" : "status-dead";
+  const statusLabel = f.status === "up" ? "AKTİF" : f.status === "unknown" ? "YENİ" : "DÜŞMÜŞ";
+  const spark = sparkPath(f.history, "messages");
+  const memberBadge = f.member_dir ? '<span class="mdir-badge" title="Üye listesi taranıyor">◆</span>' : "";
+  return `<div class="forum-card">
+    <div class="forum-card-top">
+      <span class="forum-name" title="${esc(f.name)}">${esc(f.name)} ${memberBadge}</span>
+      <span class="status-pill ${statusCls}">${statusLabel}</span>
+    </div>
+    <div class="forum-meta"><span>${fmt(f.incident_count)} kayıt</span><span>${f.latest ? fmt(f.latest.messages)+" msj" : "—"}</span></div>
+    ${spark || ""}
+  </div>`;
+}).join("");
+
+// ---- top alerts ----
+const topAlerts = DATA.alerts.slice(0, 25);
+document.getElementById("alertSub").textContent = fmt(DATA.alerts.length) + " alarmdan en yüksek riskli 25'i";
+document.getElementById("alertList").innerHTML = topAlerts.map(a => {
+  const sevCls = "sev-" + (a.sev || "LOW");
+  const entities = (a.entities || []).slice(0,3).map(e => `<span class="entity-chip">${esc(e)}</span>`).join(" ");
+  return `<div class="alert-row">
+    <div class="alert-top">
+      <div class="alert-title"><a href="${esc(a.u)}" target="_blank" rel="noopener">${esc(a.t || "başlıksız")}</a></div>
+      <span class="sev-pill ${sevCls}">${esc(a.sev || "—")}</span>
+    </div>
+    <div class="alert-meta">
+      <span><b>${esc(a.a || "bilinmiyor")}</b></span>
+      <span>${esc(forumLabel(a.src))}</span>
+      <span>risk ${fmt(a.risk)} · popülerlik ${fmt(a.pop)}${a.replies!=null? " · "+fmt(a.replies)+" yanıt":""}</span>
+      <span>${fmtDate(a.d)}</span>
+    </div>
+    ${entities ? '<div style="margin-top:6px;">'+entities+'</div>' : ""}
+  </div>`;
+}).join("");
+
+// ---- identity table ----
+document.getElementById("identityBody").innerHTML = DATA.identity_matches.map(m => `
+  <tr>
+    <td class="mono-cell">${esc(m.username)}</td>
+    <td>${m.forums.map(f => `<span class="forum-chip">${esc(f)}</span>`).join("")}</td>
+    <td class="mono-cell">${fmtDate(m.first_matched_at)}</td>
+  </tr>`).join("");
+
+// ---- member cross-forum table ----
+document.getElementById("memberBody").innerHTML = DATA.member_directory_cross_forum.map(m => `
+  <tr>
+    <td class="mono-cell">${esc(m.username)}</td>
+    <td>${m.forums.map(f => `<span class="forum-chip">${esc(f)}</span>`).join("")}</td>
+  </tr>`).join("");
+
+// ---- footer ----
+document.getElementById("footMeta").textContent =
+  "son güncelleme: " + fmtDate(DATA.generated_at) + " · " + fmt(DATA.forums.length) + " forum · " + fmt(DATA.incidents.length) + " kayıt üzerinden";
+
+// ---- unified search ----
+const searchInput = document.getElementById("searchInput");
+const clearBtn = document.getElementById("clearBtn");
+const searchResults = document.getElementById("searchResults");
+const defaultView = document.getElementById("defaultView");
+const resultGroups = document.getElementById("resultGroups");
+const searchCount = document.getElementById("searchCount");
+
+function matchScore(hay, q){ return hay.includes(q); }
+
+function runSearch(q){
+  q = q.trim().toLowerCase();
+  if(!q){
+    searchResults.hidden = true;
+    defaultView.hidden = false;
+    clearBtn.hidden = true;
+    searchCount.textContent = "";
+    return;
+  }
+  clearBtn.hidden = false;
+  searchResults.hidden = false;
+  defaultView.hidden = true;
+
+  const incMatches = DATA.incidents.filter(i =>
+    matchScore((i.t||"").toLowerCase(), q) || matchScore((i.a||"").toLowerCase(), q) ||
+    matchScore((i.src||"").toLowerCase(), q) || (i.tags||[]).some(t => t.toLowerCase().includes(q))
+  ).slice(0, 40);
+
+  const alertMatches = DATA.alerts.filter(a =>
+    matchScore((a.t||"").toLowerCase(), q) || matchScore((a.a||"").toLowerCase(), q) ||
+    matchScore((a.src||"").toLowerCase(), q) || (a.entities||[]).some(e => e.toLowerCase().includes(q))
+  ).slice(0, 40);
+
+  const idMatches = DATA.identity_matches.filter(m =>
+    matchScore(m.username.toLowerCase(), q) || m.forums.some(f => f.toLowerCase().includes(q))
+  ).slice(0, 40);
+
+  const memMatches = DATA.member_directory_cross_forum.filter(m =>
+    matchScore(m.username.toLowerCase(), q) || m.forums.some(f => f.toLowerCase().includes(q))
+  ).slice(0, 40);
+
+  const forumMatches = DATA.forums.filter(f => f.name.toLowerCase().includes(q)).slice(0, 20);
+
+  const total = incMatches.length + alertMatches.length + idMatches.length + memMatches.length + forumMatches.length;
+  searchCount.textContent = total + " sonuç";
+
+  let html = "";
+
+  if(forumMatches.length){
+    html += `<div class="result-group"><div class="result-group-head">Forumlar <span class="count">(${forumMatches.length})</span></div>` +
+      forumMatches.map(f => `<div class="result-row"><div class="rr-main"><div class="rr-title">${esc(f.name)}</div><div class="rr-sub">${esc(f.homepage||"")} · ${f.status}</div></div><div class="rr-side">${fmt(f.incident_count)} kayıt</div></div>`).join("") +
+      `</div>`;
+  }
+  if(alertMatches.length){
+    html += `<div class="result-group"><div class="result-group-head">Alarmlar <span class="count">(${alertMatches.length})</span></div>` +
+      alertMatches.map(a => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(a.u)}" target="_blank" rel="noopener">${esc(a.t||"başlıksız")}</a></div><div class="rr-sub">${esc(a.a||"")} · ${esc(forumLabel(a.src))} · risk ${fmt(a.risk)}</div></div><div class="rr-side">${fmtDate(a.d)}</div></div>`).join("") +
+      `</div>`;
+  }
+  if(incMatches.length){
+    html += `<div class="result-group"><div class="result-group-head">Kayıtlar (incidents) <span class="count">(${incMatches.length})</span></div>` +
+      incMatches.map(i => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t||"başlıksız")}</a></div><div class="rr-sub">${esc(i.a||"")} · ${esc(forumLabel(i.src))} · ${esc(i.cat||"")}</div></div><div class="rr-side">${fmtDate(i.d)}</div></div>`).join("") +
+      `</div>`;
+  }
+  if(idMatches.length){
+    html += `<div class="result-group"><div class="result-group-head">Kimlik eşleşmeleri <span class="count">(${idMatches.length})</span></div>` +
+      idMatches.map(m => `<div class="result-row"><div class="rr-main"><div class="rr-title">${esc(m.username)}</div><div class="rr-sub">${m.forums.join(", ")}</div></div><div class="rr-side">${fmtDate(m.first_matched_at)}</div></div>`).join("") +
+      `</div>`;
+  }
+  if(memMatches.length){
+    html += `<div class="result-group"><div class="result-group-head">Kayıtlı hesaplar <span class="count">(${memMatches.length})</span></div>` +
+      memMatches.map(m => `<div class="result-row"><div class="rr-main"><div class="rr-title">${esc(m.username)}</div><div class="rr-sub">${m.forums.join(", ")}</div></div></div>`).join("") +
+      `</div>`;
+  }
+  if(!total){
+    html = `<div class="empty-note">"${esc(q)}" için sonuç bulunamadı.</div>`;
+  }
+  resultGroups.innerHTML = html;
+}
+
+searchInput.addEventListener("input", () => runSearch(searchInput.value));
+clearBtn.addEventListener("click", () => { searchInput.value = ""; runSearch(""); searchInput.focus(); });
+</script>
