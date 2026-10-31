@@ -1,5 +1,5 @@
 """Offline tests for victim-domain extraction from forum text."""
-from forumtracker.entity_extraction import country_from_domain, extract_victim_domain
+from forumtracker.entity_extraction import country_from_domain, country_from_text, extract_victim_domain
 
 
 def test_extracts_first_plausible_domain():
@@ -49,3 +49,23 @@ def test_country_from_domain_su_maps_to_russia():
 
 def test_country_from_domain_none_input():
     assert country_from_domain(None) is None
+
+
+def test_country_from_text_matches_country_name_with_no_domain():
+    assert country_from_text("Turkey GSM Database - 11,000,000 rows") == "TR"
+
+
+def test_country_from_text_matches_demonym():
+    assert country_from_text("Russian banking portal breached") == "RU"
+
+
+def test_country_from_text_prefers_longest_phrase():
+    assert country_from_text("United Arab Emirates telecom leak") == "AE"
+
+
+def test_country_from_text_returns_none_when_no_known_country_mentioned():
+    assert country_from_text("Top Trending SELLER Carder Forum") is None
+
+
+def test_country_from_text_none_input():
+    assert country_from_text(None) is None

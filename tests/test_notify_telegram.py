@@ -2,7 +2,7 @@
 requests.post is mocked so these run without a bot token."""
 from unittest.mock import MagicMock, patch
 
-from forumtracker.notify_telegram import notify_alerts, send_alert
+from forumtracker.notify_telegram import notify_alerts, notify_health_alert, send_alert
 
 CARD = {
     "incident_id": "abc123",
@@ -76,3 +76,28 @@ def test_notify_alerts_sends_each_card_when_configured(mock_post, monkeypatch):
 
     assert sent == 2
     assert mock_post.call_count == 2
+
+
+@patch("forumtracker.notify_telegram.requests.post")
+def test_notify_health_alert_mentions_auto_adoption_when_a_mirror_was_adopted(mock_post):
+    mock_post.return_value = MagicMock(status_code=200)
+    adopted = {"hostname": "darkforums-official.cc", "similarity": 0.85, "incidents_seen": 12}
+
+    ok = notify_health_alert("darkforums", [], token="123:FAKE", chat_id="-100999", adopted=adopted)
+
+    assert ok is True
+    text = mock_post.call_args[1]["json"]["text"]
+    assert "Otomatik olarak yeni adrese gecildi" in text
+    assert "darkforums-official.cc" in text
+
+
+@patch("forumtracker.notify_telegram.requests.post")
+def test_notify_health_alert_lists_candidates_when_nothing_was_adopted(mock_post):
+    mock_post.return_value = MagicMock(status_code=200)
+    candidates = [{"hostname": "darkforums-official.cc", "similarity": 0.85, "mentions": 3}]
+
+    notify_health_alert("darkforums", candidates, token="123:FAKE", chat_id="-100999", adopted=None)
+
+    text = mock_post.call_args[1]["json"]["text"]
+    assert "henuz dogrulanmadi" in text
+    assert "darkforums-official.cc" in text

@@ -84,6 +84,7 @@ def test_build_dashboard_data_aggregates_real_fixture_state(tmp_path):
     assert bundle["kpi"]["member_directory_total"] == 2
     assert bundle["top_actors"] == [{"name": "EvilGhost", "count": 1}]
     assert bundle["top_countries"] == [{"code": "FR", "count": 1}]
+    assert bundle["alerts"][0]["cc"] == "FR"  # joined back from the matching incident
 
     forum_entry = next(f for f in bundle["forums"] if f["name"] == any_pool_forum)
     assert forum_entry["status"] == "up"

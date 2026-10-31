@@ -109,6 +109,11 @@ h2{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacin
 .alert-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);display:flex;gap:10px;flex-wrap:wrap;}
 .alert-meta b{color:var(--text-dim);}
 .entity-chip{background:var(--accent-soft);color:var(--accent-dim);border-radius:10px;padding:1px 7px;font-size:9.5px;}
+.alert-thumb{display:block;width:100%;max-height:150px;object-fit:cover;object-position:top;border-radius:8px;margin-top:8px;cursor:zoom-in;border:1px solid var(--border);}
+
+/* ---- lightbox ---- */
+.lightbox{position:fixed;inset:0;background:rgba(5,7,9,0.88);z-index:50;display:flex;align-items:center;justify-content:center;padding:30px;cursor:zoom-out;}
+.lightbox img{max-width:100%;max-height:100%;border-radius:10px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.5);}
 
 /* ---- tables ---- */
 .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:11px;background:var(--surface);}
@@ -234,6 +239,8 @@ footer{margin-top:8px;padding-top:18px;border-top:1px solid var(--border-soft);f
   </footer>
 </div>
 
+<div class="lightbox" id="lightbox" hidden></div>
+
 <script id="dashboard-data" type="application/json">__DATA_JSON__</script>
 <script>
 const DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
@@ -302,12 +309,24 @@ document.getElementById("forumGrid").innerHTML = sortedForums.map(f => {
   </div>`;
 }).join("");
 
+// ---- lightbox ----
+const lightbox = document.getElementById("lightbox");
+function openLightbox(url){
+  lightbox.innerHTML = `<img src="${esc(url)}" alt="ekran görüntüsü kanıtı">`;
+  lightbox.hidden = false;
+}
+lightbox.addEventListener("click", () => { lightbox.hidden = true; lightbox.innerHTML = ""; });
+
 // ---- top alerts ----
+const SCREENSHOTS = DATA.screenshots || {};
+const shotCount = Object.keys(SCREENSHOTS).length;
 const topAlerts = DATA.alerts.slice(0, 25);
-document.getElementById("alertSub").textContent = fmt(DATA.alerts.length) + " alarmdan en yüksek riskli 25'i";
+document.getElementById("alertSub").textContent = fmt(DATA.alerts.length) + " alarmdan en yüksek riskli 25'i" + (shotCount ? " · " + shotCount + " kayıt ekran görüntülü" : "");
 document.getElementById("alertList").innerHTML = topAlerts.map(a => {
   const sevCls = "sev-" + (a.sev || "LOW");
   const entities = (a.entities || []).slice(0,3).map(e => `<span class="entity-chip">${esc(e)}</span>`).join(" ");
+  const shotUrl = SCREENSHOTS[a.id];
+  const thumb = shotUrl ? `<img class="alert-thumb" src="${esc(shotUrl)}" alt="ekran görüntüsü kanıtı" loading="lazy" onclick="openLightbox('${esc(shotUrl)}')">` : "";
   return `<div class="alert-row">
     <div class="alert-top">
       <div class="alert-title"><a href="${esc(a.u)}" target="_blank" rel="noopener">${esc(a.t || "başlıksız")}</a></div>
@@ -320,35 +339,65 @@ document.getElementById("alertList").innerHTML = topAlerts.map(a => {
       <span>${fmtDate(a.d)}</span>
     </div>
     ${entities ? '<div style="margin-top:6px;">'+entities+'</div>' : ""}
+    ${thumb}
   </div>`;
 }).join("");
 
 // ---- top actors / top countries ----
-const COUNTRY_NAMES = {
-  RU:"Rusya", CN:"Çin", DE:"Almanya", FR:"Fransa", TR:"Türkiye", GB:"Birleşik Krallık",
-  NL:"Hollanda", SE:"İsveç", NO:"Norveç", ES:"İspanya", IT:"İtalya", PL:"Polonya",
-  BR:"Brezilya", IN:"Hindistan", AU:"Avustralya", CA:"Kanada", JP:"Japonya", KR:"Güney Kore",
-  MX:"Meksika", AR:"Arjantin", ZA:"Güney Afrika", CH:"İsviçre", AT:"Avusturya", BE:"Belçika",
-  DK:"Danimarka", FI:"Finlandiya", IE:"İrlanda", PT:"Portekiz", GR:"Yunanistan", CZ:"Çekya",
-  RO:"Romanya", HU:"Macaristan", IL:"İsrail", AE:"BAE", SA:"Suudi Arabistan", ID:"Endonezya",
-  TH:"Tayland", VN:"Vietnam", PH:"Filipinler", SG:"Singapur", MY:"Malezya", NZ:"Yeni Zelanda",
+// English name included alongside the Turkish label used for display, so
+// typing "turkey" (not just "türkiye") in the search box resolves to TR -
+// see countryCodesMatching() below.
+const COUNTRY_INFO = {
+  RU:{tr:"Rusya",en:"Russia"}, CN:{tr:"Çin",en:"China"}, DE:{tr:"Almanya",en:"Germany"},
+  FR:{tr:"Fransa",en:"France"}, TR:{tr:"Türkiye",en:"Turkey"}, GB:{tr:"Birleşik Krallık",en:"United Kingdom"},
+  NL:{tr:"Hollanda",en:"Netherlands"}, SE:{tr:"İsveç",en:"Sweden"}, NO:{tr:"Norveç",en:"Norway"},
+  ES:{tr:"İspanya",en:"Spain"}, IT:{tr:"İtalya",en:"Italy"}, PL:{tr:"Polonya",en:"Poland"},
+  BR:{tr:"Brezilya",en:"Brazil"}, IN:{tr:"Hindistan",en:"India"}, AU:{tr:"Avustralya",en:"Australia"},
+  CA:{tr:"Kanada",en:"Canada"}, JP:{tr:"Japonya",en:"Japan"}, KR:{tr:"Güney Kore",en:"South Korea"},
+  MX:{tr:"Meksika",en:"Mexico"}, AR:{tr:"Arjantin",en:"Argentina"}, ZA:{tr:"Güney Afrika",en:"South Africa"},
+  CH:{tr:"İsviçre",en:"Switzerland"}, AT:{tr:"Avusturya",en:"Austria"}, BE:{tr:"Belçika",en:"Belgium"},
+  DK:{tr:"Danimarka",en:"Denmark"}, FI:{tr:"Finlandiya",en:"Finland"}, IE:{tr:"İrlanda",en:"Ireland"},
+  PT:{tr:"Portekiz",en:"Portugal"}, GR:{tr:"Yunanistan",en:"Greece"}, CZ:{tr:"Çekya",en:"Czech Republic"},
+  RO:{tr:"Romanya",en:"Romania"}, HU:{tr:"Macaristan",en:"Hungary"}, IL:{tr:"İsrail",en:"Israel"},
+  AE:{tr:"BAE",en:"United Arab Emirates"}, SA:{tr:"Suudi Arabistan",en:"Saudi Arabia"},
+  ID:{tr:"Endonezya",en:"Indonesia"}, TH:{tr:"Tayland",en:"Thailand"}, VN:{tr:"Vietnam",en:"Vietnam"},
+  PH:{tr:"Filipinler",en:"Philippines"}, SG:{tr:"Singapur",en:"Singapore"}, MY:{tr:"Malezya",en:"Malaysia"},
+  NZ:{tr:"Yeni Zelanda",en:"New Zealand"}, US:{tr:"ABD",en:"United States"}, UA:{tr:"Ukrayna",en:"Ukraine"},
 };
+const COUNTRY_NAMES = Object.fromEntries(Object.entries(COUNTRY_INFO).map(([c,i]) => [c, i.tr]));
 
-function renderRankList(elId, rows, labelFn, countKey){
+function countryCodesMatching(q){
+  if(!q) return [];
+  const codes = [];
+  for(const [code, info] of Object.entries(COUNTRY_INFO)){
+    if(code.toLowerCase() === q || info.tr.toLowerCase().includes(q) || info.en.toLowerCase().includes(q)){
+      codes.push(code);
+    }
+  }
+  return codes;
+}
+
+function renderRankList(elId, rows, labelFn, countKey, onClickFn){
   const el = document.getElementById(elId);
   if(!rows.length){ el.innerHTML = '<div class="empty-note">Henüz yeterli veri yok.</div>'; return; }
   const max = Math.max(...rows.map(r => r[countKey]));
-  el.innerHTML = rows.map(r => `
-    <div class="rank-row">
+  el.innerHTML = rows.map((r, idx) => `
+    <div class="rank-row"${onClickFn ? ' style="cursor:pointer" data-rank-idx="'+idx+'"' : ''}>
       <div class="rank-label" title="${esc(labelFn(r))}">${esc(labelFn(r))}</div>
       <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${Math.max(4,(r[countKey]/max*100)).toFixed(1)}%"></div></div>
       <div class="rank-count">${fmt(r[countKey])}</div>
     </div>`).join("");
+  if(onClickFn){
+    el.querySelectorAll("[data-rank-idx]").forEach(row => {
+      row.addEventListener("click", () => onClickFn(rows[Number(row.dataset.rankIdx)]));
+    });
+  }
 }
 
 document.getElementById("actorSub").textContent = fmt(DATA.top_actors.length) + " benzersiz aktörden en aktif " + Math.min(15, DATA.top_actors.length) + "'i";
-renderRankList("actorRank", DATA.top_actors, r => r.name, "count");
-renderRankList("countryRank", DATA.top_countries, r => (COUNTRY_NAMES[r.code] || r.code) + "  ·  " + r.code, "count");
+renderRankList("actorRank", DATA.top_actors, r => r.name, "count", r => { searchInput.value = r.name; runSearch(r.name); });
+renderRankList("countryRank", DATA.top_countries, r => (COUNTRY_NAMES[r.code] || r.code) + "  ·  " + r.code, "count",
+  r => { searchInput.value = COUNTRY_NAMES[r.code] || r.code; runSearch(searchInput.value); });
 
 // ---- identity table ----
 document.getElementById("identityBody").innerHTML = DATA.identity_matches.map(m => `
@@ -392,14 +441,22 @@ function runSearch(q){
   searchResults.hidden = false;
   defaultView.hidden = true;
 
+  // Typing a country name ("turkey", "türkiye", "tr") also pulls in every
+  // incident/alert tagged with that victim country_code, even when the
+  // country word never appears in the title itself - plain substring
+  // matching alone misses most of those.
+  const countryCodes = countryCodesMatching(q);
+
   const incMatches = DATA.incidents.filter(i =>
     matchScore((i.t||"").toLowerCase(), q) || matchScore((i.a||"").toLowerCase(), q) ||
-    matchScore((i.src||"").toLowerCase(), q) || (i.tags||[]).some(t => t.toLowerCase().includes(q))
+    matchScore((i.src||"").toLowerCase(), q) || (i.tags||[]).some(t => t.toLowerCase().includes(q)) ||
+    (i.cc && countryCodes.includes(i.cc))
   ).slice(0, 40);
 
   const alertMatches = DATA.alerts.filter(a =>
     matchScore((a.t||"").toLowerCase(), q) || matchScore((a.a||"").toLowerCase(), q) ||
-    matchScore((a.src||"").toLowerCase(), q) || (a.entities||[]).some(e => e.toLowerCase().includes(q))
+    matchScore((a.src||"").toLowerCase(), q) || (a.entities||[]).some(e => e.toLowerCase().includes(q)) ||
+    (a.cc && countryCodes.includes(a.cc))
   ).slice(0, 40);
 
   const idMatches = DATA.identity_matches.filter(m =>
@@ -424,12 +481,12 @@ function runSearch(q){
   }
   if(alertMatches.length){
     html += `<div class="result-group"><div class="result-group-head">Alarmlar <span class="count">(${alertMatches.length})</span></div>` +
-      alertMatches.map(a => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(a.u)}" target="_blank" rel="noopener">${esc(a.t||"başlıksız")}</a></div><div class="rr-sub">${esc(a.a||"")} · ${esc(forumLabel(a.src))} · risk ${fmt(a.risk)}</div></div><div class="rr-side">${fmtDate(a.d)}</div></div>`).join("") +
+      alertMatches.map(a => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(a.u)}" target="_blank" rel="noopener">${esc(a.t||"başlıksız")}</a></div><div class="rr-sub">${esc(a.a||"")} · ${esc(forumLabel(a.src))} · risk ${fmt(a.risk)}${a.cc ? " · "+esc(COUNTRY_NAMES[a.cc]||a.cc) : ""}</div></div><div class="rr-side">${fmtDate(a.d)}</div></div>`).join("") +
       `</div>`;
   }
   if(incMatches.length){
     html += `<div class="result-group"><div class="result-group-head">Kayıtlar (incidents) <span class="count">(${incMatches.length})</span></div>` +
-      incMatches.map(i => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t||"başlıksız")}</a></div><div class="rr-sub">${esc(i.a||"")} · ${esc(forumLabel(i.src))} · ${esc(i.cat||"")}</div></div><div class="rr-side">${fmtDate(i.d)}</div></div>`).join("") +
+      incMatches.map(i => `<div class="result-row"><div class="rr-main"><div class="rr-title"><a href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t||"başlıksız")}</a></div><div class="rr-sub">${esc(i.a||"")} · ${esc(forumLabel(i.src))} · ${esc(i.cat||"")}${i.cc ? " · "+esc(COUNTRY_NAMES[i.cc]||i.cc) : ""}</div></div><div class="rr-side">${fmtDate(i.d)}</div></div>`).join("") +
       `</div>`;
   }
   if(idMatches.length){

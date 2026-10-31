@@ -5,13 +5,14 @@ import argparse
 import json
 import logging
 
+from .auto_mirror import AutoMirrorStore
 from .dashboard import build_dashboard
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore, backfill_from_feed
 from .member_directory import MemberDirectoryStore, crawl_batch
-from .pipeline import DATA_DIR, OUTPUT_FEED, build_sources, loop, open_stores, run_full_cycle
+from .pipeline import AUTO_MIRROR_FILE, DATA_DIR, OUTPUT_FEED, build_sources, loop, open_stores, run_full_cycle
 from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
 
@@ -22,18 +23,29 @@ MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
 
 
 def run_health_check() -> dict:
-    """Checks every pool forum's homepage once, persists the result, and
+    """Checks every pool forum's homepage once (plus any already
+    auto-adopted mirror - see auto_mirror.py), persists the result, and
     for any forum that has now crossed DEAD_THRESHOLD consecutive
     unreachable checks, looks for a same-named replacement among
     Telegram-mentioned hostnames (see discover.find_mirror_candidates).
+    This read-only report does NOT itself attempt adoption (that only
+    happens inside pipeline.run_full_cycle, which also has the SeenStore
+    context a verification fetch needs to not re-emit the same incidents
+    as "new") - it just shows what's already been adopted, as context.
     """
     store = HealthStore(HEALTH_DB)
     try:
-        urls = pool_urls(FORUM_POOL, BROWSER_FORUM_POOL)
+        auto_mirrors = AutoMirrorStore(AUTO_MIRROR_FILE)
+        urls = pool_urls(FORUM_POOL, BROWSER_FORUM_POOL, auto_mirrors.sites())
         check_all(urls, store)
         dead = store.probably_dead()
         mirror_suggestions = {name: find_mirror_candidates(name) for name in dead}
-        return {"report": store.report(), "probably_dead": dead, "mirror_suggestions": mirror_suggestions}
+        return {
+            "report": store.report(),
+            "probably_dead": dead,
+            "mirror_suggestions": mirror_suggestions,
+            "auto_adopted_mirrors": auto_mirrors.all(),
+        }
     finally:
         store.close()
 

@@ -74,6 +74,19 @@ def test_apply_ransomware_intel_derives_country_code_from_victim_domain():
     assert incident["victim"]["country_code"] == "FR"
 
 
+def test_apply_ransomware_intel_derives_country_code_from_title_text_when_no_domain_present():
+    incident = {
+        **_incident("r5", category="forum_post"),
+        "title": "Turkey GSM Database - 11,000,000 rows",
+        "description": None,
+    }
+
+    _apply_ransomware_intel(incident)
+
+    assert "website" not in incident["victim"]
+    assert incident["victim"]["country_code"] == "TR"
+
+
 def test_apply_ransomware_intel_never_downgrades_existing_category():
     incident = {**_incident("r2", category="data_breach"), "title": "LockBit involved somehow", "description": None}
 

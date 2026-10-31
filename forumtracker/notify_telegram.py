@@ -67,7 +67,11 @@ def send_alert(card: dict, token: Optional[str] = None, chat_id: Optional[str] =
 
 
 def notify_health_alert(
-    forum_name: str, mirror_candidates: list[dict], token: Optional[str] = None, chat_id: Optional[str] = None
+    forum_name: str,
+    mirror_candidates: list[dict],
+    token: Optional[str] = None,
+    chat_id: Optional[str] = None,
+    adopted: Optional[dict] = None,
 ) -> bool:
     """Plain-text ping for a pool forum that just crossed
     `health.DEAD_THRESHOLD` consecutive unreachable checks - a probable
@@ -75,6 +79,13 @@ def notify_health_alert(
     rather than going through `render_telegram_message` (built for
     Incident alert cards). Same env-var/no-op contract as
     `notify_alerts()`: silently does nothing if Telegram isn't configured.
+
+    `adopted` is auto_mirror.try_adopt_mirror()'s return value, when a
+    candidate cleared both the similarity floor and a live verification
+    fetch and tracking has already resumed automatically under this same
+    forum name - the message makes clear that happened (and still asks for
+    a manual look, since "live and RSS-shaped" is not the same guarantee
+    as "reviewed and safe" - see auto_mirror.py's docstring).
     """
     token = token or os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = chat_id or os.environ.get("TELEGRAM_CHAT_ID")
@@ -85,7 +96,13 @@ def notify_health_alert(
         f"⚠️ Forum muhtemelen adres degistirdi: {forum_name}",
         "Art arda birden fazla kontrolde ulasilamadi (DNS/baglanti hatasi, sunucu hatasi degil).",
     ]
-    if mirror_candidates:
+    if adopted:
+        lines.append(
+            f"\n✅ Otomatik olarak yeni adrese gecildi: {adopted['hostname']} "
+            f"(benzerlik={adopted['similarity']}, ilk cekimde {adopted['incidents_seen']} kayit bulundu)."
+        )
+        lines.append("Takip otomatik devam ediyor - yine de domain'i manuel dogrulaman onerilir (sahte/klon olabilir).")
+    elif mirror_candidates:
         lines.append("\nOlasi yeni adresler (Telegram'da bahsedilen, henuz dogrulanmadi - manuel incele):")
         for c in mirror_candidates[:5]:
             lines.append(f"  - {c['hostname']} (benzerlik={c['similarity']}, mentions={c['mentions']})")

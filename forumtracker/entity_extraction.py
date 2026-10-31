@@ -78,6 +78,91 @@ _CCTLD_TO_COUNTRY = {
 }
 
 
+# Country-name/demonym keyword fallback for country_from_text() below -
+# same word-boundary keyword-group strategy referenced from the
+# brunosergi/darkweb-forums-tracker "Entity Matching Code" node (curated
+# name variants, not a generic NLP classifier). Exists because
+# country_from_domain() only fires when the post text happens to contain a
+# parseable victim domain with a country-coded TLD - most posts don't
+# (e.g. "Turkey GSM Database" has no domain in it at all), so without this,
+# victim.country_code stays empty for the majority of incidents even when
+# the country is stated in plain language right in the title. Curated, not
+# exhaustive: only names/demonyms unambiguous enough not to collide with
+# unrelated forum/product naming (no bare "us", "in", "it" style tokens).
+_COUNTRY_TEXT_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "TR": ("turkey", "türkiye", "turkiye", "turkish"),
+    "RU": ("russia", "russian"),
+    "US": ("usa", "united states", "american"),
+    "GB": ("united kingdom", "britain", "british"),
+    "DE": ("germany", "german"),
+    "FR": ("france", "french"),
+    "BR": ("brazil", "brazilian", "brasil"),
+    "IN": ("india", "indian"),
+    "CN": ("china", "chinese"),
+    "ES": ("spain", "spanish"),
+    "IT": ("italy", "italian"),
+    "PL": ("poland", "polish"),
+    "NL": ("netherlands", "dutch"),
+    "SE": ("sweden", "swedish"),
+    "NO": ("norway", "norwegian"),
+    "AU": ("australia", "australian"),
+    "CA": ("canada", "canadian"),
+    "JP": ("japan", "japanese"),
+    "KR": ("south korea", "korean"),
+    "MX": ("mexico", "mexican"),
+    "AR": ("argentina", "argentinian", "argentine"),
+    "ZA": ("south africa", "south african"),
+    "CH": ("switzerland", "swiss"),
+    "AT": ("austria", "austrian"),
+    "BE": ("belgium", "belgian"),
+    "DK": ("denmark", "danish"),
+    "FI": ("finland", "finnish"),
+    "IE": ("ireland", "irish"),
+    "PT": ("portugal", "portuguese"),
+    "GR": ("greece", "greek"),
+    "CZ": ("czech republic", "czech"),
+    "RO": ("romania", "romanian"),
+    "HU": ("hungary", "hungarian"),
+    "IL": ("israel", "israeli"),
+    "AE": ("united arab emirates", "uae", "emirati"),
+    "SA": ("saudi arabia", "saudi"),
+    "ID": ("indonesia", "indonesian"),
+    "TH": ("thailand", "thai"),
+    "VN": ("vietnam", "vietnamese"),
+    "PH": ("philippines", "filipino"),
+    "SG": ("singapore", "singaporean"),
+    "MY": ("malaysia", "malaysian"),
+    "NZ": ("new zealand",),
+    "UA": ("ukraine", "ukrainian"),
+}
+
+# Flattened and sorted longest-keyword-first, so a multi-word phrase like
+# "united arab emirates" is tried before a shorter unrelated substring
+# could accidentally win.
+_COUNTRY_TEXT_PATTERNS = sorted(
+    (
+        (code, re.compile(r"\b" + re.escape(keyword) + r"\b", re.IGNORECASE))
+        for code, keywords in _COUNTRY_TEXT_KEYWORDS.items()
+        for keyword in keywords
+    ),
+    key=lambda item: len(item[1].pattern),
+    reverse=True,
+)
+
+
+def country_from_text(text: Optional[str]) -> Optional[str]:
+    """Deterministic keyword fallback for when no victim domain was found
+    (or it had no ccTLD) - scans `text` for a known country name/demonym.
+    Returns the first (longest-keyword-first) match, or None.
+    """
+    if not text:
+        return None
+    for code, pattern in _COUNTRY_TEXT_PATTERNS:
+        if pattern.search(text):
+            return code
+    return None
+
+
 def country_from_domain(domain: Optional[str]) -> Optional[str]:
     """Derives an ISO 3166-1 alpha-2 country code from a victim domain's
     ccTLD, when it has one - a generic TLD (.com, .io, .net, ...) carries no

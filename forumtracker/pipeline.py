@@ -13,9 +13,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from .alerting import is_alert_worthy, to_alert_card
+from .auto_mirror import AutoMirrorStore, try_adopt_mirror
 from .dedup import SeenStore
 from .discover import find_mirror_candidates
-from .entity_extraction import country_from_domain, extract_victim_domain
+from .entity_extraction import country_from_domain, country_from_text, extract_victim_domain
 from .forum_stats import StatsStore, collect_snapshots
 from .health import HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore
@@ -37,11 +38,17 @@ IDENTITY_DB = DATA_DIR / "identity.sqlite3"
 MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
+AUTO_MIRROR_FILE = DATA_DIR / "auto_mirrors.json"
 
 
 def build_sources() -> list[Source]:
+    # Any mirror auto-adopted by a previous cycle's health check (see
+    # try_adopt_mirror below) gets folded in here, so the very next --once
+    # process (a fresh process every 30 min in the scheduled workflow -
+    # see pipeline.yml) resumes tracking it without any code change.
+    sites = {**FORUM_POOL, **AutoMirrorStore(AUTO_MIRROR_FILE).sites()}
     return [
-        UndergroundForumSource(),
+        UndergroundForumSource(sites=sites),
         BrowserForumSource(),
         TelegramBridgeSource(),
     ]
@@ -79,8 +86,11 @@ def _apply_ransomware_intel(incident: dict) -> None:
     and pulls a real victim domain out of the text (see
     entity_extraction.py) into `victim.website` - when that domain has a
     recognizable ccTLD (.fr, .de, .com.br, ...), also derives
-    `victim.country_code` from it. Both schema fields existed from the
-    start but nothing populated them until now.
+    `victim.country_code` from it. When no domain (or no ccTLD) was found,
+    falls back to a country-name/demonym keyword match on the title/
+    description itself, since most posts never contain a parseable domain
+    at all. Both schema fields existed from the start but nothing
+    populated them until now.
 
     Only upgrades `category` from the generic "forum_post" default - never
     downgrades a source's own more specific classification (e.g.
@@ -103,12 +113,17 @@ def _apply_ransomware_intel(incident: dict) -> None:
 
     source_hostname = urlparse(incident.get("source", {}).get("url") or "").hostname
     domain = extract_victim_domain(text, exclude_hostname=source_hostname)
+    country = None
     if domain:
-        victim = incident.setdefault("victim", {})
-        victim["website"] = domain
+        incident.setdefault("victim", {})["website"] = domain
         country = country_from_domain(domain)
-        if country:
-            victim["country_code"] = country
+    if not country:
+        # Most posts never contain a parseable victim domain at all (e.g.
+        # "Turkey GSM Database") - fall back to the country name/demonym
+        # stated in the title/description itself.
+        country = country_from_text(text)
+    if country:
+        incident.setdefault("victim", {})["country_code"] = country
 
 
 def emit(incidents: list[dict]) -> None:
@@ -152,7 +167,8 @@ def check_forum_health(health_store: HealthStore) -> list[str]:
     instead of every cycle the forum stays down.
     """
     before = set(health_store.probably_dead())
-    check_all(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL), health_store)
+    auto_mirror_sites = AutoMirrorStore(AUTO_MIRROR_FILE).sites()
+    check_all(pool_urls(FORUM_POOL, BROWSER_FORUM_POOL, auto_mirror_sites), health_store)
     after = set(health_store.probably_dead())
     return sorted(after - before)
 
@@ -200,12 +216,17 @@ def run_full_cycle(
         log.exception("identity correlation raised, skipping this cycle")
 
     newly_dead: list[str] = []
+    auto_adopted: dict[str, dict] = {}
     try:
         newly_dead = check_forum_health(health_store)
+        mirror_store = AutoMirrorStore(AUTO_MIRROR_FILE)
         for name in newly_dead:
             log.warning("health: %s crossed the dead-mirror threshold", name)
             candidates = find_mirror_candidates(name)
-            notify_health_alert(name, candidates)
+            adopted = try_adopt_mirror(name, mirror_store, candidates=candidates)
+            if adopted:
+                auto_adopted[name] = adopted
+            notify_health_alert(name, candidates, adopted=adopted)
     except Exception:
         log.exception("health check raised, skipping this cycle")
 
@@ -259,6 +280,7 @@ def run_full_cycle(
         "member_directory_crawl": member_crawl_report,
         "member_directory_total": member_directory_store.total_count(),
         "registered_cross_forum": registered_cross_forum,
+        "auto_adopted_mirrors": auto_adopted,
     }
 
 

@@ -10,6 +10,18 @@ cycle), and committing a multi-MB diff every 30 minutes forever is a
 different sustainability trade-off than the small `reports/latest_cycle.json`
 summary that workflow already commits. Regenerate on demand with
 `python -m forumtracker.cli --build-dashboard` instead.
+
+**Screenshot evidence is a manual, session-scoped layer on top of this.**
+`data/screenshots/*.png` (348MB, ~1978 files as of 2026-11-01) is far too
+much to embed in one static page (16MB artifact limit) or upload file-by-file
+in bulk - there is no batch-upload path, each one is a separate action. So
+rather than pretend to cover "all incidents", `reports/dashboard_screenshots.json`
+is a small, honestly-partial {incident_id: asset_url} map of whichever
+screenshots have actually been uploaded to the currently-published artifact's
+asset store (see the Artifact tool's `upload_asset` action) - grown in
+batches over time, e.g. starting with the top alerts shown on the dashboard.
+The asset URLs it contains (`/_blob/<id>`) only resolve inside THAT specific
+published artifact - republishing to a different artifact URL invalidates them.
 """
 from __future__ import annotations
 
@@ -23,6 +35,16 @@ from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
 
 TEMPLATE_PATH = Path(__file__).parent / "templates" / "dashboard.html"
+SCREENSHOT_MAP_PATH = Path(__file__).parent.parent / "reports" / "dashboard_screenshots.json"
+
+
+def _screenshot_map(path: Path = SCREENSHOT_MAP_PATH) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
 
 
 def _forum_health(health_db: Path) -> dict:
@@ -213,6 +235,13 @@ def build_dashboard_data(data_dir: Path) -> dict:
     id_total, id_by_forum, id_matches = _identity(data_dir / "identity.sqlite3")
     incidents = _incidents(data_dir / "incidents.jsonl")
     alerts = _alerts(data_dir / "alerts.jsonl")
+    # alerts.jsonl carries no victim info of its own - join back to the
+    # matching incident (same incident_id) so the dashboard's country
+    # search/filter also covers the alert list, not just raw incidents.
+    incident_cc_by_id = {i["id"]: i["cc"] for i in incidents if i.get("cc")}
+    for a in alerts:
+        if a.get("id") in incident_cc_by_id:
+            a["cc"] = incident_cc_by_id[a["id"]]
 
     all_forum_names = list(FORUM_POOL.keys()) + list(BROWSER_FORUM_POOL.keys())
     forums = []
@@ -255,6 +284,7 @@ def build_dashboard_data(data_dir: Path) -> dict:
         "alerts": sorted(alerts, key=lambda a: (a.get("pop") or 0), reverse=True),
         "top_actors": _top_actors(incidents),
         "top_countries": _top_countries(incidents),
+        "screenshots": _screenshot_map(),
     }
 
 
