@@ -50,7 +50,7 @@ def test_build_dashboard_data_aggregates_real_fixture_state(tmp_path):
             "detected_at": "2026-09-20T00:00:00+00:00",
             "source": {"type": "forum", "name": f"forum:{any_pool_forum}", "url": None},
             "threat_actor": {"name": "EvilGhost"},
-            "victim": {"name": "victim", "country_code": "FR"},
+            "victim": {"name": "victim", "country_code": "FR", "sector": "finance"},
             "category": "forum_post",
             "title": "test thread",
             "description": None,
@@ -82,15 +82,28 @@ def test_build_dashboard_data_aggregates_real_fixture_state(tmp_path):
     assert bundle["kpi"]["identity_cross_forum"] == 1
     assert bundle["kpi"]["member_directory_cross_forum"] == 1
     assert bundle["kpi"]["member_directory_total"] == 2
-    assert bundle["top_actors"] == [{"name": "EvilGhost", "count": 1}]
+    assert bundle["top_actors"] == [{"name": "EvilGhost", "count": 1, "stars": 1, "forums": 1}]
     assert bundle["top_countries"] == [{"code": "FR", "count": 1}]
+    assert bundle["top_sectors"] == [{"sector": "finance", "count": 1}]
     assert bundle["alerts"][0]["cc"] == "FR"  # joined back from the matching incident
+    assert bundle["alerts"][0]["sector"] == "finance"
 
     forum_entry = next(f for f in bundle["forums"] if f["name"] == any_pool_forum)
     assert forum_entry["status"] == "up"
     assert forum_entry["incident_count"] == 1
     assert len(forum_entry["history"]) == 2
     assert forum_entry["latest"]["messages"] == 130
+    # the fixture's one incident is dated 2026-09-20, well outside any
+    # "recent" window relative to real wall-clock time - activity_score
+    # correctly shows 0 even though lifetime incident_count is 1.
+    assert forum_entry["recent_7d"] == 0
+    assert forum_entry["recent_30d"] == 0
+    assert forum_entry["activity_score"] == 0
+
+    activity_row = next(r for r in bundle["forum_activity"] if r["forum"] == any_pool_forum)
+    assert activity_row["total"] == 1
+
+    assert bundle["per_forum_top_actors"][any_pool_forum] == [{"name": "EvilGhost", "count": 1}]
 
     assert bundle["identity_matches"][0]["forums"] == ["carders.biz", "darkforums"]
     assert bundle["member_directory_cross_forum"][0]["forums"] == ["carders.biz", "leetforums"]

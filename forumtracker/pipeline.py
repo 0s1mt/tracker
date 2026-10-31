@@ -23,6 +23,7 @@ from .identity_correlation import IdentityStore
 from .member_directory import MemberDirectoryStore, crawl_batch
 from .notify_telegram import notify_alerts, notify_health_alert, notify_identity_match
 from .ransomware_intel import classify as classify_ransomware
+from .sector_classification import sector_from_domain, sector_from_text
 from .sources.base import Source
 from .sources.browser_forum import BROWSER_FORUM_POOL, BrowserForumSource
 from .sources.telegram_bridge import TelegramBridgeSource
@@ -89,8 +90,12 @@ def _apply_ransomware_intel(incident: dict) -> None:
     `victim.country_code` from it. When no domain (or no ccTLD) was found,
     falls back to a country-name/demonym keyword match on the title/
     description itself, since most posts never contain a parseable domain
-    at all. Both schema fields existed from the start but nothing
-    populated them until now.
+    at all. Same domain-first/text-fallback pattern derives `victim.sector`
+    (see sector_classification.py) - NOT the forum's own subforum/board
+    category (that was the previous, wrong source for this field; see
+    underground_forums.py's comment at the Victim() construction site).
+    All three schema fields existed from the start but nothing populated
+    them until now.
 
     Only upgrades `category` from the generic "forum_post" default - never
     downgrades a source's own more specific classification (e.g.
@@ -124,6 +129,10 @@ def _apply_ransomware_intel(incident: dict) -> None:
         country = country_from_text(text)
     if country:
         incident.setdefault("victim", {})["country_code"] = country
+
+    sector = sector_from_domain(domain) or sector_from_text(text)
+    if sector:
+        incident.setdefault("victim", {})["sector"] = sector
 
 
 def emit(incidents: list[dict]) -> None:

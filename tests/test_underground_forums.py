@@ -30,7 +30,12 @@ def test_xenforo_item_normalize_extracts_body_and_category():
 
     assert d["threat_actor"]["name"] == "Egemen."
     assert d["title"] == "Visual Studio Code #DOWN"
-    assert d["victim"]["sector"] == "Dos & Ddos"
+    # the board category is a navigation label, not a victim industry - it
+    # stays in tags only; victim.sector is populated later, from real text/
+    # domain signals, by pipeline._apply_ransomware_intel (see
+    # sector_classification.py)
+    assert d["victim"]["sector"] is None
+    assert "dos & ddos" in d["tags"]
     assert "HEDEF: VİSUAL STUDİO CODE" in d["description"]
     assert d["source"]["name"] == "forum:turkhackteam"
     assert d["category"] == "forum_post"

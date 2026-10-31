@@ -87,6 +87,32 @@ def test_apply_ransomware_intel_derives_country_code_from_title_text_when_no_dom
     assert incident["victim"]["country_code"] == "TR"
 
 
+def test_apply_ransomware_intel_derives_sector_from_domain_label():
+    incident = {
+        **_incident("r6", category="forum_post"),
+        "title": "Government portal spk.gov.tr leaked, 2M citizen records",
+        "description": None,
+    }
+
+    _apply_ransomware_intel(incident)
+
+    assert incident["victim"]["website"] == "spk.gov.tr"
+    assert incident["victim"]["sector"] == "government"
+
+
+def test_apply_ransomware_intel_derives_sector_from_text_when_no_domain_present():
+    incident = {
+        **_incident("r7", category="forum_post"),
+        "title": "Turkey GSM Database - 11,000,000 rows",
+        "description": None,
+    }
+
+    _apply_ransomware_intel(incident)
+
+    assert "website" not in incident["victim"]
+    assert incident["victim"]["sector"] == "telecom"
+
+
 def test_apply_ransomware_intel_never_downgrades_existing_category():
     incident = {**_incident("r2", category="data_breach"), "title": "LockBit involved somehow", "description": None}
 

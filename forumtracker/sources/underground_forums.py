@@ -428,7 +428,12 @@ class UndergroundForumSource(Source):
             published_at=published_at,
             source=SourceMeta(type="forum", name=f"forum:{site_name}", url=link),
             threat_actor=ThreatActor(name=actor),
-            victim=Victim(name=title, sector=category),
+            # victim.sector is NOT this forum's own subforum/board category
+            # (that's a navigation label, not a victim industry - it's
+            # already preserved below in `tags`) - real sector
+            # classification happens later, in pipeline._apply_ransomware_intel,
+            # see sector_classification.py's docstring.
+            victim=Victim(name=title),
             category="forum_post",
             title=title,
             description=text_body or None,

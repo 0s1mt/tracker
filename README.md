@@ -822,10 +822,26 @@ sinyalini (`discover_candidates()`) alıp, ölü forumun ismiyle metin
 benzerliğine göre sıralıyor (`difflib.SequenceMatcher` + isim
 içerme/içerilme durumunda benzerlik 0.8'e sabitleniyor — bir mirror hemen
 her zaman markayı yeni hostname'de de taşır, ör. "darkforums" ölünce
-Telegram'da "darkforums-official.cc" belirmesi gibi). **Otomatik hiçbir şeyi
-`FORUM_POOL`/`BROWSER_FORUM_POOL`'a eklemiyor** — `discover_candidates()`
-için zaten var olan "önce canlı içerik incelemesi" disiplini burada da
-geçerli, bu sadece bir öneri listesi.
+Telegram'da "darkforums-official.cc" belirmesi gibi).
+
+**Otomatik adres geçişi — `auto_mirror.py`:** Önceden bu sadece bir öneri
+listesiydi — forum ölünce birinin Telegram uyarısını görüp `FORUM_POOL`'u
+elle düzenlemesi gerekiyordu, bu da günlerce süren bir veri boşluğu
+anlamına geliyordu ("forum kapandığında çöp olma" problemi). Artık
+`pipeline.run_full_cycle`, bir forum eşiği geçtiği anda otomatik olarak bir
+mirror benimsemeyi DENİYOR — ama iki sert koşul birden sağlanmadan hiçbir
+şeye güvenmiyor: (1) benzerlik ≥0.8 (marka adı yeni hostname'de birebir
+geçiyor) VE (2) **canlı doğrulama** — `UndergroundForumSource` adayın
+RSS/HTML'ini gerçekten çekip en az 1 gerçek incident üretmek zorunda (boş/
+park edilmiş/phishing klon bir domain bunu geçemez). İkisi birden
+sağlanırsa adres, `data/auto_mirrors.json`'a kaydediliyor ve **bir sonraki
+pipeline döngüsü** (zaten her 30 dakikada taze bir process — bkz. CI/CD
+bölümü) aynı forum ismi altında otomatik olarak takibe devam ediyor —
+kod değişikliği gerekmeden. Telegram uyarısı artık "otomatik olarak yeni
+adrese geçildi" diyor ama yine de manuel inceleme öneriyor — canlı ve
+RSS-şekilli olmak, incelenmiş ve güvenli olmakla aynı garanti değil.
+`FORUM_POOL`'un kendi kaynak kodu hâlâ hiç otomatik değişmiyor; bu ayrı,
+üzerine binen bir katman.
 
 **Kullanım:**
 
@@ -1020,6 +1036,65 @@ modülde sabit `"forum"` / `"forum_post"`):
   "extra": {}
 }
 ```
+
+## Forum/aktör önem sıralaması, sektör sınıflandırma, ülke metin fallback'i (2026-11-01 batch)
+
+Rakip bir ürünün (vecert) Türkiye filtresiyle yan yana karşılaştırmadan
+çıkan 3 somut boşluğa karşılık:
+
+**1. "Hangi forum ŞU AN aktif" — `ranking.py` (yeni modül).** Önceden tek
+sinyal, forum başına ömür boyu `incident_count`'tu — yıllar önce çok post
+atmış ama artık sessiz bir forum, bu hafta gerçekten aktif olandan önde
+görünüyordu. `forum_activity()` artık sabit, dokümante edilmiş bir
+ağırlıklandırma kullanıyor: `activity_score = son_7g×3 + son_30g` — forum
+sağlığı kartları artık bu skora göre sıralı (lifetime toplam değil), yeni
+"Forum önem / aktiflik sıralaması" tablosu bunu forum başına en aktif
+aktörle (`per_forum_top_actors()`) birlikte gösteriyor. Aktör tarafında
+`actor_reputation()` basit, sabit bir formül: `skor = toplam_post + 2 ×
+(çapraz_forum_sayısı - 1)` — tek forumda çok post atan biri yerine birden
+fazla forumda görülen aktörü ödüllendiriyor (identity_correlation.py'nin
+çapraz-forum sezgisiyle aynı mantık), 1-5 yıldıza bucket'lanıyor
+(`actorRank` listesinde `★` olarak görünüyor). Hiçbiri ML/LLM değil —
+ransomware_intel.py'nin keyword/eşik skorlama tarzıyla aynı felsefe.
+
+**2. "Forum kapandığında çöp olmuyoruz" — `auto_mirror.py` (yeni modül).**
+Bkz. yukarıdaki "Forum canlılık takibi" bölümüne eklenen ayrıntı — mirror
+önerisi artık sadece Telegram'a düşmüyor, benzerlik ≥0.8 VE canlı RSS
+doğrulaması (gerçek incident üretmesi) ikisi birden sağlanırsa otomatik
+olarak `data/auto_mirrors.json`'a kaydedilip bir sonraki döngüden itibaren
+aynı forum ismi altında takip ediliyor.
+
+**3. `victim.sector` — gerçek bir sınıflandırma değildi.** Şemada alan
+baştan beri vardı ama tek dolduran yer (`underground_forums.py`'nin RSS
+normalize'i) forumun kendi ALT-FORUM/BOARD kategorisini ("Dos & Ddos", "tht
+yardım merkezi") yazıyordu — bu bir navigasyon etiketi, mağdurun endüstrisi
+değil (zaten `tags`'te duruyor, dokunulmadı). Diğer kaynaklarda (Telegram,
+browser) alan hep boştu. Yeni `sector_classification.py`, tıpkı
+`country_code`'daki gibi domain-önce/metin-fallback deseniyle çalışıyor:
+`sector_from_domain()` domain etiketlerinden (`gov`/`mil`→government,
+`edu`/`ac`→education — ccTLD'den bağımsız, yapısal bir isimlendirme
+kuralı, ör. `spk.gov.tr`→government), `sector_from_text()` ise
+İngilizce+Türkçe anahtar kelime/ifade eşleştirmesiyle ("bank", "GSM",
+"hastane", "üniversite", "bakanlığı"...) çalışıyor. **Dürüst sınır:**
+vecert'in kendi kartlarında da sık görülen "UNCLASSIFIED" durumu burada da
+gerçek — bir leak başlığı genelde kurumun ADINI verir, sektörünü değil
+("Ziraat Bank" geçer, "a financial institution" geçmez), o yüzden bu katman
+geniş kapsama değil, sadece açık/jenerik ipuçlarını yakalıyor.
+
+Ülke tarafında da aynı boşluk vardı ve aynı desenle kapatıldı:
+`country_from_text()` (`entity_extraction.py`) artık domain bulunamayan
+gönderilerde ("Turkey GSM Database" gibi domainsiz başlıklarda) ülke
+adı/demonim eşleşmesine düşüyor — mevcut veri setinde `country_code`
+kapsamı 133 → 427 kayda çıktı. Dashboard arama kutusu da düzeltildi: "turkey"
+yazmak artık doğrudan `cc=="TR"` eşleşen her şeyi getiriyor, sadece
+başlıkta kelimenin geçtiği kayıtları değil — aynı desen artık sektör için
+de geçerli (yeni "En çok hedeflenen sektörler" sıralaması + arama).
+
+**Doğrulama:** `tests/test_ranking.py` (9 test), `tests/test_auto_mirror.py`
+(7 test), `tests/test_sector_classification.py` (10 test), artı
+`tests/test_entity_extraction.py`/`test_pipeline.py`/`test_dashboard.py`/
+`test_notify_telegram.py`/`test_underground_forums.py`'a eklenen yeni
+testler — toplam süit 171 testte yeşil.
 
 ## DarkWebFeed ile ilişki
 

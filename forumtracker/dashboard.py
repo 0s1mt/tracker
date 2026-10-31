@@ -31,6 +31,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .member_directory import MEMBER_DIRECTORY_POOL
+from .ranking import actor_reputation, forum_activity, per_forum_top_actors, top_actors, top_countries, top_sectors
 from .sources.browser_forum import BROWSER_FORUM_POOL
 from .sources.underground_forums import FORUM_POOL
 
@@ -158,39 +159,9 @@ def _incidents(feed_path: Path) -> list[dict]:
                 "u": evidence.get("post_url"),
                 "tags": inc.get("tags") or [],
                 "cc": victim.get("country_code"),
+                "sector": victim.get("sector"),
             })
     return out
-
-
-# Role/placeholder actor names that would otherwise dominate a "top actors"
-# ranking without being a real identity - same list identity_correlation.py
-# already excludes from cross-forum matching, for the same reason.
-_GENERIC_ACTOR_NAMES = {
-    "unknown", "admin", "administrator", "mod", "moderator", "system",
-    "deleted", "guest", "anonymous", "support", "staff", "bot",
-}
-
-
-def _top_actors(incidents: list[dict], limit: int = 15) -> list[dict]:
-    counts: dict[str, int] = {}
-    for inc in incidents:
-        name = (inc.get("a") or "").strip()
-        if not name or name.lower() in _GENERIC_ACTOR_NAMES:
-            continue
-        counts[name] = counts.get(name, 0) + 1
-    ranked = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:limit]
-    return [{"name": name, "count": count} for name, count in ranked]
-
-
-def _top_countries(incidents: list[dict], limit: int = 12) -> list[dict]:
-    counts: dict[str, int] = {}
-    for inc in incidents:
-        cc = inc.get("cc")
-        if not cc:
-            continue
-        counts[cc] = counts.get(cc, 0) + 1
-    ranked = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:limit]
-    return [{"code": code, "count": count} for code, count in ranked]
 
 
 def _alerts(feed_path: Path) -> list[dict]:
@@ -236,12 +207,17 @@ def build_dashboard_data(data_dir: Path) -> dict:
     incidents = _incidents(data_dir / "incidents.jsonl")
     alerts = _alerts(data_dir / "alerts.jsonl")
     # alerts.jsonl carries no victim info of its own - join back to the
-    # matching incident (same incident_id) so the dashboard's country
-    # search/filter also covers the alert list, not just raw incidents.
+    # matching incident (same incident_id) so the dashboard's country/
+    # sector search/filter also covers the alert list, not just raw incidents.
     incident_cc_by_id = {i["id"]: i["cc"] for i in incidents if i.get("cc")}
+    incident_sector_by_id = {i["id"]: i["sector"] for i in incidents if i.get("sector")}
     for a in alerts:
         if a.get("id") in incident_cc_by_id:
             a["cc"] = incident_cc_by_id[a["id"]]
+        if a.get("id") in incident_sector_by_id:
+            a["sector"] = incident_sector_by_id[a["id"]]
+
+    activity_by_forum = {row["forum"]: row for row in forum_activity(incidents)}
 
     all_forum_names = list(FORUM_POOL.keys()) + list(BROWSER_FORUM_POOL.keys())
     forums = []
@@ -250,6 +226,7 @@ def build_dashboard_data(data_dir: Path) -> dict:
         homepage = cfg.get("homepage") or cfg.get("base_url")
         h = health.get(name, {})
         forum_history = history.get(name, [])
+        activity = activity_by_forum.get(name, {})
         forums.append({
             "name": name,
             "homepage": homepage,
@@ -260,7 +237,17 @@ def build_dashboard_data(data_dir: Path) -> dict:
             "latest": forum_history[-1] if forum_history else None,
             "history": forum_history,
             "incident_count": sum(1 for i in incidents if i["src"] == f"forum:{name}"),
+            "recent_7d": activity.get("recent_7d", 0),
+            "recent_30d": activity.get("recent_30d", 0),
+            "activity_score": activity.get("activity_score", 0),
         })
+
+    reputation = actor_reputation(incidents)
+    actors = top_actors(incidents)
+    for a in actors:
+        rep = reputation.get(a["name"], {})
+        a["stars"] = rep.get("stars", 1)
+        a["forums"] = rep.get("forums", 0)
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -282,8 +269,11 @@ def build_dashboard_data(data_dir: Path) -> dict:
         "member_directory_cross_forum": mdir_cross,
         "incidents": incidents,
         "alerts": sorted(alerts, key=lambda a: (a.get("pop") or 0), reverse=True),
-        "top_actors": _top_actors(incidents),
-        "top_countries": _top_countries(incidents),
+        "top_actors": actors,
+        "top_countries": top_countries(incidents),
+        "top_sectors": top_sectors(incidents),
+        "forum_activity": sorted(activity_by_forum.values(), key=lambda r: (r["activity_score"], r["total"]), reverse=True),
+        "per_forum_top_actors": per_forum_top_actors(incidents),
         "screenshots": _screenshot_map(),
     }
 
