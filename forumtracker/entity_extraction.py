@@ -57,6 +57,42 @@ _EXCLUDED_DOMAINS = {
 }
 
 
+# ccTLD -> ISO 3166-1 alpha-2, restricted to the country-coded TLDs already
+# in _TLDS above (the generic ones there - com/net/org/io/biz/... - map to
+# nothing, on purpose: a .com domain gives no real geography signal). ".su"
+# is the defunct Soviet-Union ccTLD, still actively used by Russian-speaking
+# sites (several pool forums are themselves .su) - treated as RU since that's
+# what it means in practice on this pool, not a guess.
+_CCTLD_TO_COUNTRY = {
+    "ru": "RU", "su": "RU", "cn": "CN", "de": "DE", "fr": "FR", "tr": "TR",
+    "uk": "GB", "nl": "NL", "se": "SE", "no": "NO", "es": "ES", "it": "IT",
+    "pl": "PL", "br": "BR", "in": "IN", "au": "AU", "ca": "CA", "jp": "JP",
+    "kr": "KR", "mx": "MX", "ar": "AR", "za": "ZA", "ch": "CH", "at": "AT",
+    "be": "BE", "dk": "DK", "fi": "FI", "ie": "IE", "pt": "PT", "gr": "GR",
+    "cz": "CZ", "ro": "RO", "hu": "HU", "il": "IL", "ae": "AE", "sa": "SA",
+    "id": "ID", "th": "TH", "vn": "VN", "ph": "PH", "sg": "SG", "my": "MY",
+    "nz": "NZ",
+    # compound ccTLDs (co.uk, com.tr, ...) - checked as a 2-label suffix below
+    "co.uk": "GB", "org.uk": "GB", "com.tr": "TR", "gov.tr": "TR",
+    "edu.tr": "TR", "com.br": "BR", "gov.br": "BR", "com.au": "AU",
+}
+
+
+def country_from_domain(domain: Optional[str]) -> Optional[str]:
+    """Derives an ISO 3166-1 alpha-2 country code from a victim domain's
+    ccTLD, when it has one - a generic TLD (.com, .io, .net, ...) carries no
+    real geography signal and correctly returns None rather than a guess.
+    """
+    if not domain:
+        return None
+    labels = domain.lower().split(".")
+    if len(labels) >= 3:
+        compound = ".".join(labels[-2:])
+        if compound in _CCTLD_TO_COUNTRY:
+            return _CCTLD_TO_COUNTRY[compound]
+    return _CCTLD_TO_COUNTRY.get(labels[-1])
+
+
 def extract_victim_domain(text: str, exclude_hostname: Optional[str] = None) -> Optional[str]:
     """Returns the first plausible victim domain found in `text`, or None.
 

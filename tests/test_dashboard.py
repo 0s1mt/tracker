@@ -50,7 +50,7 @@ def test_build_dashboard_data_aggregates_real_fixture_state(tmp_path):
             "detected_at": "2026-09-20T00:00:00+00:00",
             "source": {"type": "forum", "name": f"forum:{any_pool_forum}", "url": None},
             "threat_actor": {"name": "EvilGhost"},
-            "victim": {"name": "victim"},
+            "victim": {"name": "victim", "country_code": "FR"},
             "category": "forum_post",
             "title": "test thread",
             "description": None,
@@ -82,6 +82,8 @@ def test_build_dashboard_data_aggregates_real_fixture_state(tmp_path):
     assert bundle["kpi"]["identity_cross_forum"] == 1
     assert bundle["kpi"]["member_directory_cross_forum"] == 1
     assert bundle["kpi"]["member_directory_total"] == 2
+    assert bundle["top_actors"] == [{"name": "EvilGhost", "count": 1}]
+    assert bundle["top_countries"] == [{"code": "FR", "count": 1}]
 
     forum_entry = next(f for f in bundle["forums"] if f["name"] == any_pool_forum)
     assert forum_entry["status"] == "up"

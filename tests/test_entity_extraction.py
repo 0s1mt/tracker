@@ -1,5 +1,5 @@
 """Offline tests for victim-domain extraction from forum text."""
-from forumtracker.entity_extraction import extract_victim_domain
+from forumtracker.entity_extraction import country_from_domain, extract_victim_domain
 
 
 def test_extracts_first_plausible_domain():
@@ -27,3 +27,25 @@ def test_returns_none_when_no_domain_present():
 
 def test_returns_none_on_empty_text():
     assert extract_victim_domain("") is None
+
+
+def test_country_from_domain_simple_cctld():
+    assert country_from_domain("lesecologistes.fr") == "FR"
+
+
+def test_country_from_domain_compound_cctld():
+    assert country_from_domain("snu.gouv.fr") == "FR"
+    assert country_from_domain("nhs.co.uk") == "GB"
+
+
+def test_country_from_domain_generic_tld_returns_none():
+    assert country_from_domain("example.com") is None
+    assert country_from_domain("example.io") is None
+
+
+def test_country_from_domain_su_maps_to_russia():
+    assert country_from_domain("example.su") == "RU"
+
+
+def test_country_from_domain_none_input():
+    assert country_from_domain(None) is None

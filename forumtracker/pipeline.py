@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from .alerting import is_alert_worthy, to_alert_card
 from .dedup import SeenStore
 from .discover import find_mirror_candidates
-from .entity_extraction import extract_victim_domain
+from .entity_extraction import country_from_domain, extract_victim_domain
 from .forum_stats import StatsStore, collect_snapshots
 from .health import HealthStore, check_all, pool_urls
 from .identity_correlation import IdentityStore
@@ -77,8 +77,10 @@ def _apply_ransomware_intel(incident: dict) -> None:
     fuller thread-page text where available, not just the RSS teaser):
     tags a known RaaS group / ransom-note pattern (see ransomware_intel.py)
     and pulls a real victim domain out of the text (see
-    entity_extraction.py) into `victim.website`, which the schema already
-    has but nothing populated until now.
+    entity_extraction.py) into `victim.website` - when that domain has a
+    recognizable ccTLD (.fr, .de, .com.br, ...), also derives
+    `victim.country_code` from it. Both schema fields existed from the
+    start but nothing populated them until now.
 
     Only upgrades `category` from the generic "forum_post" default - never
     downgrades a source's own more specific classification (e.g.
@@ -102,7 +104,11 @@ def _apply_ransomware_intel(incident: dict) -> None:
     source_hostname = urlparse(incident.get("source", {}).get("url") or "").hostname
     domain = extract_victim_domain(text, exclude_hostname=source_hostname)
     if domain:
-        incident.setdefault("victim", {})["website"] = domain
+        victim = incident.setdefault("victim", {})
+        victim["website"] = domain
+        country = country_from_domain(domain)
+        if country:
+            victim["country_code"] = country
 
 
 def emit(incidents: list[dict]) -> None:

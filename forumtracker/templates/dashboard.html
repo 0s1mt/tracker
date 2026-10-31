@@ -120,6 +120,14 @@ tbody tr:hover td{background:var(--surface-2);}
 .mono-cell{font-family:var(--mono);font-size:11.5px;}
 .forum-chip{display:inline-block;background:var(--surface-3);border:1px solid var(--border-soft);border-radius:6px;padding:1px 7px;font-family:var(--mono);font-size:10.5px;margin:1px 3px 1px 0;color:var(--text-dim);}
 
+/* ---- rank lists (top actors / top countries) ---- */
+.rank-list{display:flex;flex-direction:column;gap:7px;}
+.rank-row{display:grid;grid-template-columns:120px 1fr 48px;gap:10px;align-items:center;}
+.rank-label{font-family:var(--mono);font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-bar-track{background:var(--surface-2);border-radius:4px;height:9px;overflow:hidden;}
+.rank-bar-fill{background:var(--accent);height:100%;border-radius:4px;}
+.rank-count{font-family:var(--mono);font-size:11px;color:var(--text-faint);text-align:right;font-variant-numeric:tabular-nums;}
+
 /* ---- search results ---- */
 .result-group{margin-bottom:20px;}
 .result-group-head{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
@@ -173,6 +181,23 @@ footer{margin-top:8px;padding-top:18px;border-top:1px solid var(--border-soft);f
           <span class="section-sub" id="alertSub"></span>
         </div>
         <div class="alert-list" id="alertList"></div>
+      </div>
+    </section>
+
+    <section class="ops-grid">
+      <div>
+        <div class="section-head">
+          <h2>En aktif tehdit aktörleri</h2>
+          <span class="section-sub" id="actorSub"></span>
+        </div>
+        <div class="rank-list" id="actorRank"></div>
+      </div>
+      <div>
+        <div class="section-head">
+          <h2>En çok hedeflenen ülkeler</h2>
+          <span class="section-sub">victim.website'in ccTLD'sinden çıkarıldı — jenerik .com/.io/.net hedef dışı</span>
+        </div>
+        <div class="rank-list" id="countryRank"></div>
       </div>
     </section>
 
@@ -297,6 +322,33 @@ document.getElementById("alertList").innerHTML = topAlerts.map(a => {
     ${entities ? '<div style="margin-top:6px;">'+entities+'</div>' : ""}
   </div>`;
 }).join("");
+
+// ---- top actors / top countries ----
+const COUNTRY_NAMES = {
+  RU:"Rusya", CN:"Çin", DE:"Almanya", FR:"Fransa", TR:"Türkiye", GB:"Birleşik Krallık",
+  NL:"Hollanda", SE:"İsveç", NO:"Norveç", ES:"İspanya", IT:"İtalya", PL:"Polonya",
+  BR:"Brezilya", IN:"Hindistan", AU:"Avustralya", CA:"Kanada", JP:"Japonya", KR:"Güney Kore",
+  MX:"Meksika", AR:"Arjantin", ZA:"Güney Afrika", CH:"İsviçre", AT:"Avusturya", BE:"Belçika",
+  DK:"Danimarka", FI:"Finlandiya", IE:"İrlanda", PT:"Portekiz", GR:"Yunanistan", CZ:"Çekya",
+  RO:"Romanya", HU:"Macaristan", IL:"İsrail", AE:"BAE", SA:"Suudi Arabistan", ID:"Endonezya",
+  TH:"Tayland", VN:"Vietnam", PH:"Filipinler", SG:"Singapur", MY:"Malezya", NZ:"Yeni Zelanda",
+};
+
+function renderRankList(elId, rows, labelFn, countKey){
+  const el = document.getElementById(elId);
+  if(!rows.length){ el.innerHTML = '<div class="empty-note">Henüz yeterli veri yok.</div>'; return; }
+  const max = Math.max(...rows.map(r => r[countKey]));
+  el.innerHTML = rows.map(r => `
+    <div class="rank-row">
+      <div class="rank-label" title="${esc(labelFn(r))}">${esc(labelFn(r))}</div>
+      <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${Math.max(4,(r[countKey]/max*100)).toFixed(1)}%"></div></div>
+      <div class="rank-count">${fmt(r[countKey])}</div>
+    </div>`).join("");
+}
+
+document.getElementById("actorSub").textContent = fmt(DATA.top_actors.length) + " benzersiz aktörden en aktif " + Math.min(15, DATA.top_actors.length) + "'i";
+renderRankList("actorRank", DATA.top_actors, r => r.name, "count");
+renderRankList("countryRank", DATA.top_countries, r => (COUNTRY_NAMES[r.code] || r.code) + "  ·  " + r.code, "count");
 
 // ---- identity table ----
 document.getElementById("identityBody").innerHTML = DATA.identity_matches.map(m => `

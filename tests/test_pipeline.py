@@ -61,6 +61,19 @@ def test_apply_ransomware_intel_upgrades_forum_post_category():
     assert incident["victim"]["website"] == "victimcorp.com"
 
 
+def test_apply_ransomware_intel_derives_country_code_from_victim_domain():
+    incident = {
+        **_incident("r4", category="forum_post"),
+        "title": "Selling database of mairie-exemple.fr, 50k residents",
+        "description": None,
+    }
+
+    _apply_ransomware_intel(incident)
+
+    assert incident["victim"]["website"] == "mairie-exemple.fr"
+    assert incident["victim"]["country_code"] == "FR"
+
+
 def test_apply_ransomware_intel_never_downgrades_existing_category():
     incident = {**_incident("r2", category="data_breach"), "title": "LockBit involved somehow", "description": None}
 

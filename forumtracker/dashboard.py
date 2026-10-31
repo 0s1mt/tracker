@@ -124,6 +124,7 @@ def _incidents(feed_path: Path) -> list[dict]:
                 continue
             source = inc.get("source") or {}
             actor = inc.get("threat_actor") or {}
+            victim = inc.get("victim") or {}
             evidence = inc.get("evidence") or {}
             out.append({
                 "id": inc.get("incident_id"),
@@ -134,8 +135,40 @@ def _incidents(feed_path: Path) -> list[dict]:
                 "d": inc.get("detected_at"),
                 "u": evidence.get("post_url"),
                 "tags": inc.get("tags") or [],
+                "cc": victim.get("country_code"),
             })
     return out
+
+
+# Role/placeholder actor names that would otherwise dominate a "top actors"
+# ranking without being a real identity - same list identity_correlation.py
+# already excludes from cross-forum matching, for the same reason.
+_GENERIC_ACTOR_NAMES = {
+    "unknown", "admin", "administrator", "mod", "moderator", "system",
+    "deleted", "guest", "anonymous", "support", "staff", "bot",
+}
+
+
+def _top_actors(incidents: list[dict], limit: int = 15) -> list[dict]:
+    counts: dict[str, int] = {}
+    for inc in incidents:
+        name = (inc.get("a") or "").strip()
+        if not name or name.lower() in _GENERIC_ACTOR_NAMES:
+            continue
+        counts[name] = counts.get(name, 0) + 1
+    ranked = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:limit]
+    return [{"name": name, "count": count} for name, count in ranked]
+
+
+def _top_countries(incidents: list[dict], limit: int = 12) -> list[dict]:
+    counts: dict[str, int] = {}
+    for inc in incidents:
+        cc = inc.get("cc")
+        if not cc:
+            continue
+        counts[cc] = counts.get(cc, 0) + 1
+    ranked = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:limit]
+    return [{"code": code, "count": count} for code, count in ranked]
 
 
 def _alerts(feed_path: Path) -> list[dict]:
@@ -220,6 +253,8 @@ def build_dashboard_data(data_dir: Path) -> dict:
         "member_directory_cross_forum": mdir_cross,
         "incidents": incidents,
         "alerts": sorted(alerts, key=lambda a: (a.get("pop") or 0), reverse=True),
+        "top_actors": _top_actors(incidents),
+        "top_countries": _top_countries(incidents),
     }
 
 
