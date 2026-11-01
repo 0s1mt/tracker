@@ -26,6 +26,7 @@ from .ransomware_intel import classify as classify_ransomware
 from .sector_classification import sector_from_domain, sector_from_text
 from .sources.base import Source
 from .sources.browser_forum import BROWSER_FORUM_POOL, BrowserForumSource
+from .sources.ransomware_live import RansomwareLiveSource
 from .sources.telegram_bridge import TelegramBridgeSource
 from .sources.underground_forums import FORUM_POOL, UndergroundForumSource
 
@@ -52,6 +53,7 @@ def build_sources() -> list[Source]:
         UndergroundForumSource(sites=sites),
         BrowserForumSource(),
         TelegramBridgeSource(),
+        RansomwareLiveSource(),
     ]
 
 
@@ -101,6 +103,11 @@ def _apply_ransomware_intel(incident: dict) -> None:
     downgrades a source's own more specific classification (e.g.
     telegram_bridge's own category mapping, or a future source that already
     knows it's looking at a verified breach).
+
+    Never overwrites a `victim.country_code`/`victim.sector` the source
+    itself already set (ransomware_live.py's ransomware.live records carry
+    both directly from that API, authoritative - a source's own structured
+    field always beats this module's text/domain guess).
     """
     text = f"{incident.get('title', '')} {incident.get('description') or ''}"
 
@@ -116,23 +123,26 @@ def _apply_ransomware_intel(incident: dict) -> None:
         if "ransomware" not in incident.get("tags", []):
             incident.setdefault("tags", []).append("ransomware")
 
+    victim = incident.setdefault("victim", {})
     source_hostname = urlparse(incident.get("source", {}).get("url") or "").hostname
     domain = extract_victim_domain(text, exclude_hostname=source_hostname)
-    country = None
-    if domain:
-        incident.setdefault("victim", {})["website"] = domain
-        country = country_from_domain(domain)
-    if not country:
-        # Most posts never contain a parseable victim domain at all (e.g.
-        # "Turkey GSM Database") - fall back to the country name/demonym
-        # stated in the title/description itself.
-        country = country_from_text(text)
-    if country:
-        incident.setdefault("victim", {})["country_code"] = country
+    if domain and not victim.get("website"):
+        victim["website"] = domain
 
-    sector = sector_from_domain(domain) or sector_from_text(text)
-    if sector:
-        incident.setdefault("victim", {})["sector"] = sector
+    if not victim.get("country_code"):
+        country = country_from_domain(domain) if domain else None
+        if not country:
+            # Most posts never contain a parseable victim domain at all (e.g.
+            # "Turkey GSM Database") - fall back to the country name/demonym
+            # stated in the title/description itself.
+            country = country_from_text(text)
+        if country:
+            victim["country_code"] = country
+
+    if not victim.get("sector"):
+        sector = (sector_from_domain(domain) if domain else None) or sector_from_text(text)
+        if sector:
+            victim["sector"] = sector
 
 
 def emit(incidents: list[dict]) -> None:

@@ -1168,6 +1168,54 @@ her zaman çalışır. Doğrulama: `tests/test_underground_forums_enrich.py`'a
 `time.monotonic()` mock'lanarak eklenen yeni test — toplam süit artık 172
 testte yeşil.
 
+### Asıl kırılma: `ransomware.live` entegrasyonu — `forumtracker/sources/ransomware_live.py`
+
+"ziraat" aratınca hiç sonuç çıkmaması şikayeti üzerine deepdarkCTI'nin daha
+önce hiç bakmadığımız `ransomware_gang.md` dosyasına bakıldı (forum.md
+dışındaki kategoriler: telegram_threat_actors.md, telegram_infostealer.md,
+markets.md, ransomware_gang.md, defacement.md, others.md — hepsi
+`fastfire/deepdarkCTI` reposunda, `api.github.com/repos/fastfire/deepdarkCTI/contents/`
+ile listelendi). Orada **ransomware.live** (api.ransomware.live/v2) bulundu:
+bizim forum/Telegram taramamız gibi metinden kurban/ülke/sektör TAHMİN
+etmek yerine, kendi CTI ekibi tarafından zaten çözülmüş gerçek kurban
+adı/domaini/ülkesini/sektörünü veren, ücretsiz, kimliksiz bir API.
+**Canlı doğrulama:** `GET /v2/countryvictims/TR` → **187 gerçek Türk
+ransomware kurbanı** (vecert'in başta gösterdiği 161 rakamına çarpıcı
+derecede yakın — muhtemelen onlar da kısmen böyle bir agregatörden
+besleniyor, salt forum taramıyorlar).
+
+**`RansomwareLiveSource`** (`GET /v2/recentvictims`, döngü başına bir kez):
+`victim`/`post_title` → `Victim.name`, `country` → `Victim.country_code`
+(DOĞRUDAN, bizim domain/metin tahminimize hiç gerek yok), `domain`/`website`
+→ `Victim.website`, `activity` → `Victim.sector` (küçük, bilinçli bir
+eşleme tablosuyla — `sector_classification.py`'nin kendi disiplini: sadece
+belirsizliksiz eşleşenler, "Other" gibi değerler None kalıyor), `group`/
+`group_name` → `ThreatActor.name`, `claim_url`/`post_url` → `evidence.post_url`.
+`category` her zaman `"ransomware_leak"`. **Önemli düzeltme:**
+`pipeline._apply_ransomware_intel()` artık `victim.country_code`/`sector`
+**zaten doluysa onu EZMIYOR** — önceden her incident için koşulsuz
+yeniden hesaplayıp üzerine yazıyordu, bu da ransomware.live'ın zaten doğru
+verdiği değeri bizim daha zayıf domain/metin tahminimizle bozabilirdi.
+
+**ToS notu:** Ücretsiz v2 API "Personal use only... not intended for
+corporate or business use" diyor, ~1 istek/dakika/endpoint sınırı var.
+Bu kaynak döngü başına sadece BİR endpoint'i BİR kez çağırıyor (30 dk'lık
+zamanlanmış döngümüzle kıyasla sınıra yaklaşmıyor bile) — ama "personal
+use" şartı teknik değil, iş modeli sorusu; bu tracker'ın çıktısı ticari
+kullanılırsa `api-pro.ransomware.live` (ücretli, sınırsız) seçeneğine
+geçilmeli.
+
+**Doğrulama:** `tests/test_ransomware_live.py` (9 test, hem
+`/recentvictims` hem `/countryvictims/<cc>`'nin farklı alan adlarını
+kapsıyor), canlı uçtan uca test (`RansomwareLiveSource().fetch()` gerçek
+API'ye karşı çalıştırıldı — 100 kayıt, ilk kurban gerçekten TR/Evinoks).
+
+**Araştırmada bulunan ama şimdilik eklenmeyen ikinci bir aday:**
+`api.ransomfeed.it` — aynı tarzda, canlı doğrulanmış (~90 gerçek kayıt,
+`country`/`work_sector` alanları var) ama veri kalitesi tutarsız
+(bazı `description` alanları "[AI generated] N/A" placeholder) — ayrı bir
+turda değerlendirilebilir.
+
 ### Araştırılan ama bilinçli olarak YAPILMAYAN: Cloudflare/CAPTCHA'lı forumlar
 
 Kullanıcı `pwnforums.st`'yi örnek verdi (vecert/osint tarzı "Country/
