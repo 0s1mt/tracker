@@ -1216,6 +1216,32 @@ API'ye karşı çalıştırıldı — 100 kayıt, ilk kurban gerçekten TR/Evino
 (bazı `description` alanları "[AI generated] N/A" placeholder) — ayrı bir
 turda değerlendirilebilir.
 
+### İkinci kırılma: Telegram köprüsü sadece BİR botun formatını anlıyordu
+
+`telegram_bridge.py`'nin asıl kısıtı forum sayısı değil, **ayrıştırıcının
+kendisiydi**: `_parse_item`, sadece breachdetect botunun "Source"/"Content"/
+"Type" yapılandırılmış kart formatını tanıyordu — gerçek bir insanın normal
+attığı herhangi bir Telegram gönderisi (düz metin/fotoğraf/video) bu formata
+uymadığı için **sessizce atılıyordu**. Canlı doğrulandı: gerçek, aktif, CTI
+açısından alakalı bir kanal (`SliceForLifeee` — CVE'ler, Europol operasyonları,
+ransomware/leak gönderileri) bu yüzden **0 incident** üretiyordu, kanal
+ölü/erişilemez olduğu için değil, ayrıştırıcı onu hiç tanımadığı için.
+
+**Düzeltme:** `_parse_generic_item()` — yapılandırılmış format eşleşmezse
+devreye giren bir fallback. Başlık/açıklamadan `content` çıkarıyor (medya-only
+başlıkları — "[Photo]", "[Video]" vb. — atıyor), `author`/`type`/`source_url`
+None bırakıyor (`_to_incident` zaten bunları opsiyonel olarak ele alıyordu).
+Ayrıca double-HTML-escape sırası düzeltildi (önce unescape, sonra tag strip —
+tersi, kaçırılmış `<a href=...>` metnini olduğu gibi içerikte bırakıyordu) ve
+standart RSS `pubDate` formatı için `parsedate_to_datetime` eklendi.
+
+`SliceForLifeee` artık `TELEGRAM_BRIDGE_POOL`'da (içerik incelemesi yapıldı,
+canlı doğrulandı). `ctifeeds`/`DarkWebInformer` denendi, köprünün
+kanal-başına soğuma süresine takıldı — ayrı bir turda tekrar denenmeli.
+
+**Doğrulama:** `tests/test_telegram_bridge.py`'a 8 yeni test (toplam 18),
+tüm süit 189 testte yeşil.
+
 ### Araştırılan ama bilinçli olarak YAPILMAYAN: Cloudflare/CAPTCHA'lı forumlar
 
 Kullanıcı `pwnforums.st`'yi örnek verdi (vecert/osint tarzı "Country/

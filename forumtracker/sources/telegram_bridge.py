@@ -22,6 +22,16 @@ decodes and regex-extracts those five fields into a plain dict; the
 `extra` - `forumtracker/discover.py` mines that field across a batch of
 these to surface new forum candidates, which is the actual "enrich the forum
 pool from Telegram" mechanism the user asked for.
+
+`_parse_item` only matches breachdetect's own bot-generated card format -
+every other real Telegram channel is just a human posting text/photos/
+videos normally, with no "Source"/"Content"/"Type" fields at all, so
+`_parse_item` returns None for 100% of their posts. This silently capped
+TELEGRAM_BRIDGE_POOL to breachdetect-format bots only (verified live
+2026-11-01: a real, active, CTI-relevant channel parsed to 0 incidents
+before this fix). `_parse_generic_item` is the fallback for that case -
+title/description -> content, no author/type/source_url (`_to_incident`
+already treats those as optional).
 """
 from __future__ import annotations
 
@@ -29,6 +39,7 @@ import html
 import logging
 import re
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Iterable, Optional
 
 import requests
@@ -43,19 +54,30 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 BRIDGE_URL = "https://tg.i-c-a.su/rss/{channel}"
 MAX_ITEMS_PER_CHANNEL = 30
 
-# channel -> config. Only breachdetect is confirmed working through this
-# bridge right now - ctifeeds/DarkWebInformer both hit the bridge's
-# per-new-channel cooldown when tried live and need a retry later (see
-# README). Add them here once confirmed; fetch() skips failures per-channel
-# so one bad entry never blocks the others.
+# channel -> config. `breachdetect` matches the structured bot format
+# (_parse_item); `SliceForLifeee` is the first channel added after
+# _parse_generic_item's fix (2026-11-01) - a real, active OSINT/security
+# researcher channel, content-reviewed live (CVEs, Europol operations,
+# ransomware/leak posts - see telegram_bridge.py's module docstring).
+# ctifeeds/DarkWebInformer both still hit the bridge's per-new-channel
+# cooldown when retried live and need another attempt later (see README).
+# Add them here once confirmed; fetch() skips failures per-channel so one
+# bad entry never blocks the others.
 TELEGRAM_BRIDGE_POOL: dict[str, dict] = {
     "breachdetect": {},
+    "SliceForLifeee": {},
 }
 
 ITEM_RE = re.compile(r"<item>(.*?)</item>", re.DOTALL)
 DESCRIPTION_RE = re.compile(r"<description>(.*?)</description>", re.DOTALL)
 LINK_RE = re.compile(r"<link>(.*?)</link>")
+TITLE_RE = re.compile(r"<title>(.*?)</title>", re.DOTALL)
+PUBDATE_RE = re.compile(r"<pubDate>(.*?)</pubDate>")
 TAG_RE = re.compile(r"<[^>]+>")
+# A plain post's <title> on this bridge is just a media-type label when the
+# post has no caption ("[Photo]", "[Video]", "favicon") - not real content,
+# so it's dropped in favor of the <description> body when one of these.
+_MEDIA_ONLY_TITLE_RE = re.compile(r"^\[(?:Photo|Video|Media|GIF|Sticker|Voice|Document)\]$|^favicon$", re.I)
 
 SOURCE_FIELD_RE = re.compile(
     r'"Source":\s*"(?:<a[^>]*href="([^"]*)"[^>]*>[^<]*</a>|([^"]*))"'
@@ -139,12 +161,61 @@ def _parse_item(item_xml: str, link: Optional[str] = None) -> Optional[dict]:
     return row
 
 
+def _parse_generic_item(item_xml: str) -> Optional[dict]:
+    """Fallback for any channel post that doesn't match the breachdetect
+    bot's structured Source/Content/Type shape - i.e. almost every other
+    public Telegram channel, which is just a human posting text/photos/
+    videos normally. Before this existed, _parse_item() silently dropped
+    every single post from a channel like this (verified live 2026-11-01:
+    a real, active, CTI-relevant channel - SliceForLifeee - parsed to 0
+    incidents), which meant TELEGRAM_BRIDGE_POOL could in practice only
+    ever grow with more breachdetect-format bots, not real channels.
+
+    Returns a row shaped exactly like _parse_item()'s structured row but
+    with author/detection_date/type/source_url left None - _to_incident()
+    already treats all of those as optional via .get() fallbacks.
+    """
+    # Same double-HTML-escaping this bridge uses for breachdetect's content
+    # (see _parse_item) - unescape before stripping tags, or an escaped
+    # "&amp;lt;a href..." only half-decodes into visible literal tag text.
+    desc_m = DESCRIPTION_RE.search(item_xml)
+    description = TAG_RE.sub("", html.unescape(html.unescape(desc_m.group(1)))).strip() if desc_m else ""
+
+    title_m = TITLE_RE.search(item_xml)
+    title = TAG_RE.sub("", html.unescape(html.unescape(title_m.group(1)))).strip() if title_m else ""
+    if _MEDIA_ONLY_TITLE_RE.match(title):
+        title = ""
+
+    content = description or title
+    if not content:
+        return None
+
+    link_m = LINK_RE.search(item_xml)
+    link = link_m.group(1) if link_m else None
+
+    pubdate_m = PUBDATE_RE.search(item_xml)
+    pubdate = pubdate_m.group(1).strip() if pubdate_m else None
+
+    return {
+        "content": content,
+        "author": None,
+        "detection_date": pubdate,
+        "type": None,
+        "source_url": None,
+        "link": link,
+    }
+
+
 def _parse_date(raw: Optional[str]) -> Optional[str]:
     if not raw:
         return None
     try:
         return datetime.strptime(raw, "%d %b %Y").replace(tzinfo=timezone.utc).isoformat()
     except ValueError:
+        pass
+    try:
+        return parsedate_to_datetime(raw).isoformat()
+    except (TypeError, ValueError):
         return raw
 
 
@@ -179,7 +250,7 @@ class TelegramBridgeSource(Source):
 
         out = []
         for item_xml in ITEM_RE.findall(resp.text)[:MAX_ITEMS_PER_CHANNEL]:
-            row = _parse_item(item_xml)
+            row = _parse_item(item_xml) or _parse_generic_item(item_xml)
             if row is None:
                 continue
             out.append(self._to_incident(channel, row, ingested_at))
