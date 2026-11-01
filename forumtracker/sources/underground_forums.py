@@ -1,11 +1,15 @@
 """Live thread/post scraper for underground hacking & cracking forums.
 
 Targets pulled from the community-maintained deepdarkCTI list
-(github.com/fastfire/deepdarkCTI, forum.md) and validated live in this
-session: from ~190 "ONLINE + clearnet" candidates, 76 were actually
-reachable, and of those, 29 exposed a working RSS feed. This module covers
-those 29 - real .onion-only forums are out of scope here (Tor egress is not
-available from this environment; see README for the workaround).
+(github.com/fastfire/deepdarkCTI, forum.md) and validated live across
+several sessions (most recently 2026-11-01, re-diffing the then-current
+list against this pool - see the "re-diffed" comment below FORUM_POOL):
+real .onion-only forums are out of scope here (Tor egress is not available
+from this environment; see README for the workaround), and so are
+Cloudflare/login-gated ones (verified live, not assumed - see README's
+pwnforums.st section) and off-topic ones (adult content, game cheats/
+botting, breach-news blogs rather than forum chatter). FORUM_POOL below is
+the living result of that ongoing review, currently 30 forums.
 
 RSS auto-discovery instead of guessed URLs: forum software (XenForo, MyBB,
 IPB, and others) all advertise their feed via
@@ -136,6 +140,19 @@ FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
     "spear": {"homepage": "https://spear.cx", "rss": "https://spear.cx/syndication.php"},
     "toolbase": {"homepage": "https://www.toolbase.bz", "rss": "https://www.toolbase.bz/board/rss/forums/1-tools/"},
     "warriors": {"homepage": "https://warriors.to", "rss": "https://warriors.to/forums/-/index.rss"},
+    # --- re-diffed against the current (2026-11-01) deepdarkCTI forum.md, 167
+    # not-yet-in-pool ONLINE+clearnet candidates probed. Most were dead
+    # (DNS/connect failures - the list churns fast), Cloudflare/login-gated
+    # (xssf.net's "/feed" is actually its login page, same HUMINT-only
+    # category as pwnforums.st - see README), off-topic (zismo.biz: VK
+    # account farming, rf-cheats.ru: game cheats/botting, korovka.cc: a
+    # breach-NEWS blog, not forum chatter - out of scope per this module's
+    # own docstring), or duplicates of a pool forum under another domain
+    # (blackbones.net's RSS literally links back to blackbones.cc;
+    # leakforum.st's and cracked.sh's <link> tags point at leakforum.io and
+    # a dead cracked.st respectively). One real, live, content-reviewed
+    # addition survived:
+    "ascarding": {"homepage": "https://ascarding.com", "rss": "https://ascarding.com/forums/-/index.rss"},
     # --- global expansion batch (2026-09-12): candidates sourced from threat-intel
     # write-ups/forum directories, each live-verified twice (once by research, once
     # independently here) with a real 200 + genuine <item>-bearing RSS body before
