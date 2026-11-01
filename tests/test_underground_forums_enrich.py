@@ -232,3 +232,31 @@ def test_enrich_batch_one_failing_screenshot_does_not_block_the_rest(mock_get, m
 
     assert "screenshot_url" not in out[0]["evidence"]
     assert out[1]["evidence"].get("screenshot_url")
+
+
+@patch("forumtracker.sources.underground_forums.time.monotonic")
+@patch("playwright.sync_api.sync_playwright")
+@patch("forumtracker.sources.underground_forums.requests.get")
+def test_enrich_batch_stops_taking_screenshots_once_wall_clock_budget_exceeded(mock_get, mock_sp, mock_monotonic):
+    """A slow forum (or several) can make _save_screenshot() calls run long
+    with nothing logged in between (only failures are logged) - live-observed
+    2026-11-01, a real cycle spent 25+ minutes here after a collection gap.
+    SCREENSHOT_BATCH_BUDGET_SECONDS bounds that so the rest of run_full_cycle
+    (emit, alerts, health-check, mirror-adoption) always still runs within
+    the 30-minute scheduled-task cadence - see scripts/run_cycle.ps1."""
+    from forumtracker.sources.underground_forums import SCREENSHOT_BATCH_BUDGET_SECONDS
+
+    mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
+    mock_browser, _ = _mock_playwright(mock_sp)
+    # batch_start, then one check per loop iteration: the 1st incident is
+    # within budget, the 2nd's check already reads past the budget.
+    mock_monotonic.side_effect = [0, 0, SCREENSHOT_BATCH_BUDGET_SECONDS + 1]
+    source = UndergroundForumSource()
+    incidents = [_incident(post_url="https://forum.example/Thread-1"),
+                 _incident(post_url="https://forum.example/Thread-2")]
+
+    out = source.enrich_batch(incidents)
+
+    assert out[0]["evidence"].get("screenshot_url")
+    assert "screenshot_url" not in out[1]["evidence"]
+    assert mock_browser.new_page.call_count == 1

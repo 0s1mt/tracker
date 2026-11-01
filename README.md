@@ -1096,6 +1096,93 @@ de geçerli (yeni "En çok hedeflenen sektörler" sıralaması + arama).
 `test_notify_telegram.py`/`test_underground_forums.py`'a eklenen yeni
 testler — toplam süit 171 testte yeşil.
 
+## Local-only geliştirme ve sürekli toplama (2026-11-01)
+
+`origin/main` 13 Ekim'de başka bir katkıcı tarafından tamamen farklı bir
+mimariye ("forumwatch": Postgres + matcher + API + Docker servisi)
+pivotlandı ve bu pivot sırasında `.github/workflows/pipeline.yml`'in
+30-dakikalık zamanlayıcısı kaldırıldı — yani origin'deki hiçbir şey artık bu
+dashboard/JSONL mimarisini çalıştırmıyor. Bilinçli karar: bu dal `main`'i
+origin'e **push etmiyoruz / forumwatch'u merge etmiyoruz** — iki ayrı yön,
+local'de bağımsız gelişmeye devam ediyor. Bu da şu sonucu doğurdu: veri
+toplama artık **hiçbir yerde** otomatik çalışmıyordu — `data/incidents.jsonl`
+6 hafta (8 Eylül → 20 Eylül'den sonra hiç) donmuş durumda bulundu, bu da
+"Türkiye sonuçları neden bu kadar az" sorusunun gerçek sebeplerinden
+biriydi (veri eski olduğu için değil — ama tazeleme de kapsamı artırmadı,
+aşağıya bkz).
+
+### Local sürekli çalıştırma — `scripts/run_cycle.ps1` + Windows Task Scheduler
+
+GitHub Actions'ın yerini alan local eşdeğeri: `scripts/run_cycle.ps1` bir
+`--once` döngüsü + `--build-dashboard`'u loglayarak çalıştırıyor
+(`logs/cycle.log`, ~2MB'ı geçince son 5000 satıra kırpılıyor). Kayıtlı
+görev:
+
+```powershell
+schtasks /create /tn "DarkWebForumTracker" /tr "powershell.exe -ExecutionPolicy Bypass -File \"C:\Users\Monster\Desktop\DarkWebFeed\Darkweb-forum-tracker\scripts\run_cycle.ps1\"" /sc minute /mo 30 /rl limited /f
+```
+
+Her 30 dakikada bir (GitHub Actions'ın zaten doğrulanmış kadansıyla aynı —
+bkz. pipeline.yml'nin kendi gerekçesi), kullanıcı oturumu açıkken çalışır
+(parola/SYSTEM yetkisi gerekmez). Kontrol: `schtasks /query /tn
+"DarkWebForumTracker" /v`, elle tetikleme: `schtasks /run /tn
+"DarkWebForumTracker"`, kaldırma: `schtasks /delete /tn
+"DarkWebForumTracker" /f`.
+
+**Neden `--loop` değil, tekrarlayan `--once`:** Tek bir uzun ömürlü süreç
+yerine her 30 dakikada bağımsız, kendi kendini iyileştiren bir çalıştırma —
+bir döngünün çökmesi (beklenmeyen exception, uyku moduna geçen makine) bir
+sonraki zamanlanmış çalıştırmayı etkilemiyor; `--loop`'ta aynı süreç
+sonsuza dek canlı kalmak zorunda.
+
+**Mirror-adoption gecikme formülü (3. sorudaki "TLD değişince feed
+gecikiyor" sorusunun yanıtı):** `health.DEAD_THRESHOLD = 3` ardışık
+ulaşılamaz kontrol + adoption da aynı `run_full_cycle` içinde çalıştığı
+için, bir forum öldükten sonra otomatik mirror geçişinin tetiklenmesi en
+fazla `3 × 30dk = 90 dakika` sürer. Bu zaten bilinçli bir tasarım — `--health`
+bayrağı ayrı ve daha sık çalıştırılsa bile adoption'ı HIZLANDIRMAZ, çünkü
+adoption'ın ihtiyaç duyduğu SeenStore bağlamı sadece `run_full_cycle`'da var
+(`cli.py`'nin `run_health_check()` docstring'i bunu zaten belirtiyor) — yani
+daha sık health-check eklemek yanlış çözüm olurdu, gerçek kaldıraç kolun
+30 dakikalık ana döngünün düzenli çalışmasını garantilemekti.
+
+### Bulunan ve düzeltilen: sınırsız ekran görüntüsü fazı, zamanlanmış görevi tehdit ediyordu
+
+`scripts/run_cycle.ps1`'i elle test ederken (gerçek, 6 haftalık boşluktan
+sonraki ilk döngü) bir çalıştırma **25+ dakika** sürdü ve log'da uzun süre
+hiç yeni satır görünmedi — dışarıdan "takıldı" ile "yavaş ama çalışıyor"
+ayırt edilemiyordu (çünkü `_save_screenshot()` sadece HATA durumunda log
+yazıyor, her başarılı adımda değil). Kök neden: `enrich_batch()`'teki
+ekran görüntüsü fazı tek tek adımlarda sınırlı (nav 15sn, selector 8sn,
+settle 3sn) ama **toplamda sınırsız** — yüzlerce yeni kayıt + birkaç yavaş
+forum varsa, tüm döngü teorik olarak süresiz uzayabiliyordu. Bu artık her
+30 dakikada bir zamanlanmış bir görev olarak çalışacağı için ciddi bir risk:
+ekran görüntüsü fazı uzarsa, döngünün geri kalanı (emit, alarm, health-check,
+mirror-adoption, dashboard yenileme — hepsi hızlı) hiç çalışamayabilirdi.
+
+**Düzeltme:** `SCREENSHOT_BATCH_BUDGET_SECONDS = 600` (10 dakika) — tüm
+ekran görüntüsü fazı için TOPLAM bir zaman bütçesi. Aşılırsa kalan kayıtlar
+RSS-teaser `description`'larıyla ve ekran görüntüsüz bırakılıyor (Playwright
+hiç kurulu değilmiş gibi, zaten var olan bir davranış), döngünün geri kalanı
+her zaman çalışır. Doğrulama: `tests/test_underground_forums_enrich.py`'a
+`time.monotonic()` mock'lanarak eklenen yeni test — toplam süit artık 172
+testte yeşil.
+
+### Araştırılan ama bilinçli olarak YAPILMAYAN: Cloudflare/CAPTCHA'lı forumlar
+
+Kullanıcı `pwnforums.st`'yi örnek verdi (vecert/osint tarzı "Country/
+Category/Market" alanlı yapılandırılmış ilan formatı). Doğrulandı: site
+gerçek, ama hem düz `requests` hem gerçek bir Playwright/Chromium
+tarayıcısı (6sn bekleme dahil) "Just a moment..." (Cloudflare
+interaktif doğrulama) ekranından öteye geçemiyor. Araştırma (Cybersixgill,
+Flare gibi vendörlerin kendi metodoloji sayfaları) gösteriyor ki ciddi
+oyuncular bile bunu scraping hilesiyle değil **HUMINT** ile çözüyor (gerçek
+bir hesapla foruma üye olup itibar kazanan bir insan analist) — yani
+otomatik bir "çözüm" aramak zaten yanlış hedef. Kapsam dışı bırakıldı;
+tek gerçekçi yol kullanıcının kendi hesap/cookie'siyle meşru bir oturum
+vermesi olurdu (ayrı, insan-bakımı gerektiren bir karar, şimdilik
+uygulanmadı).
+
 ## DarkWebFeed ile ilişki
 
 Bu modül DarkWebFeed'in genel ingestion pipeline'ından bilerek ayrıldı: kendi

@@ -3,4 +3,5 @@ __pycache__/
 .pytest_cache/
 data/
 loop.log
+logs/
 .env

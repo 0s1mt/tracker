@@ -24,6 +24,7 @@ import html
 import json
 import logging
 import re
+import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Iterable, Optional
@@ -85,6 +86,22 @@ _SLUG_RE = re.compile(r"[^A-Za-z0-9_-]")
 SCREENSHOT_NAV_TIMEOUT_MS = 15_000
 SCREENSHOT_CONTENT_TIMEOUT_MS = 8_000
 SCREENSHOT_OVERLAY_SETTLE_MS = 3_000
+
+# Live-observed (2026-11-01): a single slow/overloaded forum can make
+# several consecutive _save_screenshot() calls each burn close to their
+# full ~26s worst case (15s nav + 8s selector-wait + 3s settle), with
+# nothing logged in between since only failures are logged - from the
+# outside this is indistinguishable from a genuine hang. After a 6-week
+# collection gap, one real run spent 25+ minutes in this loop alone. Since
+# this now runs on a 30-minute recurring local schedule (see
+# scripts/run_cycle.ps1), an unbounded screenshot phase risks the *rest*
+# of the cycle (emit, alerts, health-check, mirror-adoption, dashboard
+# rebuild - all cheap/fast) never running at all. A wall-clock budget on
+# the screenshot phase - not per-item, the whole batch - caps that risk:
+# once exceeded, remaining incidents simply keep their RSS-teaser
+# `description` and no `screenshot_url`, same as if Playwright were never
+# installed, rather than blocking the cycle indefinitely.
+SCREENSHOT_BATCH_BUDGET_SECONDS = 600
 
 # name -> (homepage_url, known_rss_url or None to force autodiscovery)
 FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
@@ -254,7 +271,18 @@ class UndergroundForumSource(Source):
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 try:
-                    for inc in out:
+                    batch_start = time.monotonic()
+                    skipped = 0
+                    for i, inc in enumerate(out):
+                        if time.monotonic() - batch_start > SCREENSHOT_BATCH_BUDGET_SECONDS:
+                            skipped = len(out) - i
+                            log.warning(
+                                "underground_forums: screenshot batch budget (%ds) exceeded, "
+                                "skipping remaining %d incident(s) this cycle (no screenshot, "
+                                "RSS-teaser description kept)",
+                                SCREENSHOT_BATCH_BUDGET_SECONDS, skipped,
+                            )
+                            break
                         url = (inc.get("evidence") or {}).get("post_url")
                         if not url:
                             continue
