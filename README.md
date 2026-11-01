@@ -1242,6 +1242,35 @@ kanal-başına soğuma süresine takıldı — ayrı bir turda tekrar denenmeli.
 **Doğrulama:** `tests/test_telegram_bridge.py`'a 8 yeni test (toplam 18),
 tüm süit 189 testte yeşil.
 
+### Üçüncü kırılma: "Leads Market" — zaten sahip olduğumuz forumların kullanmadığımız alt-forumu
+
+Ziraat Bank örneği klasik bir "hacklenmiş veritabanı" ilanı değildi —
+"LEAD INFORMATION / Category: Bank Promotion Leads / Market: Banking-Finance"
+formatında, yani bir **pazarlama-lead satıcısı** ilanı, farklı bir tür. Bunun
+üzerine (deepdarkCTI'ye hiç dönmeden) doğrudan web'de "lead marketplace
+forum" araması yaptım — ve `bf.st` (BreachForums) ile `darkforums.as`
+üzerinde **"Leads Market" diye özel bir alt-forum olduğunu** buldum. Her
+ikisi de **zaten FORUM_POOL'umuzda** — sorun yeni bir forum bulmak değildi,
+sorun şu anki genel feed'in (`syndication.php`, sitedeki TÜM alt-forumların
+en son ~30 gönderisi, `MAX_ITEMS_PER_SITE`) bu düşük-hacimli alt-forumu
+boğuyor olmasıydı.
+
+**Canlı doğrulandı:** Her iki forum da MyBB altyapısı kullanıyor ve
+`syndication.php?fid=N` ile alt-foruma özel feed veriyor (`bf.st` için
+fid=42, `darkforums.as` için fid=83) — ikisinde de **aynı "Turkey Betting
+Leads" gönderisi** çıktı (çapraz doğrulama). Gerçek içerik: "21Bitcoin
+Crypto Leads", "700k Coinbase Crypto Leads", "Turkey Betting Leads",
+"China Communist Party Members Leads" — tam olarak aradığımız tür.
+
+Pool'daki diğer MyBB-tabanlı forumlarda (`bhcforums`, `leakforum.io`,
+`sinister.ly`) aynı `/Forum-Leads-Market` yolu denendi — yok, bu ikisine
+özgü.
+
+**Eklenen:** `breachforums-leads`, `darkforums-leads` (`underground_forums.py`
+FORUM_POOL'a yeni girdi olarak — yeni bir forum değil, var olan bir
+forumun ayrı bir feed'i). Canlı test: `UndergroundForumSource` ile
+30 gerçek "lead" ilanı çekti.
+
 ### Araştırılan ama bilinçli olarak YAPILMAYAN: Cloudflare/CAPTCHA'lı forumlar
 
 Kullanıcı `pwnforums.st`'yi örnek verdi (vecert/osint tarzı "Country/

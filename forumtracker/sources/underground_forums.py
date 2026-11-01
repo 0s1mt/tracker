@@ -9,7 +9,9 @@ from this environment; see README for the workaround), and so are
 Cloudflare/login-gated ones (verified live, not assumed - see README's
 pwnforums.st section) and off-topic ones (adult content, game cheats/
 botting, breach-news blogs rather than forum chatter). FORUM_POOL below is
-the living result of that ongoing review, currently 30 forums.
+the living result of that ongoing review, currently 34 entries (some are
+a specific subforum of an already-pooled site, not a wholly separate
+forum - see the "breachforums-leads"/"darkforums-leads" comment below).
 
 RSS auto-discovery instead of guessed URLs: forum software (XenForo, MyBB,
 IPB, and others) all advertise their feed via
@@ -131,6 +133,22 @@ FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
     # archives (18+)" ad in their sampled items alongside otherwise-CTI content.
     "breachforums": {"homepage": "https://bf.st", "rss": "https://bf.st/syndication.php"},
     "darkforums": {"homepage": "https://darkforums.as", "rss": "https://darkforums.as/syndication.php"},
+    # The site-wide feeds above only carry the latest ~30 posts ACROSS every
+    # subforum (MAX_ITEMS_PER_SITE), so a specific, lower-traffic subforum
+    # like "Leads Market" (marketing/contact-lead sales - e.g. "Turkey
+    # Betting Leads", "700k Coinbase Crypto Leads" - a different genre from
+    # database-breach dumps, closer to the "[TURKEY] Ziraat Bank Promotion
+    # Leads" case that motivated this search) gets crowded out and almost
+    # never shows up. Found live (2026-11-01): both forums' MyBB software
+    # exposes a per-subforum feed via `syndication.php?fid=N`, confirmed
+    # with a real shared cross-post ("Turkey Betting Leads" appears on
+    # both) - same two already-working forums, just their dedicated feed
+    # instead of being diluted into the general one. Checked whether this
+    # fid-based per-subforum pattern exists on the pool's other MyBB-style
+    # forums (bhcforums, leakforum.io) - it doesn't, this is specific to
+    # these two.
+    "breachforums-leads": {"homepage": "https://bf.st/Forum-Leads-Market", "rss": "https://bf.st/syndication.php?fid=42"},
+    "darkforums-leads": {"homepage": "https://darkforums.as/Forum-Leads-Market", "rss": "https://darkforums.as/syndication.php?fid=83"},
     "blackbones": {"homepage": "https://blackbones.cc", "rss": "https://blackbones.cc/forums/-/index.rss"},
     "blackhatpakistan": {"homepage": "https://blackhatpakistan.net", "rss": "https://blackhatpakistan.net/forums/-/index.rss"},
     "forumteam.top": {"homepage": "https://forumteam.top", "rss": "https://forumteam.top/forums/-/index.rss"},
