@@ -13,6 +13,7 @@ from forumtracker.sources.browser_forum import (
     _classify_blocked,
     _extract_mybb_post_body,
     _parse_cookie_string,
+    _parse_latest_posts,
     _parse_mybb_seo_board,
 )
 
@@ -140,10 +141,63 @@ def test_fetch_skips_cookies_when_env_var_unset(mock_sp, monkeypatch):
 
 @patch("playwright.sync_api.sync_playwright")
 def test_fetch_without_cookies_env_behaves_as_before(mock_sp):
-    """patched.to (no cookies_env key at all) must not even look at os.environ."""
+    """A site with no cookies_env key at all (patched.to) must not even
+    look at os.environ. Scoped to just that one site explicitly, not the
+    full default BROWSER_FORUM_POOL, so this stays true regardless of what
+    else gets added to the pool later (e.g. pwnforums.st, which does carry
+    cookies_env)."""
     _, mock_context, _ = _mock_playwright_context(mock_sp)
-    source = BrowserForumSource()  # default BROWSER_FORUM_POOL, patched.to only
+    source = BrowserForumSource(sites={
+        "patched.to": {
+            "board_url": "https://patched.to/Forum-refunding-services",
+            "base_url": "https://patched.to",
+            "parser": "mybb_seo",
+        },
+    })
 
     list(source.fetch())
 
     mock_context.add_cookies.assert_not_called()
+
+
+# --- _parse_latest_posts: pwnforums.st's sitewide "Latest Posts" sidebar -
+# real authenticated HTML provided by the user (2026-11-06), trimmed into
+# tests/fixtures/pwnforums_latest_posts.html (no session tokens).
+
+def test_parse_latest_posts_extracts_real_items():
+    html = _read_fixture("pwnforums_latest_posts.html")
+    threads = _parse_latest_posts(html, "https://pwnforums.st")
+
+    assert len(threads) == 3
+    titles = [t["title"] for t in threads]
+    assert any("Climb Up - 151K" in t for t in titles)
+    assert any("ChatGPT jailbreak unlock" == t for t in titles)
+
+
+def test_parse_latest_posts_keeps_type_prefix_label_in_title():
+    html = _read_fixture("pwnforums_latest_posts.html")
+    threads = _parse_latest_posts(html, "https://pwnforums.st")
+
+    prefixed = [t for t in threads if "SELLING" in t["title"] or "DATABASE" in t["title"]]
+    assert len(prefixed) == 2
+    assert any("DATABASE" in t["title"] and "Philippines" in t["title"] for t in prefixed)
+
+
+def test_parse_latest_posts_resolves_relative_thread_link():
+    html = _read_fixture("pwnforums_latest_posts.html")
+    threads = _parse_latest_posts(html, "https://pwnforums.st")
+
+    links = [t["link"] for t in threads]
+    assert "https://pwnforums.st/Thread-ChatGPT-jailbreak-unlock" in links
+
+
+def test_parse_latest_posts_extracts_author_not_type_prefix():
+    html = _read_fixture("pwnforums_latest_posts.html")
+    threads = _parse_latest_posts(html, "https://pwnforums.st")
+
+    authors = {t["author"] for t in threads}
+    assert authors == {"Alduin", "NoUsername010", "colleenoakes"}
+
+
+def test_parse_latest_posts_empty_html_returns_empty_list():
+    assert _parse_latest_posts("<html><body>nothing here</body></html>", "https://pwnforums.st") == []

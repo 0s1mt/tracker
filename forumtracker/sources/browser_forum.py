@@ -29,6 +29,14 @@ patched.to, voided.to). Live review of each (2026-09-06) found:
   thread listings (refund-fraud-as-a-service ads) with full first-post
   bodies visible to a guest session. The one concretely wired site below.
 
+pwnforums.st was added separately (2026-11-06), via `cookies_env` session
+reuse rather than RSS auto-discovery or a guest-accessible board - see its
+`BROWSER_FORUM_POOL` entry's own comment and README's "pwnforums.st"
+section for the full story (Cloudflare + Anubis gated, cookie-reuse only
+works from the cookie's own solving IP). Its `mybb_latest_posts` parser
+targets the homepage's sitewide "Latest Posts" sidebar widget, not a
+single board - see `_parse_latest_posts`.
+
 Unlike `underground_forums.py` (plain `requests` + regex against clean RSS
 XML), this source drives a real headless Chromium via Playwright - these
 pages are ordinary server-rendered HTML today, but the whole point of a
@@ -82,6 +90,22 @@ BROWSER_FORUM_POOL: dict[str, dict[str, str]] = {
         "board_url": "https://patched.to/Forum-refunding-services",
         "base_url": "https://patched.to",
         "parser": "mybb_seo",
+    },
+    # Cloudflare + Anubis gated (see README's "pwnforums.st" section) -
+    # cookies_env points at an env var holding a real, human-solved session
+    # (never a literal value here). `board_url` is the homepage itself,
+    # not a specific board: its "Latest Posts" sidebar already aggregates
+    # the newest posts across every board on the site (see
+    # _parse_latest_posts) - the MyBB-theme equivalent of an RSS feed for a
+    # site that has none. Confirmed working ONLY from the cookie's own
+    # solving IP (see README) - this entry is inert (cookies_env unset,
+    # falls back to an anonymous fetch that Cloudflare blocks, 0 incidents,
+    # logged not raised) unless run from that exact machine/network.
+    "pwnforums.st": {
+        "board_url": "https://pwnforums.st/",
+        "base_url": "https://pwnforums.st",
+        "parser": "mybb_latest_posts",
+        "cookies_env": "PWNFORUMS_COOKIES",
     },
 }
 
@@ -173,6 +197,49 @@ def _parse_mybb_seo_board(html: str, base_url: str) -> list[dict]:
     return threads
 
 
+def _parse_latest_posts(html: str, base_url: str) -> list[dict]:
+    """Extracts (title, link, author) rows from a MyBB theme's sitewide
+    "Latest Posts" sidebar widget (`div.lp-box` / `div.lp-item`) - seen live
+    on pwnforums.st's homepage (2026-11-06, real authenticated HTML provided
+    by the user). Unlike `_parse_mybb_seo_board` (one specific board's
+    thread list), this widget already aggregates the newest posts across
+    EVERY board on the site onto a single page - the MyBB-theme equivalent
+    of the RSS feed `underground_forums.py` uses elsewhere, for a forum
+    with no RSS at all.
+
+    A post's title anchor (`a.lp-title`) sometimes carries a colored prefix
+    label as a nested `<span class="rf_tprefix">` (e.g. "SELLING",
+    "DATABASE") immediately before the real title text - `get_text()` folds
+    that in naturally ("SELLING [FR] Climb Up - 151K"), which is fine: it's
+    a real signal (listing type), not noise, so it's kept rather than
+    stripped. The author link's href is always an absolute `/User-<name>`
+    URL already (unlike the thread link, which is relative) - no urljoin
+    needed there.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    threads: list[dict] = []
+    for item in soup.find_all("div", class_="lp-item"):
+        title_a = item.select_one("a.lp-title")
+        if title_a is None or not title_a.get("href"):
+            continue
+        title = title_a.get_text(" ", strip=True)
+        if not title:
+            continue
+
+        meta = item.select_one("div.lp-meta")
+        author_a = meta.find("a", href=True) if meta else None
+        author = author_a.get_text(strip=True) if author_a else "unknown"
+
+        threads.append({
+            "title": title,
+            "link": urljoin(base_url, title_a["href"]),
+            "author": author,
+        })
+        if len(threads) >= MAX_THREADS_PER_SITE:
+            break
+    return threads
+
+
 def _extract_mybb_post_body(html: str) -> Optional[str]:
     soup = BeautifulSoup(html, "html.parser")
     body_div = soup.find("div", class_="post_body")
@@ -186,6 +253,7 @@ def _extract_mybb_post_body(html: str) -> Optional[str]:
 
 _PARSERS = {
     "mybb_seo": (_parse_mybb_seo_board, _extract_mybb_post_body),
+    "mybb_latest_posts": (_parse_latest_posts, _extract_mybb_post_body),
 }
 
 
