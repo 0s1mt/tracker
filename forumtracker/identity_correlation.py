@@ -95,12 +95,24 @@ class IdentityStore:
         ).fetchall()
         return [r[0] for r in rows]
 
-    def record(self, username: str, forum: str, seen_at: Optional[str] = None) -> Optional[CrossMatch]:
+    def record(
+        self, username: str, forum: str, seen_at: Optional[str] = None, commit: bool = True,
+    ) -> Optional[CrossMatch]:
         """Records one (username, forum) sighting. Returns a CrossMatch iff
         this sighting is what pushed the username's distinct-forum count
         from 1 to 2+ for the FIRST time (i.e. a newly discovered
         cross-platform identity, not a re-confirmation of an already-known
         one) - callers use this to notify/emit exactly once per discovery.
+
+        `commit=False` defers the disk sync to the caller (see `commit()`
+        below) - a bulk loader seeding hundreds of thousands of rows one at
+        a time (seed_external_usernames()) was observed taking 30-75 minutes
+        with the per-call commit this method used unconditionally before
+        (2026-11-06): SQLite's default commit does a synchronous disk flush,
+        so N rows means N flushes. The normal pipeline callers
+        (record_incidents(), a few dozen new incidents per cycle) keep
+        `commit=True` and are unaffected - this is strictly opt-in for bulk
+        loads.
         """
         username_norm = normalize_username(username)
         if username_norm is None or not forum:
@@ -120,7 +132,8 @@ class IdentityStore:
             """,
             (username_norm, forum, username.strip(), seen_at, seen_at),
         )
-        self._conn.commit()
+        if commit:
+            self._conn.commit()
 
         if already_matched:
             return None
@@ -133,7 +146,8 @@ class IdentityStore:
             "INSERT OR IGNORE INTO cross_matches (username_norm, forums, first_matched_at) VALUES (?, ?, ?)",
             (username_norm, json.dumps(forums), seen_at),
         )
-        self._conn.commit()
+        if commit:
+            self._conn.commit()
 
         display_names = [
             r[0] for r in self._conn.execute(
@@ -141,6 +155,9 @@ class IdentityStore:
             ).fetchall()
         ]
         return CrossMatch(username_norm, forums, display_names, seen_at)
+
+    def commit(self) -> None:
+        self._conn.commit()
 
     def record_incidents(self, incidents: Iterable[dict]) -> list[CrossMatch]:
         """Same as record(), applied to a batch of Incident dicts - the
@@ -201,6 +218,57 @@ class IdentityStore:
 
     def close(self) -> None:
         self._conn.close()
+
+
+def seed_external_usernames(
+    store: IdentityStore, mapping: dict[str, list[str]], source_label: str = "external",
+) -> list[CrossMatch]:
+    """Seeds the store from usernames observed on forums THIS pipeline
+    cannot scrape itself (Cloudflare/login-gated or otherwise out of
+    FORUM_POOL's reach - e.g. hackforums.net, cracked.sh, xss.pro, pwnforums.st),
+    sourced from a third-party static dump (see
+    scripts/fetch_known_actor_usernames.py, which pulls
+    github.com/spmedia/Threat-Actor-Usernames-Scrape - MIT licensed, each
+    file's own `forum_users_<name>.txt` name becomes the forum label here).
+
+    `mapping` is `{username: [forum_name, ...]}`. Each (username, forum)
+    pair is recorded exactly like a live-scraped sighting via the same
+    `record()` used by `record_incidents()` - the forum label is prefixed
+    with `source_label` (default "external:") so a report can tell "this
+    forum was live-observed by us" apart from "this forum comes from the
+    static dump", without needing a second table or code path. This means
+    a username we ourselves see post on one pool forum can now also match
+    against a forum we structurally cannot reach, extending this
+    correlator's effective reach past FORUM_POOL's own blind spots - the
+    actual gap this was built to close (see README's forum-access-gap
+    section).
+
+    Never raises: a malformed mapping entry is skipped, same discipline as
+    record_incidents(). Commits every 5,000 rows rather than every single
+    one (`record(..., commit=False)`) - a few hundred thousand rows each
+    forcing their own synchronous disk flush is what made this take 30-75
+    minutes before; batching the flush brings a run with the same ~900k
+    rows down to well under a minute (2026-11-06 fix).
+    """
+    new_matches: list[CrossMatch] = []
+    since_commit = 0
+    for username, forums in mapping.items():
+        if not isinstance(forums, list):
+            continue
+        for forum in forums:
+            try:
+                match = store.record(username, f"{source_label}:{forum}", commit=False)
+            except Exception:
+                log.exception("identity_correlation: failed to seed external %r / %r", username, forum)
+                continue
+            if match is not None:
+                new_matches.append(match)
+            since_commit += 1
+            if since_commit >= 5000:
+                store.commit()
+                since_commit = 0
+    store.commit()
+    return new_matches
 
 
 def backfill_from_feed(store: IdentityStore, feed_path: Path) -> list[CrossMatch]:

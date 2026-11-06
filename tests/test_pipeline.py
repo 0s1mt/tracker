@@ -5,7 +5,9 @@ from forumtracker.forum_stats import StatsStore
 from forumtracker.health import HealthStore
 from forumtracker.identity_correlation import IdentityStore
 from forumtracker.member_directory import MemberDirectoryStore
-from forumtracker.pipeline import _apply_ransomware_intel, build_alerts, run_full_cycle
+from forumtracker.pipeline import _apply_ransomware_intel, build_alerts, build_sources, run_full_cycle
+from forumtracker.sources.ransomware_live import RansomwareLiveSource
+from forumtracker.sources.underground_forums import UndergroundForumSource
 from forumtracker.schema import Evidence, Incident, ThreatActor, Victim
 from forumtracker.schema import Source as SourceMeta
 
@@ -242,3 +244,34 @@ def test_run_full_cycle_survives_a_broken_source(tmp_path, monkeypatch):
     )
 
     assert summary["new_incidents"] == 0
+
+
+def test_build_sources_default_includes_all_source_types():
+    sources = build_sources()
+    names = {s.name for s in sources}
+    assert names == {"underground_forums", "browser_forums", "telegram_bridge", "ransomware_live"}
+
+
+def test_build_sources_only_forums_restricts_to_underground_forums_alone():
+    sources = build_sources(only_forums=["darkforums", "breachforums"])
+    assert len(sources) == 1
+    assert isinstance(sources[0], UndergroundForumSource)
+    assert not any(isinstance(s, RansomwareLiveSource) for s in sources)
+
+
+def test_build_sources_only_forums_matches_leads_subforum_variants():
+    sources = build_sources(only_forums=["darkforums"])
+    site_names = set(sources[0].sites.keys())
+    assert "darkforums" in site_names
+    assert "darkforums-leads" in site_names
+    assert "breachforums" not in site_names
+
+
+def test_build_sources_only_forums_with_no_match_yields_empty_pool():
+    # e.g. "pwnforums" - a forum not yet in FORUM_POOL (Cloudflare-gated,
+    # see underground_forums.py's comment) - must degrade gracefully to an
+    # empty site dict, not raise, matching the rest of this pipeline's
+    # never-raise discipline.
+    sources = build_sources(only_forums=["pwnforums"])
+    assert len(sources) == 1
+    assert sources[0].sites == {}

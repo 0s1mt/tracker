@@ -42,11 +42,12 @@ run the test suite.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
@@ -66,6 +67,16 @@ SCREENSHOT_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "scree
 _SLUG_RE = re.compile(r"[^A-Za-z0-9_-]")
 
 # name -> site config. "parser" selects which _parse_*/_extract_* pair below to use.
+# Optional "cookies_env": the NAME of an environment variable (never a
+# literal cookie value in this file) holding a `name1=value1; name2=value2`
+# cookie string exported from a real, human-solved browser session on that
+# site - see `_parse_cookie_string` and README's "Cloudflare-gated forums"
+# section. This is session REUSE, not automated bot-check solving: a human
+# clears the Cloudflare/login wall once in their own browser, and that
+# already-cleared session's cookies are replayed here. Without the env var
+# set (or set to empty), a site falls back to the plain anonymous fetch
+# exactly as before - this is fully opt-in, nothing changes for sites that
+# don't need it.
 BROWSER_FORUM_POOL: dict[str, dict[str, str]] = {
     "patched.to": {
         "board_url": "https://patched.to/Forum-refunding-services",
@@ -93,6 +104,26 @@ _LOGIN_WALL_SIGNATURES = (
     "you must be registered",
     "sign in to view",
 )
+
+
+def _parse_cookie_string(cookie_str: str, domain: str) -> list[dict]:
+    """`name1=value1; name2=value2` (the format a browser's devtools/cookie
+    export gives you for a `Cookie:` request header) -> Playwright's
+    `context.add_cookies()` shape. `domain` gets a leading dot so the
+    cookie applies across subdomains, matching how most forum software
+    actually sets its session cookie.
+    """
+    cookies = []
+    for part in cookie_str.split(";"):
+        part = part.strip()
+        if not part or "=" not in part:
+            continue
+        name, _, value = part.partition("=")
+        name, value = name.strip(), value.strip()
+        if not name:
+            continue
+        cookies.append({"name": name, "value": value, "domain": domain, "path": "/"})
+    return cookies
 
 
 def _classify_blocked(html: str) -> Optional[str]:
@@ -198,50 +229,68 @@ class BrowserForumSource(Source):
             return []
         parse_board, extract_body = _PARSERS[parser_name]
 
-        page = browser.new_page(user_agent=UA)
+        context = browser.new_context(user_agent=UA)
+        cookies_env = cfg.get("cookies_env")
+        if cookies_env:
+            cookie_str = os.environ.get(cookies_env)
+            if cookie_str:
+                domain = "." + (urlparse(cfg["board_url"]).hostname or "")
+                context.add_cookies(_parse_cookie_string(cookie_str, domain))
+            else:
+                log.warning(
+                    "browser_forums: %s configured with cookies_env=%r but that env var is unset, "
+                    "falling back to an anonymous session", site_name, cookies_env,
+                )
+
         try:
-            page.goto(cfg["board_url"], timeout=NAV_TIMEOUT_MS, wait_until="domcontentloaded")
-            html = page.content()
+            page = context.new_page()
+            try:
+                page.goto(cfg["board_url"], timeout=NAV_TIMEOUT_MS, wait_until="domcontentloaded")
+                html = page.content()
+            finally:
+                page.close()
+
+            blocked = _classify_blocked(html)
+            if blocked:
+                log.warning("browser_forums: %s blocked (%s), skipping this cycle", site_name, blocked)
+                return []
+
+            threads = parse_board(html, cfg["base_url"])
+            out: list[Incident] = []
+            for thread in threads:
+                body, screenshot_path = None, None
+                if len(out) < MAX_THREAD_BODIES_PER_SITE:
+                    body, screenshot_path = self._fetch_thread(context, thread["link"], thread["title"], extract_body)
+                out.append(Incident(
+                    detected_at=ingested_at,
+                    published_at=None,
+                    source=SourceMeta(type="forum", name=f"forum:{site_name}", url=thread["link"]),
+                    threat_actor=ThreatActor(name=thread.get("author", "unknown")),
+                    victim=Victim(name=thread["title"]),
+                    category="forum_post",
+                    title=thread["title"],
+                    description=body,
+                    evidence=Evidence(post_url=thread["link"], screenshot_url=screenshot_path),
+                    confidence="claimed",
+                    tags=["forum", site_name],
+                    extra={},
+                ))
+            return out
         finally:
-            page.close()
-
-        blocked = _classify_blocked(html)
-        if blocked:
-            log.warning("browser_forums: %s blocked (%s), skipping this cycle", site_name, blocked)
-            return []
-
-        threads = parse_board(html, cfg["base_url"])
-        out: list[Incident] = []
-        for thread in threads:
-            body, screenshot_path = None, None
-            if len(out) < MAX_THREAD_BODIES_PER_SITE:
-                body, screenshot_path = self._fetch_thread(browser, thread["link"], thread["title"], extract_body)
-            out.append(Incident(
-                detected_at=ingested_at,
-                published_at=None,
-                source=SourceMeta(type="forum", name=f"forum:{site_name}", url=thread["link"]),
-                threat_actor=ThreatActor(name=thread.get("author", "unknown")),
-                victim=Victim(name=thread["title"]),
-                category="forum_post",
-                title=thread["title"],
-                description=body,
-                evidence=Evidence(post_url=thread["link"], screenshot_url=screenshot_path),
-                confidence="claimed",
-                tags=["forum", site_name],
-                extra={},
-            ))
-        return out
+            context.close()
 
     @staticmethod
-    def _fetch_thread(browser, url: str, title: str, extract_body) -> tuple[Optional[str], Optional[str]]:
+    def _fetch_thread(context, url: str, title: str, extract_body) -> tuple[Optional[str], Optional[str]]:
         """Fetches one thread page: always returns its body text (if parseable),
         and additionally saves a screenshot - but only when the thread is
         judged alert-worthy (see alerting.is_alert_worthy), to keep the
         common case cheap on disk I/O. `evidence.screenshot_url` here is a
         local file path, not a hosted URL - there's no image host wired up
-        yet, see README.
+        yet, see README. Takes the site's `context` (not `browser` directly)
+        so a cookie-authenticated session, if configured, carries over to
+        the thread fetch too - not just the board listing.
         """
-        page = browser.new_page(user_agent=UA)
+        page = context.new_page()
         try:
             page.goto(url, timeout=NAV_TIMEOUT_MS, wait_until="domcontentloaded")
             html = page.content()

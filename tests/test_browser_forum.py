@@ -6,10 +6,13 @@ against real HTML recorded live from patched.to (2026-09-06) and a real
 only to exercise the login-wall classifier.
 """
 import os
+from unittest.mock import MagicMock, patch
 
 from forumtracker.sources.browser_forum import (
+    BrowserForumSource,
     _classify_blocked,
     _extract_mybb_post_body,
+    _parse_cookie_string,
     _parse_mybb_seo_board,
 )
 
@@ -61,3 +64,86 @@ def test_classify_blocked_detects_real_login_wall():
 def test_classify_blocked_returns_none_for_normal_page():
     html = _read_fixture("patched_board.html")
     assert _classify_blocked(html) is None
+
+
+# --- _parse_cookie_string: turns a devtools-exported `Cookie:` header value
+# into Playwright's add_cookies() shape, for session-reuse against
+# Cloudflare/login-gated forums (see BROWSER_FORUM_POOL's "cookies_env" comment).
+
+def test_parse_cookie_string_splits_name_value_pairs():
+    cookies = _parse_cookie_string("session=abc123; cf_clearance=xyz789", ".pwnforums.st")
+    assert {"name": "session", "value": "abc123", "domain": ".pwnforums.st", "path": "/"} in cookies
+    assert {"name": "cf_clearance", "value": "xyz789", "domain": ".pwnforums.st", "path": "/"} in cookies
+
+
+def test_parse_cookie_string_skips_malformed_segments():
+    cookies = _parse_cookie_string("session=abc123; garbage; =noname; ", ".pwnforums.st")
+    assert len(cookies) == 1
+    assert cookies[0]["name"] == "session"
+
+
+def test_parse_cookie_string_empty_input_returns_empty_list():
+    assert _parse_cookie_string("", ".pwnforums.st") == []
+
+
+# --- fetch()-level: cookies_env wiring through to context.add_cookies()
+
+def _mock_playwright_context(mock_sp):
+    mock_browser = MagicMock()
+    mock_context = MagicMock()
+    mock_page = MagicMock()
+    mock_page.content.return_value = "<html><body>no threads here</body></html>"
+    mock_context.new_page.return_value = mock_page
+    mock_browser.new_context.return_value = mock_context
+    mock_sp.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+    return mock_browser, mock_context, mock_page
+
+
+@patch("playwright.sync_api.sync_playwright")
+def test_fetch_applies_cookies_when_env_var_is_set(mock_sp, monkeypatch):
+    monkeypatch.setenv("TEST_PWN_COOKIES", "session=abc123")
+    _, mock_context, _ = _mock_playwright_context(mock_sp)
+    source = BrowserForumSource(sites={
+        "pwnforums.st": {
+            "board_url": "https://pwnforums.st/board",
+            "base_url": "https://pwnforums.st",
+            "parser": "mybb_seo",
+            "cookies_env": "TEST_PWN_COOKIES",
+        },
+    })
+
+    list(source.fetch())
+
+    mock_context.add_cookies.assert_called_once()
+    applied = mock_context.add_cookies.call_args[0][0]
+    assert applied[0]["name"] == "session"
+    assert applied[0]["domain"] == ".pwnforums.st"
+
+
+@patch("playwright.sync_api.sync_playwright")
+def test_fetch_skips_cookies_when_env_var_unset(mock_sp, monkeypatch):
+    monkeypatch.delenv("TEST_PWN_COOKIES_UNSET", raising=False)
+    _, mock_context, _ = _mock_playwright_context(mock_sp)
+    source = BrowserForumSource(sites={
+        "pwnforums.st": {
+            "board_url": "https://pwnforums.st/board",
+            "base_url": "https://pwnforums.st",
+            "parser": "mybb_seo",
+            "cookies_env": "TEST_PWN_COOKIES_UNSET",
+        },
+    })
+
+    list(source.fetch())
+
+    mock_context.add_cookies.assert_not_called()
+
+
+@patch("playwright.sync_api.sync_playwright")
+def test_fetch_without_cookies_env_behaves_as_before(mock_sp):
+    """patched.to (no cookies_env key at all) must not even look at os.environ."""
+    _, mock_context, _ = _mock_playwright_context(mock_sp)
+    source = BrowserForumSource()  # default BROWSER_FORUM_POOL, patched.to only
+
+    list(source.fetch())
+
+    mock_context.add_cookies.assert_not_called()

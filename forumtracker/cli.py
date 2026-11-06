@@ -4,13 +4,14 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from pathlib import Path
 
 from .auto_mirror import AutoMirrorStore
 from .dashboard import build_dashboard
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
 from .health import DEAD_THRESHOLD, HealthStore, check_all, pool_urls
-from .identity_correlation import IdentityStore, backfill_from_feed
+from .identity_correlation import IdentityStore, backfill_from_feed, seed_external_usernames
 from .member_directory import MemberDirectoryStore, crawl_batch
 from .pipeline import AUTO_MIRROR_FILE, DATA_DIR, OUTPUT_FEED, build_sources, loop, open_stores, run_full_cycle
 from .sources.browser_forum import BROWSER_FORUM_POOL
@@ -76,17 +77,24 @@ def run_stats_snapshot() -> dict:
         store.close()
 
 
-def run_identity_report(backfill: bool = False) -> dict:
+def run_identity_report(backfill: bool = False, seed_external_path: str | None = None) -> dict:
     """Reports every username currently known to have posted on 2+ pool
     forums (see identity_correlation.py). `--identity-backfill` seeds this
     from the existing incidents.jsonl first - otherwise the report only
     reflects whatever --once/--loop runs have recorded since IdentityStore
-    was first created.
+    was first created. `--identity-seed-external` additionally seeds from a
+    third-party static username dump (see
+    scripts/fetch_known_actor_usernames.py), extending matches to forums
+    this pipeline cannot scrape itself - see seed_external_usernames()'s
+    docstring.
     """
     store = IdentityStore(IDENTITY_DB)
     try:
         if backfill:
             backfill_from_feed(store, OUTPUT_FEED)
+        if seed_external_path:
+            payload = json.loads(Path(seed_external_path).read_text(encoding="utf-8"))
+            seed_external_usernames(store, payload.get("usernames", {}))
         matches = store.all_matches()
         return {
             "cross_forum_matches": len(matches),
@@ -169,6 +177,12 @@ def main() -> None:
         help="with --identity, first seed the identity store from the existing incidents.jsonl",
     )
     parser.add_argument(
+        "--identity-seed-external", metavar="PATH", default=None,
+        help="with --identity, additionally seed from a third-party username->forums JSON dump "
+             "(see scripts/fetch_known_actor_usernames.py), extending cross-forum matches to "
+             "forums this pipeline cannot scrape itself",
+    )
+    parser.add_argument(
         "--crawl-members", action="store_true",
         help="advance the resumable member-directory crawl (see member_directory.py) and report "
              "usernames registered on 2+ forums",
@@ -180,6 +194,13 @@ def main() -> None:
     parser.add_argument(
         "--db-stats", action="store_true",
         help="report how many users/forums are currently stored (member_directory + identity), no network calls",
+    )
+    parser.add_argument(
+        "--only-forums", metavar="NAME1,NAME2,...", default=None,
+        help="restrict this run to underground-forum sites whose FORUM_POOL key contains one of these "
+             "comma-separated substrings (e.g. 'darkforums,breachforums' also matches the "
+             "'-leads' subforum variants), skipping browser/Telegram/ransomware.live sources "
+             "entirely - for a focused test run, not the normal full-pool cycle",
     )
     parser.add_argument(
         "--build-dashboard", action="store_true",
@@ -199,7 +220,10 @@ def main() -> None:
         return
 
     if args.identity:
-        print(json.dumps(run_identity_report(backfill=args.identity_backfill), ensure_ascii=False, indent=2))
+        report = run_identity_report(
+            backfill=args.identity_backfill, seed_external_path=args.identity_seed_external,
+        )
+        print(json.dumps(report, ensure_ascii=False, indent=2))
         return
 
     if args.crawl_members:
@@ -224,7 +248,8 @@ def main() -> None:
     # crawl increment - via the same run_full_cycle() a --loop iteration
     # uses, so a one-shot CI/scheduled run and a long-lived local loop
     # never drift apart. See pipeline.run_full_cycle's docstring.
-    sources = build_sources()
+    only_forums = args.only_forums.split(",") if args.only_forums else None
+    sources = build_sources(only_forums=only_forums)
     store, health_store, stats_store, identity_store, member_directory_store = open_stores()
     try:
         summary = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)

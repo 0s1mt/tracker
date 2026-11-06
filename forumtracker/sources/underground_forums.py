@@ -9,7 +9,7 @@ from this environment; see README for the workaround), and so are
 Cloudflare/login-gated ones (verified live, not assumed - see README's
 pwnforums.st section) and off-topic ones (adult content, game cheats/
 botting, breach-news blogs rather than forum chatter). FORUM_POOL below is
-the living result of that ongoing review, currently 34 entries (some are
+the living result of that ongoing review, currently 36 entries (some are
 a specific subforum of an already-pooled site, not a wholly separate
 forum - see the "breachforums-leads"/"darkforums-leads" comment below).
 
@@ -202,6 +202,36 @@ FORUM_POOL: dict[str, dict[str, Optional[str]]] = {
     "0x00sec": {"homepage": "https://0x00sec.org", "rss": "https://0x00sec.org/rss/"},
     "nulledbb": {"homepage": "https://nulledbb.com", "rss": "https://nulledbb.com/syndication.php"},
     "voided": {"homepage": "https://voided.to", "rss": "https://voided.to/syndication.php"},
+    # --- GitHub-sourced batch (2026-11-06): candidates surfaced not from
+    # deepdarkCTI but from a third-party tracker's own config
+    # (github.com/adminlove520/DarkWeb-Forums-Tracker's rss_dataleak.yaml),
+    # live-tested here one by one:
+    "cardforum": {"homepage": "https://cardforum.cc", "rss": "https://cardforum.cc/syndication.php?limit=50"},
+    # "dublikat" is at.dublikat.club, NOT the bare dublikat.club already
+    # rejected above (2026-09-06 batch comment: "recurring 'intimate
+    # archives (18+)' ad"). Different host behind the same brand - bare
+    # dublikat.club now 403s outright, while this "at." subdomain returned
+    # a clean 25-item feed; re-checked specifically for that 18+ ad marker
+    # in every item's title AND description (not just a title skim) and it
+    # is genuinely absent here - real content is document forgery/SIM-card/
+    # crypto-exchange/verification services, on-topic. Not re-adding the
+    # bare domain; this is a distinct, separately-verified host.
+    "dublikat": {"homepage": "https://at.dublikat.club", "rss": "https://at.dublikat.club/forums/-/index.rss"},
+    # Checked and NOT added from the same source list: "hard-tm" (hard-tm.su)
+    # re-confirms the existing 2026-09-06 rejection above almost verbatim -
+    # live sample still shows explicit adult-content thread titles mixed
+    # into the feed, same problem, not a mistaken exclusion. "xforums.st" /
+    # "gerki" (forum.gerki.ws) are both behind a Cloudflare browser-check
+    # wall (302/503), same already-documented category as pwnforums.st -
+    # not attempted past that. "leakbase.la" now serves a law-enforcement
+    # seizure page ("This Website Has Been Seized"), confirmed dead.
+    # "htdark.com"/"mipped.com"/"ipbmafia.ru" could not be reached at all
+    # from this environment (TLS handshake / connection timeout) - inconclusive,
+    # not added on an unverified guess. "sinister.ly" in that config uses a
+    # subforum-specific feed (`?fid=9`) instead of the site-wide one already
+    # in this pool - same pattern as the Leads Market discovery above - but
+    # the fid=9 URL could not be reached from this environment either
+    # (DNS/connect failure, repeatable); worth retrying later, not added yet.
 }
 
 
@@ -210,7 +240,12 @@ class UndergroundForumSource(Source):
     poll_interval_seconds = 900
 
     def __init__(self, sites: Optional[dict] = None) -> None:
-        self.sites = sites or FORUM_POOL
+        # `sites or FORUM_POOL` would be wrong here: an explicitly empty
+        # dict (e.g. pipeline.build_sources()'s only_forums filter matching
+        # nothing) is falsy and would silently fall back to the FULL pool
+        # instead of meaning "no sites" - only a real None (no argument at
+        # all) should default to FORUM_POOL.
+        self.sites = FORUM_POOL if sites is None else sites
 
     def fetch(self) -> Iterable[Incident]:
         now = datetime.now(timezone.utc).isoformat()

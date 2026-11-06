@@ -1,7 +1,12 @@
 """Offline tests for cross-forum username correlation - no network."""
 import json
 
-from forumtracker.identity_correlation import IdentityStore, backfill_from_feed, normalize_username
+from forumtracker.identity_correlation import (
+    IdentityStore,
+    backfill_from_feed,
+    normalize_username,
+    seed_external_usernames,
+)
 
 
 def test_normalize_username_lowercases_and_strips():
@@ -96,4 +101,41 @@ def test_backfill_from_feed_seeds_matches_from_jsonl(tmp_path):
 def test_backfill_from_feed_missing_file_returns_empty(tmp_path):
     store = IdentityStore(tmp_path / "identity.sqlite3")
     assert backfill_from_feed(store, tmp_path / "nope.jsonl") == []
+    store.close()
+
+
+def test_seed_external_usernames_matches_against_own_live_sighting(tmp_path):
+    # Our own pipeline already saw "EvilGhost" post on "darkforums" (a pool
+    # forum we scrape). The external dump says the same username also
+    # appears on "cracked" (a forum we cannot scrape ourselves) - seeding
+    # it should surface a cross-match extending past our own pool.
+    store = IdentityStore(tmp_path / "identity.sqlite3")
+    store.record("EvilGhost", "darkforums")
+    matches = seed_external_usernames(store, {"EvilGhost": ["cracked"]})
+    assert len(matches) == 1
+    assert matches[0].username_norm == "evilghost"
+    assert set(matches[0].forums) == {"darkforums", "external:cracked"}
+    store.close()
+
+
+def test_seed_external_usernames_two_external_forums_also_match_each_other(tmp_path):
+    store = IdentityStore(tmp_path / "identity.sqlite3")
+    matches = seed_external_usernames(store, {"SoloActor": ["cracked", "hackforums"]})
+    assert len(matches) == 1
+    assert set(matches[0].forums) == {"external:cracked", "external:hackforums"}
+    store.close()
+
+
+def test_seed_external_usernames_skips_malformed_entries(tmp_path):
+    store = IdentityStore(tmp_path / "identity.sqlite3")
+    matches = seed_external_usernames(store, {"BadEntry": "not-a-list", "Good": ["cracked", "xss"]})
+    assert len(matches) == 1
+    assert matches[0].username_norm == "good"
+    store.close()
+
+
+def test_seed_external_usernames_respects_generic_name_filter(tmp_path):
+    store = IdentityStore(tmp_path / "identity.sqlite3")
+    matches = seed_external_usernames(store, {"admin": ["cracked", "xss"]})
+    assert matches == []
     store.close()

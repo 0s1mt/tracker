@@ -10,6 +10,7 @@ import json
 import logging
 import time
 from pathlib import Path
+from typing import Optional
 from urllib.parse import urlparse
 
 from .alerting import is_alert_worthy, to_alert_card
@@ -43,12 +44,23 @@ ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 AUTO_MIRROR_FILE = DATA_DIR / "auto_mirrors.json"
 
 
-def build_sources() -> list[Source]:
+def build_sources(only_forums: Optional[list[str]] = None) -> list[Source]:
+    """`only_forums`: substring-matched against FORUM_POOL keys (so
+    "darkforums" also pulls in "darkforums-leads") - scopes a run down to
+    just those underground-forum sites and skips the other source types
+    entirely (browser-based, Telegram, ransomware.live). Built for a
+    focused test run (e.g. a tight 5-minute-interval 3-forum CI workflow -
+    see .github/workflows/test_3forum.yml) without touching the full-pool
+    production path, which still calls this with no argument.
+    """
     # Any mirror auto-adopted by a previous cycle's health check (see
     # try_adopt_mirror below) gets folded in here, so the very next --once
     # process (a fresh process every 30 min in the scheduled workflow -
     # see pipeline.yml) resumes tracking it without any code change.
     sites = {**FORUM_POOL, **AutoMirrorStore(AUTO_MIRROR_FILE).sites()}
+    if only_forums:
+        sites = {name: cfg for name, cfg in sites.items() if any(f in name for f in only_forums)}
+        return [UndergroundForumSource(sites=sites)]
     return [
         UndergroundForumSource(sites=sites),
         BrowserForumSource(),
