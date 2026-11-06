@@ -1135,6 +1135,22 @@ bir döngünün çökmesi (beklenmeyen exception, uyku moduna geçen makine) bir
 sonraki zamanlanmış çalıştırmayı etkilemiyor; `--loop`'ta aynı süreç
 sonsuza dek canlı kalmak zorunda.
 
+**Cookie-gerektiren siteler (pwnforums.st gibi) için:** `cookies_env`
+(`browser_forum.py`, bkz. "pwnforums.st" bölümü) bir ortam değişkeninin
+ADINI okur, değerini asla koda/depoya yazmaz. Zamanlanmış görevin bunu
+görebilmesi için **kalıcı** bir Windows ortam değişkeni gerekir (sadece bir
+terminalde `$env:PWNFORUMS_COOKIES = "..."` yazmak yeterli değil, o sadece
+o oturum için geçerli ve schtasks'ın yeni süreci bunu görmez):
+
+```powershell
+setx PWNFORUMS_COOKIES "anubis.pwnforums-auth=...; cf_clearance=...; mybbuser=...; sid=...; ..."
+```
+
+`setx` sonrası yeni açılan her süreç (zamanlanmış görev dahil) bunu görür;
+mevcut bir PowerShell penceresi görmez, yeniden açmak gerekir. Cookie süresi
+dolunca (Anubis token'ı ~24 saat, bkz. JWT'nin `exp`/`iat` farkı) aynı
+komutla taze bir değerle üzerine yazılmalı.
+
 **Mirror-adoption gecikme formülü (3. sorudaki "TLD değişince feed
 gecikiyor" sorusunun yanıtı):** `health.DEAD_THRESHOLD = 3` ardışık
 ulaşılamaz kontrol + adoption da aynı `run_full_cycle` içinde çalıştığı
@@ -1271,20 +1287,50 @@ FORUM_POOL'a yeni girdi olarak — yeni bir forum değil, var olan bir
 forumun ayrı bir feed'i). Canlı test: `UndergroundForumSource` ile
 30 gerçek "lead" ilanı çekti.
 
-### Araştırılan ama bilinçli olarak YAPILMAYAN: Cloudflare/CAPTCHA'lı forumlar
+### pwnforums.st: Cloudflare + Anubis, cookie-reuse altyapısı var ama IP'ye bağlı
 
 Kullanıcı `pwnforums.st`'yi örnek verdi (vecert/osint tarzı "Country/
 Category/Market" alanlı yapılandırılmış ilan formatı). Doğrulandı: site
 gerçek, ama hem düz `requests` hem gerçek bir Playwright/Chromium
-tarayıcısı (6sn bekleme dahil) "Just a moment..." (Cloudflare
-interaktif doğrulama) ekranından öteye geçemiyor. Araştırma (Cybersixgill,
-Flare gibi vendörlerin kendi metodoloji sayfaları) gösteriyor ki ciddi
-oyuncular bile bunu scraping hilesiyle değil **HUMINT** ile çözüyor (gerçek
-bir hesapla foruma üye olup itibar kazanan bir insan analist) — yani
-otomatik bir "çözüm" aramak zaten yanlış hedef. Kapsam dışı bırakıldı;
-tek gerçekçi yol kullanıcının kendi hesap/cookie'siyle meşru bir oturum
-vermesi olurdu (ayrı, insan-bakımı gerektiren bir karar, şimdilik
-uygulanmadı).
+tarayıcısı (6sn bekleme dahil) "Just a moment..." (Cloudflare interaktif
+doğrulama) ekranından öteye geçemiyor. Araştırma (Cybersixgill, Flare gibi
+vendörlerin kendi metodoloji sayfaları) gösteriyor ki ciddi oyuncular bile
+bunu scraping hilesiyle değil **HUMINT** ile çözüyor (gerçek bir hesapla
+foruma üye olup itibar kazanan bir insan analist) — yani otomatik bir
+"çözüm" aramak zaten yanlış hedef. Ayrıca FlareSolverr/cloudscraper/
+undetected-chromedriver/playwright-stealth gibi genel Cloudflare-bypass
+araçları araştırıldı (2026-11-06): hepsi 2026'nın Turnstile/Managed
+Challenge varyantlarına karşı güvenilmez olarak raporlanıyor, üstüne bunlar
+otomatik bot-tespiti atlatma (detection evasion) kategorisine giriyor - bu
+projenin ve kullanılan araç setinin politikasıyla çelişiyor, kurulmadı.
+
+**cookies_env desteği eklendi** (`browser_forum.py`): bir site için
+`cookies_env` config alanı, insanın KENDİ tarayıcısında bir kez çözdüğü
+oturumun cookie'sini (env var üzerinden, hiçbir zaman koda/depoya
+yazılmadan) tekrar kullanmaya izin veriyor - bu otomatik atlatma değil,
+zaten çözülmüş bir oturumun replay'i. Kullanıcı gerçek pwnforums.st
+cookie'lerini verdi (2026-11-06) - `cf_clearance`, `mybbuser` (gerçek MyBB
+oturumu, uid doğrulandı), ve bir `anubis.pwnforums-auth` JWT (sitenin
+Cloudflare'e ek olarak "Anubis" proof-of-work anti-bot katmanı da
+kullandığını gösteriyor).
+
+**Canlı test sonucu: cookie'ler Playwright context'ine doğru şekilde
+uygulandı (9/9 doğrulandı) ama site hâlâ "Just a moment..." gösterdi.**
+Nedeni: bu ortamın dış IP'si (`194.187.250.164`, `api.ipify.org` ile
+doğrulandı) kullanıcının kendi IP'si değil - hem `cf_clearance` hem
+Anubis'in JWT'si (payload'da bir `restriction` alanı taşıyor) çözüldüğü
+IP'ye bağlı görünüyor. **Bu, cookie-reuse'un sadece kullanıcının kendi
+makinesinden/ağından çalışacağı, GitHub Actions'tan (her çalıştırmada
+farklı datacenter IP'si) ASLA çalışmayacağı anlamına geliyor** - bu yüzden
+pwnforums tek bir forum için bile yerel çalıştırmayı (schtasks, README'nin
+"Local sürekli çalıştırma" bölümü) zorunlu kılıyor, diğer forumlar bulutta
+olsa bile.
+
+Devam etmek için gereken: pwnforums'un gerçek (authenticated) bir pano/konu
+listesi sayfasının HTML'i (kullanıcının kendi tarayıcısından view-source/
+save - bu ortamın IP'si hiçbir zaman gerçek içeriği göremeyeceği için başka
+yol yok), ardından `BROWSER_FORUM_POOL`'a `cookies_env` ile yeni bir giriş
+ve o yapıya özel bir parser.
 
 ## DarkWebFeed ile ilişki
 
