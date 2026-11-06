@@ -256,13 +256,31 @@ _PARSERS = {
     "mybb_latest_posts": (_parse_latest_posts, _extract_mybb_post_body),
 }
 
+# Chatbox/shoutbox parsers: (html) -> list of {"author": str, "message": str}.
+# Deliberately empty for now - pwnforums.st's Shoutbox messages are inserted
+# into `#shoutarea` by client-side JS over a live WebSocket (socket.io), not
+# present in any server-rendered HTML this project has captured yet (the
+# real authenticated homepage HTML provided 2026-11-06 showed `#shoutarea`
+# genuinely empty - no messages had arrived yet in that page load). Writing
+# a parser against guessed markup risks silently matching nothing (or
+# worse, matching the wrong thing) - needs a real populated sample first
+# (DevTools "Copy outerHTML" on `#shoutarea` after messages appear, NOT
+# view-source, which only ever shows the pre-JS empty container). Once
+# added here, point a site's `chatbox_parser` config at its key and set
+# `chatbox_wait_ms` (see `_fetch_site`).
+_CHATBOX_PARSERS: dict = {}
+
 
 class BrowserForumSource(Source):
     name = "browser_forums"
     poll_interval_seconds = 1800
 
     def __init__(self, sites: Optional[dict] = None) -> None:
-        self.sites = sites or BROWSER_FORUM_POOL
+        # Same bug class fixed in underground_forums.py's UndergroundForumSource:
+        # `sites or BROWSER_FORUM_POOL` would silently fall back to the full
+        # pool for an explicitly empty dict (falsy) - only a real None (no
+        # argument at all) should default to BROWSER_FORUM_POOL.
+        self.sites = BROWSER_FORUM_POOL if sites is None else sites
 
     def fetch(self) -> Iterable[Incident]:
         try:
@@ -312,9 +330,23 @@ class BrowserForumSource(Source):
 
         try:
             page = context.new_page()
+            chatbox_html = None
             try:
                 page.goto(cfg["board_url"], timeout=NAV_TIMEOUT_MS, wait_until="domcontentloaded")
                 html = page.content()
+
+                # Chat widgets (pwnforums.st's Shoutbox) aren't in the
+                # server-rendered HTML at all - they're populated client-side
+                # over a live WebSocket after load, so the ONLY way to see
+                # any message is to keep this same page (same already-
+                # connected socket) open a little longer before re-reading
+                # the DOM. `chatbox_wait_ms` is opt-in per site - a plain
+                # board (patched.to, and pwnforums.st's own Latest Posts
+                # parse above) never pays this extra wait.
+                chatbox_wait_ms = cfg.get("chatbox_wait_ms")
+                if chatbox_wait_ms and cfg.get("chatbox_parser") in _CHATBOX_PARSERS:
+                    page.wait_for_timeout(chatbox_wait_ms)
+                    chatbox_html = page.content()
             finally:
                 page.close()
 
@@ -343,6 +375,24 @@ class BrowserForumSource(Source):
                     tags=["forum", site_name],
                     extra={},
                 ))
+
+            if chatbox_html is not None:
+                parse_chatbox = _CHATBOX_PARSERS[cfg["chatbox_parser"]]
+                for msg in parse_chatbox(chatbox_html):
+                    out.append(Incident(
+                        detected_at=ingested_at,
+                        published_at=None,
+                        source=SourceMeta(type="forum", name=f"forum:{site_name}", url=cfg["board_url"]),
+                        threat_actor=ThreatActor(name=msg.get("author", "unknown")),
+                        victim=Victim(name=msg["message"][:80]),
+                        category="chat_message",
+                        title=msg["message"][:80],
+                        description=msg["message"],
+                        evidence=Evidence(post_url=cfg["board_url"]),
+                        confidence="claimed",
+                        tags=["chatbox", site_name],
+                        extra={},
+                    ))
             return out
         finally:
             context.close()

@@ -201,3 +201,17 @@ def test_parse_latest_posts_extracts_author_not_type_prefix():
 
 def test_parse_latest_posts_empty_html_returns_empty_list():
     assert _parse_latest_posts("<html><body>nothing here</body></html>", "https://pwnforums.st") == []
+
+
+def test_browser_forum_source_explicit_empty_sites_stays_empty():
+    # Same falsy-empty-dict bug class as UndergroundForumSource.__init__ -
+    # `sites or BROWSER_FORUM_POOL` would silently fall back to the full
+    # pool for sites={}.
+    source = BrowserForumSource(sites={})
+    assert source.sites == {}
+
+
+def test_browser_forum_source_none_defaults_to_full_pool():
+    source = BrowserForumSource()
+    assert "patched.to" in source.sites
+    assert "pwnforums.st" in source.sites
