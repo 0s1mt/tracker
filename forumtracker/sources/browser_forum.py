@@ -106,6 +106,12 @@ BROWSER_FORUM_POOL: dict[str, dict[str, str]] = {
         "base_url": "https://pwnforums.st",
         "parser": "mybb_latest_posts",
         "cookies_env": "PWNFORUMS_COOKIES",
+        # Shoutbox messages arrive over a live WebSocket, not in the initial
+        # server response - 8s was enough for the real captured session
+        # (2026-11-06) to show its already-loaded history, not a wait for
+        # brand-new messages one at a time; see _parse_shoutbox_messages.
+        "chatbox_wait_ms": 8_000,
+        "chatbox_parser": "pwnforums_shoutbox",
     },
 }
 
@@ -240,6 +246,69 @@ def _parse_latest_posts(html: str, base_url: str) -> list[dict]:
     return threads
 
 
+_SHOUT_SYSTEM_PREFIXES = ("posted new thread",)
+
+
+def _shout_id_to_timestamp(msg_id: str) -> Optional[str]:
+    """pwnforums.st's Shoutbox message `id` is a MongoDB ObjectId: its first
+    4 bytes (8 hex chars) are a real Unix timestamp (seconds). Decoded and
+    cross-checked against the Anubis JWT's own `iat` claim from the same
+    captured session (2026-11-06) - both land on the same day, hours apart,
+    consistent with real chat history rather than a coincidence. Falls back
+    to None (not raising) for a malformed/too-short id - a missing
+    published_at is a known, handled case throughout this schema.
+    """
+    if not msg_id or len(msg_id) < 8:
+        return None
+    try:
+        return datetime.fromtimestamp(int(msg_id[:8], 16), tz=timezone.utc).isoformat()
+    except (ValueError, OSError, OverflowError):
+        return None
+
+
+def _parse_shoutbox_messages(html: str) -> list[dict]:
+    """Extracts real human chat lines from pwnforums.st's Shoutbox
+    (`#shoutarea`, populated client-side over a live WebSocket - see
+    `BrowserForumSource._fetch_site`'s chatbox_wait_ms handling). Each
+    message is a `<div username="..." user="<uid>" id="<objectid>"
+    class="msgShout">...<span class="content_msgShout">...</span></div>` -
+    real sample captured live (authenticated) 2026-11-06. Reply-quote
+    wrappers (`div.msgQuote`) nest their own `div.msgShout` child, which
+    `find_all` still reaches regardless of nesting depth - no special
+    handling needed there.
+
+    The shoutbox ALSO carries auto-generated "X posted new thread Y in Z"
+    announcement lines (an IRC-style `* user did something *` action,
+    visually distinct via a `noColon` username class) for every new
+    thread anywhere on the site - these duplicate what
+    `_parse_latest_posts` already captures as a real forum_post Incident,
+    so they're filtered out here by their stable text prefix rather than
+    kept as a second, redundant "chat_message" Incident for the same
+    thread. Genuine human chat (including ones that happen to mention a
+    thread, like "@user check out my thread") does not start with this
+    exact prefix, so this stays a narrow, specific filter rather than
+    dropping real content.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    messages: list[dict] = []
+    for item in soup.find_all("div", class_="msgShout"):
+        author = item.get("username")
+        if not author:
+            continue
+        content = item.select_one("span.content_msgShout")
+        if content is None:
+            continue
+        text = content.get_text(" ", strip=True)
+        if not text or text.startswith(_SHOUT_SYSTEM_PREFIXES):
+            continue
+        messages.append({
+            "author": author,
+            "message": text,
+            "published_at": _shout_id_to_timestamp(item.get("id", "")),
+        })
+    return messages
+
+
 def _extract_mybb_post_body(html: str) -> Optional[str]:
     soup = BeautifulSoup(html, "html.parser")
     body_div = soup.find("div", class_="post_body")
@@ -256,19 +325,10 @@ _PARSERS = {
     "mybb_latest_posts": (_parse_latest_posts, _extract_mybb_post_body),
 }
 
-# Chatbox/shoutbox parsers: (html) -> list of {"author": str, "message": str}.
-# Deliberately empty for now - pwnforums.st's Shoutbox messages are inserted
-# into `#shoutarea` by client-side JS over a live WebSocket (socket.io), not
-# present in any server-rendered HTML this project has captured yet (the
-# real authenticated homepage HTML provided 2026-11-06 showed `#shoutarea`
-# genuinely empty - no messages had arrived yet in that page load). Writing
-# a parser against guessed markup risks silently matching nothing (or
-# worse, matching the wrong thing) - needs a real populated sample first
-# (DevTools "Copy outerHTML" on `#shoutarea` after messages appear, NOT
-# view-source, which only ever shows the pre-JS empty container). Once
-# added here, point a site's `chatbox_parser` config at its key and set
-# `chatbox_wait_ms` (see `_fetch_site`).
-_CHATBOX_PARSERS: dict = {}
+# Chatbox/shoutbox parsers: (html) -> list of {"author", "message", "published_at"}.
+_CHATBOX_PARSERS = {
+    "pwnforums_shoutbox": _parse_shoutbox_messages,
+}
 
 
 class BrowserForumSource(Source):
@@ -381,7 +441,7 @@ class BrowserForumSource(Source):
                 for msg in parse_chatbox(chatbox_html):
                     out.append(Incident(
                         detected_at=ingested_at,
-                        published_at=None,
+                        published_at=msg.get("published_at"),
                         source=SourceMeta(type="forum", name=f"forum:{site_name}", url=cfg["board_url"]),
                         threat_actor=ThreatActor(name=msg.get("author", "unknown")),
                         victim=Victim(name=msg["message"][:80]),

@@ -15,6 +15,8 @@ from forumtracker.sources.browser_forum import (
     _parse_cookie_string,
     _parse_latest_posts,
     _parse_mybb_seo_board,
+    _parse_shoutbox_messages,
+    _shout_id_to_timestamp,
 )
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
@@ -215,3 +217,104 @@ def test_browser_forum_source_none_defaults_to_full_pool():
     source = BrowserForumSource()
     assert "patched.to" in source.sites
     assert "pwnforums.st" in source.sites
+
+
+# --- _parse_shoutbox_messages / _shout_id_to_timestamp: pwnforums.st's live
+# Shoutbox (#shoutarea), real authenticated DOM snapshot (2026-11-06).
+
+def test_shout_id_to_timestamp_decodes_real_objectid():
+    # Cross-checked against this same captured session's Anubis JWT `iat`
+    # (2026-11-06T13:14:05Z) - this message's id decodes a few hours
+    # earlier on the same day, consistent with real chat history.
+    iso = _shout_id_to_timestamp("6aeda998c18031cb62b9c16b")
+    assert iso is not None
+    assert iso.startswith("2026-11-06T")
+
+
+def test_shout_id_to_timestamp_handles_malformed_id():
+    assert _shout_id_to_timestamp("") is None
+    assert _shout_id_to_timestamp("abc") is None
+
+
+def test_parse_shoutbox_messages_extracts_real_chat_line():
+    html = _read_fixture("pwnforums_shoutbox.html")
+    messages = _parse_shoutbox_messages(html)
+
+    chat = [m for m in messages if m["author"] == "blackpudding1"]
+    assert len(chat) == 1
+    assert "credit = points" in chat[0]["message"]
+    assert chat[0]["published_at"].startswith("2026-11-06T")
+
+
+def test_parse_shoutbox_messages_filters_out_posted_new_thread_announcements():
+    html = _read_fixture("pwnforums_shoutbox.html")
+    messages = _parse_shoutbox_messages(html)
+
+    assert not any(m["author"] == "infinityteam" for m in messages)
+    assert not any("posted new thread" in m["message"] for m in messages)
+
+
+def test_parse_shoutbox_messages_skips_empty_emoji_only_message():
+    html = _read_fixture("pwnforums_shoutbox.html")
+    messages = _parse_shoutbox_messages(html)
+
+    assert not any(m["author"] == "k1083" for m in messages)
+
+
+def test_parse_shoutbox_messages_finds_reply_nested_inside_msgquote():
+    html = _read_fixture("pwnforums_shoutbox.html")
+    messages = _parse_shoutbox_messages(html)
+
+    admin = [m for m in messages if m["author"] == "Admin"]
+    assert len(admin) == 1
+    assert admin[0]["message"] == "yes"
+
+
+def test_parse_shoutbox_messages_empty_html_returns_empty_list():
+    assert _parse_shoutbox_messages("<html><body>nothing</body></html>") == []
+
+
+# --- fetch()-level: chatbox_wait_ms / chatbox_parser wiring
+
+@patch("playwright.sync_api.sync_playwright")
+def test_fetch_captures_chatbox_after_wait_when_configured(mock_sp):
+    mock_browser, mock_context, mock_page = _mock_playwright_context(mock_sp)
+    board_html = "<html><body>no threads</body></html>"
+    chat_html = _read_fixture("pwnforums_shoutbox.html")
+    mock_page.content.side_effect = [board_html, chat_html]
+    source = BrowserForumSource(sites={
+        "pwnforums.st": {
+            "board_url": "https://pwnforums.st/",
+            "base_url": "https://pwnforums.st",
+            "parser": "mybb_latest_posts",
+            "chatbox_wait_ms": 8_000,
+            "chatbox_parser": "pwnforums_shoutbox",
+        },
+    })
+
+    incidents = list(source.fetch())
+
+    mock_page.wait_for_timeout.assert_called_once_with(8_000)
+    chat_incidents = [i for i in incidents if i.category == "chat_message"]
+    assert any(i.threat_actor.name == "blackpudding1" for i in chat_incidents)
+    assert not any(i.threat_actor.name == "infinityteam" for i in chat_incidents)
+
+
+@patch("playwright.sync_api.sync_playwright")
+def test_fetch_skips_chatbox_capture_when_not_configured(mock_sp):
+    """patched.to has no chatbox_wait_ms at all - must never call
+    wait_for_timeout nor look for chat_message incidents."""
+    mock_browser, mock_context, mock_page = _mock_playwright_context(mock_sp)
+    mock_page.content.return_value = "<html><body>no threads</body></html>"
+    source = BrowserForumSource(sites={
+        "patched.to": {
+            "board_url": "https://patched.to/Forum-refunding-services",
+            "base_url": "https://patched.to",
+            "parser": "mybb_seo",
+        },
+    })
+
+    incidents = list(source.fetch())
+
+    mock_page.wait_for_timeout.assert_not_called()
+    assert not any(i.category == "chat_message" for i in incidents)
