@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 
 from .auto_mirror import AutoMirrorStore
+from .collection_health import CollectionHealthStore
 from .dashboard import build_dashboard
 from .discover import find_mirror_candidates
 from .forum_stats import StatsStore, collect_snapshots
@@ -21,6 +22,7 @@ HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
 IDENTITY_DB = DATA_DIR / "identity.sqlite3"
 MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
+COLLECTION_HEALTH_DB = DATA_DIR / "collection_health.sqlite3"
 
 
 def run_health_check() -> dict:
@@ -126,6 +128,28 @@ def run_member_crawl(pages_per_forum: int = 3) -> dict:
         store.close()
 
 
+def run_collection_health_report() -> dict:
+    """Read-only report over whatever --once/--loop cycles have already
+    recorded (see collection_health.py) - no network calls, this just
+    reads the per-site SQLite state. Each row's `status` distinguishes
+    "healthy" (feed reachable this cycle, however many new posts), from
+    "unreachable" (feed down/blocked/not found this cycle) and "error"
+    (the site's whole fetch raised) - a forum with status=healthy and
+    new_records=0 is a quiet night, not a problem; one with
+    status=unreachable is the thing worth investigating.
+    """
+    store = CollectionHealthStore(COLLECTION_HEALTH_DB)
+    try:
+        report = store.report()
+        return {
+            "sites_tracked": len(report),
+            "unhealthy": [r["site"] for r in report if r["status"] != "healthy"],
+            "report": report,
+        }
+    finally:
+        store.close()
+
+
 def run_db_stats() -> dict:
     """Reports how many users/forums are currently on disk in each store,
     without touching the network - member_directory (registered, weaker
@@ -192,6 +216,12 @@ def main() -> None:
         help="with --crawl-members, max pages to fetch per forum this run (default 3)",
     )
     parser.add_argument(
+        "--collection-health", action="store_true",
+        help="report each underground-forum site's last cycle's fetch outcome (healthy/unreachable/error, "
+             "posts discovered, new vs duplicate, parse/HTTP errors) - no network calls, reads what "
+             "--once/--loop already recorded",
+    )
+    parser.add_argument(
         "--db-stats", action="store_true",
         help="report how many users/forums are currently stored (member_directory + identity), no network calls",
     )
@@ -230,6 +260,10 @@ def main() -> None:
         print(json.dumps(run_member_crawl(pages_per_forum=args.crawl_pages), ensure_ascii=False, indent=2))
         return
 
+    if args.collection_health:
+        print(json.dumps(run_collection_health_report(), ensure_ascii=False, indent=2))
+        return
+
     if args.db_stats:
         print(json.dumps(run_db_stats(), ensure_ascii=False, indent=2))
         return
@@ -250,9 +284,12 @@ def main() -> None:
     # never drift apart. See pipeline.run_full_cycle's docstring.
     only_forums = args.only_forums.split(",") if args.only_forums else None
     sources = build_sources(only_forums=only_forums)
-    store, health_store, stats_store, identity_store, member_directory_store = open_stores()
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = open_stores()
     try:
-        summary = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
+        summary = run_full_cycle(
+            sources, store, health_store, stats_store, identity_store, member_directory_store,
+            collection_health_store,
+        )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     finally:
         store.close()
@@ -260,6 +297,7 @@ def main() -> None:
         stats_store.close()
         identity_store.close()
         member_directory_store.close()
+        collection_health_store.close()
 
 
 if __name__ == "__main__":

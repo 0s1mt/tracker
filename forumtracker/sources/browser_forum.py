@@ -432,6 +432,7 @@ class BrowserForumSource(Source):
                     description=body,
                     evidence=Evidence(post_url=thread["link"], screenshot_url=screenshot_path),
                     confidence="claimed",
+                    stable_key=thread["link"],
                     tags=["forum", site_name],
                     extra={},
                 ))

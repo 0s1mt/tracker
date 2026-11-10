@@ -9,12 +9,14 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
 from .alerting import is_alert_worthy, to_alert_card
 from .auto_mirror import AutoMirrorStore, try_adopt_mirror
+from .collection_health import CollectionHealthStore
 from .dedup import SeenStore
 from .discover import find_mirror_candidates
 from .entity_extraction import country_from_domain, country_from_text, extract_victim_domain
@@ -39,19 +41,27 @@ HEALTH_DB = DATA_DIR / "health.sqlite3"
 STATS_DB = DATA_DIR / "forum_stats.sqlite3"
 IDENTITY_DB = DATA_DIR / "identity.sqlite3"
 MEMBER_DIRECTORY_DB = DATA_DIR / "member_directory.sqlite3"
+COLLECTION_HEALTH_DB = DATA_DIR / "collection_health.sqlite3"
 OUTPUT_FEED = DATA_DIR / "incidents.jsonl"
 ALERTS_FEED = DATA_DIR / "alerts.jsonl"
 AUTO_MIRROR_FILE = DATA_DIR / "auto_mirrors.json"
 
 
 def build_sources(only_forums: Optional[list[str]] = None) -> list[Source]:
-    """`only_forums`: substring-matched against FORUM_POOL keys (so
-    "darkforums" also pulls in "darkforums-leads") - scopes a run down to
-    just those underground-forum sites and skips the other source types
-    entirely (browser-based, Telegram, ransomware.live). Built for a
-    focused test run (e.g. a tight 5-minute-interval 3-forum CI workflow -
-    see .github/workflows/test_3forum.yml) without touching the full-pool
+    """`only_forums`: substring-matched against both FORUM_POOL keys (so
+    "darkforums" also pulls in "darkforums-leads") and BROWSER_FORUM_POOL
+    keys (so "pwnforums" pulls in "pwnforums.st") - scopes a run down to
+    just those forum sites and skips the other source types entirely
+    (Telegram, ransomware.live). Built for a focused test run (e.g. a tight
+    5-minute-interval 3-forum CI workflow - see
+    .github/workflows/test_3forum.yml) without touching the full-pool
     production path, which still calls this with no argument.
+
+    A BrowserForumSource is only included in the returned list when at
+    least one browser-pool site actually matches `only_forums` - a bare
+    UndergroundForumSource(sites={}) for a miss is cheap and harmless, but
+    an unconditional BrowserForumSource would needlessly spend a Chromium
+    launch on a run that was never going to touch it.
     """
     # Any mirror auto-adopted by a previous cycle's health check (see
     # try_adopt_mirror below) gets folded in here, so the very next --once
@@ -59,8 +69,14 @@ def build_sources(only_forums: Optional[list[str]] = None) -> list[Source]:
     # see pipeline.yml) resumes tracking it without any code change.
     sites = {**FORUM_POOL, **AutoMirrorStore(AUTO_MIRROR_FILE).sites()}
     if only_forums:
-        sites = {name: cfg for name, cfg in sites.items() if any(f in name for f in only_forums)}
-        return [UndergroundForumSource(sites=sites)]
+        underground_sites = {name: cfg for name, cfg in sites.items() if any(f in name for f in only_forums)}
+        browser_sites = {
+            name: cfg for name, cfg in BROWSER_FORUM_POOL.items() if any(f in name for f in only_forums)
+        }
+        result: list[Source] = [UndergroundForumSource(sites=underground_sites)]
+        if browser_sites:
+            result.append(BrowserForumSource(sites=browser_sites))
+        return result
     return [
         UndergroundForumSource(sites=sites),
         BrowserForumSource(),
@@ -69,7 +85,9 @@ def build_sources(only_forums: Optional[list[str]] = None) -> list[Source]:
     ]
 
 
-def run_once(sources: list[Source], store: SeenStore) -> list[dict]:
+def run_once(
+    sources: list[Source], store: SeenStore, collection_health_store: Optional[CollectionHealthStore] = None,
+) -> list[dict]:
     all_new: list[dict] = []
     for source in sources:
         try:
@@ -79,6 +97,11 @@ def run_once(sources: list[Source], store: SeenStore) -> list[dict]:
             continue
 
         new_incidents = store.filter_new(incidents)
+        if collection_health_store is not None:
+            try:
+                _record_collection_health(collection_health_store, source, incidents, new_incidents)
+            except Exception:
+                log.exception("collection_health recording raised for %s, skipping this cycle", source.name)
         try:
             new_incidents = source.enrich_batch(new_incidents)
         except Exception:
@@ -92,6 +115,30 @@ def run_once(sources: list[Source], store: SeenStore) -> list[dict]:
         log.info("%s: %d fetched, %d new", source.name, len(incidents), len(new_incidents))
         all_new.extend(new_incidents)
     return all_new
+
+
+def _record_collection_health(
+    collection_health_store: CollectionHealthStore, source: Source, incidents: list[dict], new_incidents: list[dict],
+) -> None:
+    """Merges a source's per-site fetch-outcome snapshot (`last_cycle_health`
+    - currently only `UndergroundForumSource` sets this; any other source
+    is skipped here, same as a source without the attribute at all) with
+    real new/duplicate counts derived from the incident batch itself
+    (grouping by each incident's own `source.name`, e.g. "forum:darkforums"
+    - that field already carries the individual site, not just the Source
+    class, so this needs no extra plumbing from fetch()).
+    """
+    per_site_health = getattr(source, "last_cycle_health", None)
+    if not per_site_health:
+        return
+    fetched_counts = Counter(inc["source"]["name"].split(":", 1)[-1] for inc in incidents)
+    new_counts = Counter(inc["source"]["name"].split(":", 1)[-1] for inc in new_incidents)
+    merged = {}
+    for site, snapshot in per_site_health.items():
+        fetched = fetched_counts.get(site, 0)
+        new = new_counts.get(site, 0)
+        merged[site] = {**snapshot, "new_records": new, "duplicates": max(fetched - new, 0)}
+    collection_health_store.record_cycle(merged)
 
 
 def _apply_ransomware_intel(incident: dict) -> None:
@@ -211,6 +258,7 @@ def run_full_cycle(
     stats_store: StatsStore,
     identity_store: IdentityStore,
     member_directory_store: MemberDirectoryStore,
+    collection_health_store: Optional[CollectionHealthStore] = None,
 ) -> dict:
     """One complete cycle: ingest -> dedup -> alert -> identity-correlate ->
     health-check -> stats-snapshot -> member-directory crawl increment.
@@ -231,7 +279,7 @@ def run_full_cycle(
     printed output and as the basis for the CI workflow's committed
     reports/*.json.
     """
-    new_incidents = run_once(sources, store)
+    new_incidents = run_once(sources, store, collection_health_store)
     emit(new_incidents)
     alerts = build_alerts(new_incidents)
     emit_alerts(alerts)
@@ -298,6 +346,13 @@ def run_full_cycle(
         log.exception("identity report read raised")
         identity_matches = []
 
+    collection_health_report: list[dict] = []
+    if collection_health_store is not None:
+        try:
+            collection_health_report = collection_health_store.report()
+        except Exception:
+            log.exception("collection_health report read raised")
+
     return {
         "new_incidents": len(new_incidents),
         "alerts": len(alerts),
@@ -312,25 +367,32 @@ def run_full_cycle(
         "member_directory_total": member_directory_store.total_count(),
         "registered_cross_forum": registered_cross_forum,
         "auto_adopted_mirrors": auto_adopted,
+        "collection_health": collection_health_report,
     }
 
 
-def open_stores() -> tuple[SeenStore, HealthStore, StatsStore, IdentityStore, MemberDirectoryStore]:
+def open_stores() -> tuple[
+    SeenStore, HealthStore, StatsStore, IdentityStore, MemberDirectoryStore, CollectionHealthStore,
+]:
     return (
         SeenStore(SEEN_DB),
         HealthStore(HEALTH_DB),
         StatsStore(STATS_DB),
         IdentityStore(IDENTITY_DB),
         MemberDirectoryStore(MEMBER_DIRECTORY_DB),
+        CollectionHealthStore(COLLECTION_HEALTH_DB),
     )
 
 
 def loop(poll_seconds: int = 900) -> None:
     sources = build_sources()
-    store, health_store, stats_store, identity_store, member_directory_store = open_stores()
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = open_stores()
     try:
         while True:
-            run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
+            run_full_cycle(
+                sources, store, health_store, stats_store, identity_store, member_directory_store,
+                collection_health_store,
+            )
             time.sleep(poll_seconds)
     finally:
         store.close()
@@ -338,3 +400,4 @@ def loop(poll_seconds: int = 900) -> None:
         stats_store.close()
         identity_store.close()
         member_directory_store.close()
+        collection_health_store.close()

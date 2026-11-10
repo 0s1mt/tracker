@@ -38,6 +38,8 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from ..schema import Evidence, Incident, ThreatActor, Victim
 from ..schema import Source as SourceMeta
@@ -47,6 +49,44 @@ from .browser_forum import SCREENSHOT_DIR
 log = logging.getLogger(__name__)
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36"}
+
+# Shared across every GET in this module (RSS fetch, homepage RSS-link
+# discovery, full thread-body fetch) instead of a bare `requests.get()` per
+# call - gets us connection pooling/keep-alive for free, plus automatic
+# bounded retry with exponential backoff + jitter on 429/5xx (never on
+# other 4xx - a 403/404 is a correctness signal, not transient, so retrying
+# it would just make a bot-blocked site see 3x the request volume for the
+# same eventual "no"). `respect_retry_after_header` honors a real
+# rate-limit's own requested delay over our own backoff guess.
+_RETRY = Retry(
+    total=3,
+    backoff_factor=1.0,
+    backoff_jitter=0.5,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=frozenset(["GET"]),
+    respect_retry_after_header=True,
+)
+_SESSION = requests.Session()
+_SESSION.mount("https://", HTTPAdapter(max_retries=_RETRY))
+_SESSION.mount("http://", HTTPAdapter(max_retries=_RETRY))
+
+
+def _log_http_status(what: str, url: str, status_code: int) -> None:
+    """Called only once Retry has already exhausted its attempts for a
+    retryable code (or immediately for a non-retryable one) - distinguishes
+    the three operationally-different outcomes the old bare
+    `if status != 200: return None` collapsed into one, so logs actually
+    say whether a site is rate-limiting us, blocking us, or just down,
+    instead of all three reading identically as "fetch failed".
+    """
+    if status_code == 429:
+        log.warning("underground_forums: %s rate-limited (429, retries exhausted) for %s", what, url)
+    elif status_code == 403:
+        log.warning("underground_forums: %s forbidden (403, likely bot-blocked) for %s", what, url)
+    elif 500 <= status_code < 600:
+        log.warning("underground_forums: %s server error (%d, retries exhausted) for %s", what, status_code, url)
+    else:
+        log.info("underground_forums: %s returned %d for %s", what, status_code, url)
 
 RSS_LINK_RE = re.compile(
     r'<link[^>]+type=["\']application/(?:rss\+xml|atom\+xml)["\'][^>]*href=["\']([^"\']+)["\']',
@@ -250,33 +290,70 @@ class UndergroundForumSource(Source):
     def fetch(self) -> Iterable[Incident]:
         now = datetime.now(timezone.utc).isoformat()
         incidents: list[Incident] = []
+        # Per-site outcome for this cycle, read by pipeline.py (via
+        # getattr, so a source without this attribute degrades silently)
+        # to populate collection_health.py's per-source observability
+        # record. This is what tells "0 new posts, feed reachable, 30
+        # items parsed cleanly" (status=healthy) apart from "0 new posts,
+        # feed unreachable this cycle" (status=unreachable) and "site
+        # raised" (status=error) - before this, all three collapsed into
+        # the same silent empty list, indistinguishable from each other or
+        # from a dead parser selector.
+        self.last_cycle_health: dict[str, dict] = {}
         for site_name, cfg in self.sites.items():
             try:
-                incidents.extend(self._fetch_site(site_name, cfg, now))
+                site_incidents, fetched_ok, parse_errors = self._fetch_site(site_name, cfg, now)
+                incidents.extend(site_incidents)
+                self.last_cycle_health[site_name] = {
+                    "last_attempt": now,
+                    "last_success": now if fetched_ok else None,
+                    "posts_discovered": len(site_incidents),
+                    "parse_errors": parse_errors,
+                    "http_errors": 0 if fetched_ok else 1,
+                    "status": "healthy" if fetched_ok else "unreachable",
+                }
             except Exception:
                 log.exception("underground_forums: site %s failed entirely, skipping", site_name)
+                self.last_cycle_health[site_name] = {
+                    "last_attempt": now,
+                    "last_success": None,
+                    "posts_discovered": 0,
+                    "parse_errors": 0,
+                    "http_errors": 1,
+                    "status": "error",
+                }
         return incidents
 
-    def _fetch_site(self, site_name: str, cfg: dict, ingested_at: str) -> list[Incident]:
+    def _fetch_site(self, site_name: str, cfg: dict, ingested_at: str) -> tuple[list[Incident], bool, int]:
+        """Returns (incidents, fetched_ok, parse_errors) - `fetched_ok` is
+        False only when no RSS content could be obtained at all (feed
+        down/blocked/not found this cycle), never when the feed was
+        reachable but genuinely empty or 100% malformed items (that's
+        still `fetched_ok=True` with posts_discovered=0 or
+        parse_errors>0 - a reachable-but-broken-parser site is a
+        different, more specific signal than an unreachable one).
+        """
         rss_url = cfg.get("rss")
         rss_text = self._try_fetch_rss(rss_url) if rss_url else None
         if rss_text is None:
             discovered = self._discover_rss_url(cfg["homepage"])
             if not discovered:
                 log.warning("underground_forums: no RSS feed found for %s", site_name)
-                return []
+                return [], False, 0
             rss_text = self._try_fetch_rss(discovered)
             rss_url = discovered
             if rss_text is None:
-                return []
+                return [], False, 0
 
         out = []
+        parse_errors = 0
         for match in list(ITEM_RE.finditer(rss_text))[:MAX_ITEMS_PER_SITE]:
             try:
                 out.append(self._normalize(site_name, match.group("body"), ingested_at))
             except Exception:
+                parse_errors += 1
                 log.exception("underground_forums: skipping malformed item from %s", site_name)
-        return out
+        return out, True, parse_errors
 
     def enrich(self, incident: dict) -> dict:
         """Visits the thread page ONCE and pulls two things off it: the
@@ -414,11 +491,18 @@ class UndergroundForumSource(Source):
     @staticmethod
     def _fetch_thread_page(url: str) -> Optional[str]:
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=12)
-        except Exception:
+            resp = _SESSION.get(url, headers=HEADERS, timeout=12)
+        except requests.exceptions.Timeout:
+            log.warning("underground_forums: thread fetch timed out for %s", url)
+            return None
+        except requests.exceptions.RequestException:
             log.exception("underground_forums: thread fetch failed for %s", url)
             return None
+        except Exception:
+            log.exception("underground_forums: thread fetch raised unexpectedly for %s", url)
+            return None
         if resp.status_code != 200:
+            _log_http_status("thread fetch", url, resp.status_code)
             return None
         return resp.text
 
@@ -459,10 +543,18 @@ class UndergroundForumSource(Source):
     @staticmethod
     def _discover_rss_url(homepage: str) -> Optional[str]:
         try:
-            resp = requests.get(homepage, headers=HEADERS, timeout=10)
-            resp.raise_for_status()
-        except Exception:
+            resp = _SESSION.get(homepage, headers=HEADERS, timeout=10)
+        except requests.exceptions.Timeout:
+            log.warning("underground_forums: homepage fetch timed out for %s", homepage)
+            return None
+        except requests.exceptions.RequestException:
             log.exception("underground_forums: homepage fetch failed for %s", homepage)
+            return None
+        except Exception:
+            log.exception("underground_forums: homepage fetch raised unexpectedly for %s", homepage)
+            return None
+        if resp.status_code != 200:
+            _log_http_status("homepage fetch", homepage, resp.status_code)
             return None
         m = RSS_LINK_RE.search(resp.text)
         if not m:
@@ -473,13 +565,22 @@ class UndergroundForumSource(Source):
     @staticmethod
     def _try_fetch_rss(url: str) -> Optional[str]:
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=12)
-            if resp.status_code != 200 or "<item>" not in resp.text:
-                return None
-            return resp.text
-        except Exception:
+            resp = _SESSION.get(url, headers=HEADERS, timeout=12)
+        except requests.exceptions.Timeout:
+            log.warning("underground_forums: RSS fetch timed out for %s", url)
+            return None
+        except requests.exceptions.RequestException:
             log.exception("underground_forums: RSS fetch failed for %s", url)
             return None
+        except Exception:
+            log.exception("underground_forums: RSS fetch raised unexpectedly for %s", url)
+            return None
+        if resp.status_code != 200:
+            _log_http_status("RSS fetch", url, resp.status_code)
+            return None
+        if "<item>" not in resp.text:
+            return None
+        return resp.text
 
     @staticmethod
     def _extract(pattern: re.Pattern, body: str) -> Optional[str]:
@@ -539,4 +640,5 @@ class UndergroundForumSource(Source):
             confidence="claimed",
             tags=["forum", site_name] + ([category.lower()] if category else []),
             extra={},
+            stable_key=link,
         )

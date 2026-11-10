@@ -4,6 +4,8 @@ pages fetched during development (see underground_forums.py's
 POST_BODY_SELECTORS comment)."""
 from unittest.mock import MagicMock, patch
 
+import requests
+
 from forumtracker.sources.underground_forums import UndergroundForumSource
 
 XENFORO_THREAD_HTML = """
@@ -80,13 +82,52 @@ def test_extract_reply_count_none_when_no_ldjson():
     assert UndergroundForumSource._extract_reply_count(XENFORO_THREAD_HTML) is None
 
 
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_fetch_thread_page_returns_none_on_non_200(mock_get):
     mock_get.return_value = MagicMock(status_code=403, text="")
     assert UndergroundForumSource._fetch_thread_page("https://forum.example/thread") is None
 
 
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
+def test_fetch_thread_page_returns_none_on_rate_limit(mock_get):
+    mock_get.return_value = MagicMock(status_code=429, text="")
+    assert UndergroundForumSource._fetch_thread_page("https://forum.example/thread") is None
+
+
+@patch(
+    "forumtracker.sources.underground_forums._SESSION.get",
+    side_effect=requests.exceptions.Timeout("timed out"),
+)
+def test_fetch_thread_page_returns_none_on_timeout_without_raising(mock_get):
+    assert UndergroundForumSource._fetch_thread_page("https://forum.example/thread") is None
+
+
+@patch(
+    "forumtracker.sources.underground_forums._SESSION.get",
+    side_effect=requests.exceptions.ConnectionError("reset"),
+)
+def test_try_fetch_rss_returns_none_on_connection_error_without_raising(mock_get):
+    assert UndergroundForumSource._try_fetch_rss("https://forum.example/rss") is None
+
+
+def test_shared_session_retries_are_bounded_and_exponential_with_jitter():
+    """Guards the collection-engine reliability fix directly: a bare
+    `requests.get()` per call (the previous behavior) silently gave up on
+    the first 429/5xx with no retry at all. Asserting the real, live
+    `_RETRY`/`_SESSION` config here - not a reimplementation of it - means
+    this test fails if a future change accidentally drops bounded retry,
+    backoff, or jitter rather than just checking they exist in the abstract.
+    """
+    from forumtracker.sources.underground_forums import _RETRY, _SESSION
+
+    assert _RETRY.total == 3
+    assert _RETRY.backoff_factor > 0
+    assert _RETRY.backoff_jitter > 0
+    assert {429, 500, 502, 503, 504}.issubset(set(_RETRY.status_forcelist))
+    assert _SESSION.get_adapter("https://forum.example/rss").max_retries is _RETRY
+
+
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_replaces_short_rss_teaser_with_full_body(mock_get):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     source = UndergroundForumSource()
@@ -98,7 +139,7 @@ def test_enrich_replaces_short_rss_teaser_with_full_body(mock_get):
     assert out["extra"]["content_source"] == "thread_page"
 
 
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_stores_reply_count_when_ldjson_present(mock_get):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_WITH_LDJSON_HTML)
     source = UndergroundForumSource()
@@ -110,7 +151,7 @@ def test_enrich_stores_reply_count_when_ldjson_present(mock_get):
     assert "Full first post text" in out["description"]
 
 
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_keeps_rss_description_when_thread_page_is_gated(mock_get):
     mock_get.return_value = MagicMock(status_code=200, text=GATED_THREAD_HTML)
     source = UndergroundForumSource()
@@ -133,7 +174,7 @@ def test_enrich_noop_without_post_url():
     assert out["description"] == "teaser"
 
 
-@patch("forumtracker.sources.underground_forums.requests.get", side_effect=Exception("network down"))
+@patch("forumtracker.sources.underground_forums._SESSION.get", side_effect=Exception("network down"))
 def test_enrich_returns_incident_unchanged_on_fetch_exception(mock_get):
     source = UndergroundForumSource()
     incident = _incident(description="teaser")
@@ -156,7 +197,7 @@ def _mock_playwright(mock_sp, page=None):
 
 
 @patch("playwright.sync_api.sync_playwright")
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_sets_screenshot_url_for_each_incident(mock_get, mock_sp):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     _mock_playwright(mock_sp)
@@ -172,7 +213,7 @@ def test_enrich_batch_sets_screenshot_url_for_each_incident(mock_get, mock_sp):
 
 
 @patch("playwright.sync_api.sync_playwright")
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_launches_browser_once_for_whole_batch(mock_get, mock_sp):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     _mock_playwright(mock_sp)
@@ -186,7 +227,7 @@ def test_enrich_batch_launches_browser_once_for_whole_batch(mock_get, mock_sp):
 
 
 @patch("playwright.sync_api.sync_playwright")
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_skips_incident_without_post_url(mock_get, mock_sp):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     mock_browser, _ = _mock_playwright(mock_sp)
@@ -200,7 +241,7 @@ def test_enrich_batch_skips_incident_without_post_url(mock_get, mock_sp):
     mock_browser.new_page.assert_not_called()
 
 
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_skips_screenshots_when_playwright_not_installed(mock_get):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     source = UndergroundForumSource()
@@ -215,7 +256,7 @@ def test_enrich_batch_skips_screenshots_when_playwright_not_installed(mock_get):
 
 
 @patch("playwright.sync_api.sync_playwright")
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_one_failing_screenshot_does_not_block_the_rest(mock_get, mock_sp):
     mock_get.return_value = MagicMock(status_code=200, text=XENFORO_THREAD_HTML)
     mock_browser = MagicMock()
@@ -236,7 +277,7 @@ def test_enrich_batch_one_failing_screenshot_does_not_block_the_rest(mock_get, m
 
 @patch("forumtracker.sources.underground_forums.time.monotonic")
 @patch("playwright.sync_api.sync_playwright")
-@patch("forumtracker.sources.underground_forums.requests.get")
+@patch("forumtracker.sources.underground_forums._SESSION.get")
 def test_enrich_batch_stops_taking_screenshots_once_wall_clock_budget_exceeded(mock_get, mock_sp, mock_monotonic):
     """A slow forum (or several) can make _save_screenshot() calls run long
     with nothing logged in between (only failures are logged) - live-observed

@@ -1,11 +1,13 @@
 """Offline tests for pipeline-level orchestration logic (no network)."""
 import forumtracker.pipeline as pipeline
+from forumtracker.collection_health import CollectionHealthStore
 from forumtracker.dedup import SeenStore
 from forumtracker.forum_stats import StatsStore
 from forumtracker.health import HealthStore
 from forumtracker.identity_correlation import IdentityStore
 from forumtracker.member_directory import MemberDirectoryStore
 from forumtracker.pipeline import _apply_ransomware_intel, build_alerts, build_sources, run_full_cycle
+from forumtracker.sources.browser_forum import BrowserForumSource
 from forumtracker.sources.ransomware_live import RansomwareLiveSource
 from forumtracker.sources.underground_forums import UndergroundForumSource
 from forumtracker.schema import Evidence, Incident, ThreatActor, Victim
@@ -172,6 +174,7 @@ def _stores(tmp_path):
         StatsStore(tmp_path / "stats.sqlite3"),
         IdentityStore(tmp_path / "identity.sqlite3"),
         MemberDirectoryStore(tmp_path / "member_directory.sqlite3"),
+        CollectionHealthStore(tmp_path / "collection_health.sqlite3"),
     )
 
 
@@ -194,9 +197,11 @@ def test_run_full_cycle_wires_identity_correlation(tmp_path, monkeypatch):
         _forum_incident("post-b", "carders.biz", "EvilGhost"),
     ])]
     stores = _stores(tmp_path)
-    store, health_store, stats_store, identity_store, member_directory_store = stores
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = stores
 
-    summary = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
+    summary = run_full_cycle(
+        sources, store, health_store, stats_store, identity_store, member_directory_store, collection_health_store,
+    )
 
     assert summary["new_incidents"] == 2
     assert len(summary["new_identity_matches"]) == 1
@@ -219,10 +224,14 @@ def test_run_full_cycle_second_call_does_not_duplicate_incidents(tmp_path, monke
     incidents = [_forum_incident("post-a", "darkforums", "EvilGhost")]
     sources = [_FakeSource(incidents)]
     stores = _stores(tmp_path)
-    store, health_store, stats_store, identity_store, member_directory_store = stores
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = stores
 
-    first = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
-    second = run_full_cycle(sources, store, health_store, stats_store, identity_store, member_directory_store)
+    first = run_full_cycle(
+        sources, store, health_store, stats_store, identity_store, member_directory_store, collection_health_store,
+    )
+    second = run_full_cycle(
+        sources, store, health_store, stats_store, identity_store, member_directory_store, collection_health_store,
+    )
 
     assert first["new_incidents"] == 1
     assert second["new_incidents"] == 0  # SeenStore dedup, same as before this refactor
@@ -238,12 +247,73 @@ def test_run_full_cycle_survives_a_broken_source(tmp_path, monkeypatch):
             raise RuntimeError("network exploded")
 
     stores = _stores(tmp_path)
-    store, health_store, stats_store, identity_store, member_directory_store = stores
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = stores
     summary = run_full_cycle(
-        [_BrokenSource()], store, health_store, stats_store, identity_store, member_directory_store
+        [_BrokenSource()], store, health_store, stats_store, identity_store, member_directory_store,
+        collection_health_store,
     )
 
     assert summary["new_incidents"] == 0
+
+
+def test_run_full_cycle_reports_collection_health_for_sources_that_track_it(tmp_path, monkeypatch):
+    _stub_network_touching_steps(monkeypatch, tmp_path)
+
+    class _FakeUndergroundSource:
+        """Mimics UndergroundForumSource's last_cycle_health contract (set
+        inside its own fetch()) without touching the network - verifies
+        run_full_cycle/run_once's merge of per-site fetch outcome with
+        real new/duplicate counts derived from the incident batch.
+        """
+        name = "underground_forums"
+
+        def fetch(self):
+            self.last_cycle_health = {
+                "darkforums": {
+                    "status": "healthy", "last_attempt": "2026-11-07T00:00:00+00:00",
+                    "last_success": "2026-11-07T00:00:00+00:00", "posts_discovered": 2, "parse_errors": 0,
+                    "http_errors": 0,
+                },
+                "deadforum": {
+                    "status": "unreachable", "last_attempt": "2026-11-07T00:00:00+00:00",
+                    "last_success": None, "posts_discovered": 0, "parse_errors": 0, "http_errors": 1,
+                },
+            }
+            return [
+                _forum_incident("post-a", "darkforums", "actor1"),
+                _forum_incident("post-b", "darkforums", "actor2"),
+            ]
+
+        def enrich_batch(self, incidents):
+            return incidents
+
+    stores = _stores(tmp_path)
+    store, health_store, stats_store, identity_store, member_directory_store, collection_health_store = stores
+
+    summary = run_full_cycle(
+        [_FakeUndergroundSource()], store, health_store, stats_store, identity_store, member_directory_store,
+        collection_health_store,
+    )
+
+    by_site = {row["site"]: row for row in summary["collection_health"]}
+    assert by_site["darkforums"]["status"] == "healthy"
+    assert by_site["darkforums"]["new_records"] == 2
+    assert by_site["darkforums"]["duplicates"] == 0
+    assert by_site["deadforum"]["status"] == "unreachable"
+    assert by_site["deadforum"]["new_records"] == 0
+    assert by_site["deadforum"]["http_errors"] == 1
+
+    # A second cycle with the same two incidents: darkforums is still
+    # "healthy" (feed reachable), but both posts are now duplicates, not
+    # new - the thing collection_health must NOT confuse with a failure.
+    second = run_full_cycle(
+        [_FakeUndergroundSource()], store, health_store, stats_store, identity_store, member_directory_store,
+        collection_health_store,
+    )
+    second_by_site = {row["site"]: row for row in second["collection_health"]}
+    assert second_by_site["darkforums"]["status"] == "healthy"
+    assert second_by_site["darkforums"]["new_records"] == 0
+    assert second_by_site["darkforums"]["duplicates"] == 2
 
 
 def test_build_sources_default_includes_all_source_types():
@@ -268,10 +338,24 @@ def test_build_sources_only_forums_matches_leads_subforum_variants():
 
 
 def test_build_sources_only_forums_with_no_match_yields_empty_pool():
-    # e.g. "pwnforums" - a forum not yet in FORUM_POOL (Cloudflare-gated,
-    # see underground_forums.py's comment) - must degrade gracefully to an
-    # empty site dict, not raise, matching the rest of this pipeline's
-    # never-raise discipline.
-    sources = build_sources(only_forums=["pwnforums"])
+    # A name matching neither FORUM_POOL nor BROWSER_FORUM_POOL must degrade
+    # gracefully to a single empty-site UndergroundForumSource, not raise,
+    # matching the rest of this pipeline's never-raise discipline.
+    sources = build_sources(only_forums=["totally-unknown-forum-xyz"])
     assert len(sources) == 1
     assert sources[0].sites == {}
+
+
+def test_build_sources_only_forums_matches_browser_pool_too():
+    # "pwnforums" matches BROWSER_FORUM_POOL's "pwnforums.st" (Cloudflare/
+    # Anubis-gated, browser-based - see browser_forum.py) even though it
+    # matches nothing in FORUM_POOL (RSS-based) - a previous version of
+    # build_sources only ever consulted FORUM_POOL here, which meant
+    # test_3forum.yml's "--only-forums darkforums,breachforums,pwnforums"
+    # could never actually collect pwnforums regardless of cookie validity.
+    sources = build_sources(only_forums=["pwnforums"])
+    assert len(sources) == 2
+    assert isinstance(sources[0], UndergroundForumSource)
+    assert sources[0].sites == {}
+    assert isinstance(sources[1], BrowserForumSource)
+    assert set(sources[1].sites.keys()) == {"pwnforums.st"}
