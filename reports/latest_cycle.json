@@ -1,45 +1,36 @@
 {
-  "new_incidents": 261,
-  "alerts": 66,
+  "new_incidents": 216,
+  "alerts": 94,
   "telegram_sent": 0,
   "new_identity_matches": [
     {
       "username": [
-        "AlkoTelecom"
+        "Аддольф"
       ],
       "forums": [
         "bdfclub",
-        "blackhatpakistan"
+        "probiv"
       ]
     },
     {
       "username": [
-        "SeanWallace"
+        "avshaletip"
       ],
       "forums": [
-        "blackhatpakistan",
-        "leetforums"
-      ]
-    },
-    {
-      "username": [
-        "PayPerInst"
-      ],
-      "forums": [
-        "ascarding",
-        "blackbones"
+        "blackbones",
+        "forumteam.top"
       ]
     }
   ],
   "newly_dead_forums": [],
-  "stats_forums_found": 11,
+  "stats_forums_found": 9,
   "health_report": [
     {
       "name": "cardinggame",
       "homepage": "https://cardinggame.site",
       "status": "unreachable",
-      "consecutive_failures": 22,
-      "last_checked_at": "2026-11-22T13:13:46.565160+00:00",
+      "consecutive_failures": 23,
+      "last_checked_at": "2026-11-22T20:29:13.914786+00:00",
       "last_success_at": null,
       "last_http_status": null,
       "last_error": "HTTPSConnectionPool(host='cardinggame.site', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='cardinggame.site', port=443): Failed to resolve 'cardingg"
@@ -48,8 +39,8 @@
       "name": "sinister.ly",
       "homepage": "https://sinister.ly",
       "status": "unreachable",
-      "consecutive_failures": 22,
-      "last_checked_at": "2026-11-22T13:13:43.973511+00:00",
+      "consecutive_failures": 23,
+      "last_checked_at": "2026-11-22T20:29:10.812199+00:00",
       "last_success_at": null,
       "last_http_status": null,
       "last_error": "HTTPSConnectionPool(host='sinister.ly', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='sinister.ly', port=443): Failed to resolve 'sinister.ly' ([Err"
@@ -58,19 +49,39 @@
       "name": "spear",
       "homepage": "https://spear.cx",
       "status": "unreachable",
-      "consecutive_failures": 20,
-      "last_checked_at": "2026-11-22T13:13:45.630466+00:00",
+      "consecutive_failures": 21,
+      "last_checked_at": "2026-11-22T20:29:12.869235+00:00",
       "last_success_at": "2026-11-11T07:13:56.429582+00:00",
       "last_http_status": null,
       "last_error": "HTTPSConnectionPool(host='spear.cx', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='spear.cx', port=443): Failed to resolve 'spear.cx' ([Errno -2] Na"
+    },
+    {
+      "name": "leetforums",
+      "homepage": "https://leetforums.cc",
+      "status": "unreachable",
+      "consecutive_failures": 1,
+      "last_checked_at": "2026-11-22T20:29:10.816425+00:00",
+      "last_success_at": "2026-11-22T13:13:43.976853+00:00",
+      "last_http_status": null,
+      "last_error": "HTTPSConnectionPool(host='leetforums.cc', port=443): Read timed out. (read timeout=10)"
+    },
+    {
+      "name": "probiv",
+      "homepage": "https://probiv.one",
+      "status": "unreachable",
+      "consecutive_failures": 1,
+      "last_checked_at": "2026-11-22T20:29:10.894223+00:00",
+      "last_success_at": "2026-11-22T13:13:44.197982+00:00",
+      "last_http_status": null,
+      "last_error": "HTTPSConnectionPool(host='probiv.one', port=443): Read timed out. (read timeout=10)"
     },
     {
       "name": "0x00sec",
       "homepage": "https://0x00sec.org",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.655103+00:00",
-      "last_success_at": "2026-11-22T13:13:46.655103+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.361174+00:00",
+      "last_success_at": "2026-11-22T20:29:14.361174+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -79,8 +90,8 @@
       "homepage": "https://forum.antichat.io",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.605035+00:00",
-      "last_success_at": "2026-11-22T13:13:46.605035+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.107901+00:00",
+      "last_success_at": "2026-11-22T20:29:14.107901+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -89,8 +100,8 @@
       "homepage": "https://ascarding.com",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.982485+00:00",
-      "last_success_at": "2026-11-22T13:13:45.982485+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.453109+00:00",
+      "last_success_at": "2026-11-22T20:29:13.453109+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -99,8 +110,8 @@
       "homepage": "https://bdfclub.com",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.974434+00:00",
-      "last_success_at": "2026-11-22T13:13:43.974434+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.813489+00:00",
+      "last_success_at": "2026-11-22T20:29:10.813489+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -109,8 +120,8 @@
       "homepage": "https://bhcforums.cc",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.975353+00:00",
-      "last_success_at": "2026-11-22T13:13:43.975353+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.814430+00:00",
+      "last_success_at": "2026-11-22T20:29:10.814430+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -119,8 +130,8 @@
       "homepage": "https://blackbones.cc",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.028436+00:00",
-      "last_success_at": "2026-11-22T13:13:45.028436+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.201394+00:00",
+      "last_success_at": "2026-11-22T20:29:12.201394+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -129,8 +140,8 @@
       "homepage": "https://blackhatpakistan.net",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.089227+00:00",
-      "last_success_at": "2026-11-22T13:13:45.089227+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.206356+00:00",
+      "last_success_at": "2026-11-22T20:29:12.206356+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -139,8 +150,8 @@
       "homepage": "https://bf.st",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.518077+00:00",
-      "last_success_at": "2026-11-22T13:13:44.518077+00:00",
+      "last_checked_at": "2026-11-22T20:29:11.766505+00:00",
+      "last_success_at": "2026-11-22T20:29:11.766505+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -149,8 +160,8 @@
       "homepage": "https://bf.st/Forum-Leads-Market",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.853752+00:00",
-      "last_success_at": "2026-11-22T13:13:44.853752+00:00",
+      "last_checked_at": "2026-11-22T20:29:11.943687+00:00",
+      "last_success_at": "2026-11-22T20:29:11.943687+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -159,8 +170,8 @@
       "homepage": "https://carders.biz",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.976021+00:00",
-      "last_success_at": "2026-11-22T13:13:43.976021+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.815633+00:00",
+      "last_success_at": "2026-11-22T20:29:10.815633+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -169,8 +180,8 @@
       "homepage": "https://cardforum.cc",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.878299+00:00",
-      "last_success_at": "2026-11-22T13:13:46.878299+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.469567+00:00",
+      "last_success_at": "2026-11-22T20:29:14.469567+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -179,8 +190,8 @@
       "homepage": "https://carding.pw",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.388039+00:00",
-      "last_success_at": "2026-11-22T13:13:46.388039+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.758520+00:00",
+      "last_success_at": "2026-11-22T20:29:13.758520+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -189,8 +200,8 @@
       "homepage": "https://darkforums.as",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.784115+00:00",
-      "last_success_at": "2026-11-22T13:13:44.784115+00:00",
+      "last_checked_at": "2026-11-22T20:29:11.793053+00:00",
+      "last_success_at": "2026-11-22T20:29:11.793053+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -199,8 +210,8 @@
       "homepage": "https://darkforums.as/Forum-Leads-Market",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.900458+00:00",
-      "last_success_at": "2026-11-22T13:13:44.900458+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.048517+00:00",
+      "last_success_at": "2026-11-22T20:29:12.048517+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -209,8 +220,8 @@
       "homepage": "https://darknetarmy.st",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.219266+00:00",
-      "last_success_at": "2026-11-22T13:13:46.219266+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.682776+00:00",
+      "last_success_at": "2026-11-22T20:29:13.682776+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -219,8 +230,8 @@
       "homepage": "https://darkwebmafias.net",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.589560+00:00",
-      "last_success_at": "2026-11-22T13:13:46.589560+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.947527+00:00",
+      "last_success_at": "2026-11-22T20:29:13.947527+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -229,8 +240,8 @@
       "homepage": "https://at.dublikat.club",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.908367+00:00",
-      "last_success_at": "2026-11-22T13:13:46.908367+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.608575+00:00",
+      "last_success_at": "2026-11-22T20:29:14.608575+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -239,8 +250,8 @@
       "homepage": "https://forumteam.top",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.117316+00:00",
-      "last_success_at": "2026-11-22T13:13:45.117316+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.655419+00:00",
+      "last_success_at": "2026-11-22T20:29:12.655419+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -249,18 +260,8 @@
       "homepage": "https://leakforum.io",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.504512+00:00",
-      "last_success_at": "2026-11-22T13:13:44.504512+00:00",
-      "last_http_status": 200,
-      "last_error": null
-    },
-    {
-      "name": "leetforums",
-      "homepage": "https://leetforums.cc",
-      "status": "up",
-      "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.976853+00:00",
-      "last_success_at": "2026-11-22T13:13:43.976853+00:00",
+      "last_checked_at": "2026-11-22T20:29:11.616359+00:00",
+      "last_success_at": "2026-11-22T20:29:11.616359+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -269,8 +270,8 @@
       "homepage": "https://mmgp.com",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.977562+00:00",
-      "last_success_at": "2026-11-22T13:13:43.977562+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.817264+00:00",
+      "last_success_at": "2026-11-22T20:29:10.817264+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -279,8 +280,8 @@
       "homepage": "https://niflheim.world",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.359103+00:00",
-      "last_success_at": "2026-11-22T13:13:45.359103+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.712967+00:00",
+      "last_success_at": "2026-11-22T20:29:12.712967+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -289,8 +290,8 @@
       "homepage": "https://www.nodo313.net",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.493706+00:00",
-      "last_success_at": "2026-11-22T13:13:45.493706+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.760224+00:00",
+      "last_success_at": "2026-11-22T20:29:12.760224+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -299,8 +300,8 @@
       "homepage": "https://nulledbb.com",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.787605+00:00",
-      "last_success_at": "2026-11-22T13:13:46.787605+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.384779+00:00",
+      "last_success_at": "2026-11-22T20:29:14.384779+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -309,8 +310,8 @@
       "homepage": "https://patched.to/Forum-refunding-services",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.987506+00:00",
-      "last_success_at": "2026-11-22T13:13:46.987506+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.680390+00:00",
+      "last_success_at": "2026-11-22T20:29:14.680390+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -319,18 +320,8 @@
       "homepage": "https://piratebuhta.pw",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.584413+00:00",
-      "last_success_at": "2026-11-22T13:13:45.584413+00:00",
-      "last_http_status": 200,
-      "last_error": null
-    },
-    {
-      "name": "probiv",
-      "homepage": "https://probiv.one",
-      "status": "up",
-      "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.197982+00:00",
-      "last_success_at": "2026-11-22T13:13:44.197982+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.835338+00:00",
+      "last_success_at": "2026-11-22T20:29:12.835338+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -339,8 +330,8 @@
       "homepage": "https://pwnforums.st/",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:47.041854+00:00",
-      "last_success_at": "2026-11-22T13:13:47.041854+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.690635+00:00",
+      "last_success_at": "2026-11-22T20:29:14.690635+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -349,8 +340,8 @@
       "homepage": "https://spyhackerz.org",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.972460+00:00",
-      "last_success_at": "2026-11-22T13:13:43.972460+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.811661+00:00",
+      "last_success_at": "2026-11-22T20:29:10.811661+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -359,8 +350,8 @@
       "homepage": "https://www.toolbase.bz",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.679485+00:00",
-      "last_success_at": "2026-11-22T13:13:45.679485+00:00",
+      "last_checked_at": "2026-11-22T20:29:12.924587+00:00",
+      "last_success_at": "2026-11-22T20:29:12.924587+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -369,8 +360,8 @@
       "homepage": "https://www.turkhackteam.org",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:43.971457+00:00",
-      "last_success_at": "2026-11-22T13:13:43.971457+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.810723+00:00",
+      "last_success_at": "2026-11-22T20:29:10.810723+00:00",
       "last_http_status": 403,
       "last_error": null
     },
@@ -379,8 +370,8 @@
       "homepage": "https://validmarket.io",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.426681+00:00",
-      "last_success_at": "2026-11-22T13:13:46.426681+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.899863+00:00",
+      "last_success_at": "2026-11-22T20:29:13.899863+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -389,8 +380,8 @@
       "homepage": "https://voided.to",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:46.839866+00:00",
-      "last_success_at": "2026-11-22T13:13:46.839866+00:00",
+      "last_checked_at": "2026-11-22T20:29:14.458105+00:00",
+      "last_success_at": "2026-11-22T20:29:14.458105+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -399,8 +390,8 @@
       "homepage": "https://warriors.to",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:45.918227+00:00",
-      "last_success_at": "2026-11-22T13:13:45.918227+00:00",
+      "last_checked_at": "2026-11-22T20:29:13.016333+00:00",
+      "last_success_at": "2026-11-22T20:29:13.016333+00:00",
       "last_http_status": 200,
       "last_error": null
     },
@@ -409,13 +400,33 @@
       "homepage": "https://xreactor.org",
       "status": "up",
       "consecutive_failures": 0,
-      "last_checked_at": "2026-11-22T13:13:44.233608+00:00",
-      "last_success_at": "2026-11-22T13:13:44.233608+00:00",
+      "last_checked_at": "2026-11-22T20:29:10.970734+00:00",
+      "last_success_at": "2026-11-22T20:29:10.970734+00:00",
       "last_http_status": 200,
       "last_error": null
     }
   ],
   "identity_matches": [
+    {
+      "username": [
+        "Аддольф"
+      ],
+      "forums": [
+        "bdfclub",
+        "probiv"
+      ],
+      "first_matched_at": "2026-11-22T20:14:28.677095+00:00"
+    },
+    {
+      "username": [
+        "avshaletip"
+      ],
+      "forums": [
+        "blackbones",
+        "forumteam.top"
+      ],
+      "first_matched_at": "2026-11-22T20:14:28.677095+00:00"
+    },
     {
       "username": [
         "AlkoTelecom"
@@ -2618,87 +2629,79 @@
   ],
   "stats_snapshots": {
     "turkhackteam": null,
+    "spyhackerz": null,
     "mmgp": {
       "threads": 740862,
-      "messages": 17507374,
-      "members": 406584
-    },
-    "probiv": {
-      "threads": 165916,
-      "messages": 1214271,
-      "members": 149980
+      "messages": 17507410,
+      "members": 406585
     },
     "carders.biz": {
       "threads": 14172,
-      "messages": 62200,
-      "members": 65464
+      "messages": 62207,
+      "members": 65469
     },
-    "spyhackerz": null,
     "breachforums": null,
-    "breachforums-leads": null,
-    "darkforums": null,
-    "darkforums-leads": null,
     "bdfclub": {
-      "threads": 159900,
-      "messages": 335507,
-      "members": 74124
+      "threads": 159881,
+      "messages": 335496,
+      "members": 74128
     },
-    "leakforum.io": null,
+    "breachforums-leads": null,
     "xreactor": null,
-    "leetforums": {
-      "threads": 17545,
-      "messages": 37456,
-      "members": 106817
-    },
+    "bhcforums": null,
+    "darkforums-leads": null,
+    "leakforum.io": null,
+    "darkforums": null,
     "blackhatpakistan": {
       "threads": 1230,
-      "messages": 2615,
-      "members": 4009
+      "messages": 2617,
+      "members": 4013
     },
     "nodo313": null,
     "spear": null,
     "forumteam.top": {
-      "threads": 73329,
-      "messages": 275624,
-      "members": 163699
+      "threads": 73344,
+      "messages": 275645,
+      "members": 163707
     },
+    "toolbase": null,
     "warriors": null,
-    "niflheim": {
-      "threads": 179174,
-      "messages": 413561,
-      "members": 63819
-    },
     "darknetarmy": null,
     "piratebuhta": {
       "threads": 38087,
-      "messages": 302421,
-      "members": 186922
+      "messages": 302338,
+      "members": 186928
     },
-    "cardinggame": null,
-    "toolbase": null,
-    "bhcforums": null,
     "blackbones": null,
-    "0x00sec": null,
-    "validmarket": {
-      "threads": 10703,
-      "messages": 29571,
-      "members": 65660
+    "cardinggame": null,
+    "niflheim": {
+      "threads": 179225,
+      "messages": 413648,
+      "members": 63831
     },
+    "antichat": null,
+    "0x00sec": null,
     "carding.pw": null,
     "darkwebmafias": {
       "threads": 788,
       "messages": 5038,
-      "members": 46927
+      "members": 46931
     },
-    "nulledbb": null,
+    "validmarket": {
+      "threads": 10706,
+      "messages": 29584,
+      "members": 65666
+    },
     "dublikat": null,
-    "antichat": null,
-    "pwnforums.st": null,
-    "voided": null,
-    "patched.to": null,
+    "nulledbb": null,
     "cardforum": null,
     "ascarding": null,
-    "sinister.ly": null
+    "voided": null,
+    "pwnforums.st": null,
+    "patched.to": null,
+    "sinister.ly": null,
+    "leetforums": null,
+    "probiv": null
   },
   "member_directory_crawl": {
     "carders.biz": {
@@ -2993,7 +2996,7 @@
     {
       "site": "0x00sec",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3004,19 +3007,19 @@
     {
       "site": "antichat",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
-      "new_records": 15,
-      "duplicates": 0,
+      "new_records": 4,
+      "duplicates": 11,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "ascarding",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
       "new_records": 2,
       "duplicates": 18,
@@ -3026,19 +3029,19 @@
     {
       "site": "bdfclub",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 19,
-      "new_records": 5,
-      "duplicates": 14,
+      "new_records": 9,
+      "duplicates": 10,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "bhcforums",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
       "new_records": 0,
       "duplicates": 15,
@@ -3048,29 +3051,29 @@
     {
       "site": "blackbones",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
-      "new_records": 4,
-      "duplicates": 16,
+      "new_records": 5,
+      "duplicates": 15,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "blackhatpakistan",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
-      "new_records": 2,
-      "duplicates": 18,
+      "new_records": 1,
+      "duplicates": 19,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "breachforums",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-20T22:55:49.098325+00:00",
       "posts_discovered": 0,
       "new_records": 0,
@@ -3081,7 +3084,7 @@
     {
       "site": "breachforums-leads",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-20T22:55:49.098325+00:00",
       "posts_discovered": 0,
       "new_records": 0,
@@ -3092,8 +3095,8 @@
     {
       "site": "carders.biz",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
       "new_records": 0,
       "duplicates": 20,
@@ -3103,8 +3106,8 @@
     {
       "site": "cardforum",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 30,
       "new_records": 30,
       "duplicates": 0,
@@ -3114,8 +3117,8 @@
     {
       "site": "carding.pw",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 8,
       "new_records": 0,
       "duplicates": 8,
@@ -3125,7 +3128,7 @@
     {
       "site": "cardinggame",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3136,8 +3139,8 @@
     {
       "site": "darkforums",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
       "new_records": 15,
       "duplicates": 0,
@@ -3147,18 +3150,18 @@
     {
       "site": "darkforums-leads",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
-      "new_records": 15,
-      "duplicates": 0,
+      "new_records": 0,
+      "duplicates": 15,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "darknetarmy",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-18T11:27:21.649573+00:00",
       "posts_discovered": 0,
       "new_records": 0,
@@ -3169,8 +3172,8 @@
     {
       "site": "darkwebmafias",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 5,
       "new_records": 0,
       "duplicates": 5,
@@ -3180,7 +3183,7 @@
     {
       "site": "dublikat",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-20T22:55:49.098325+00:00",
       "posts_discovered": 0,
       "new_records": 0,
@@ -3191,19 +3194,19 @@
     {
       "site": "forumteam.top",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 30,
-      "new_records": 14,
-      "duplicates": 16,
+      "new_records": 15,
+      "duplicates": 15,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "leakforum.io",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
       "new_records": 15,
       "duplicates": 0,
@@ -3212,41 +3215,41 @@
     },
     {
       "site": "leetforums",
-      "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "status": "unreachable",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-22T12:59:38.307129+00:00",
-      "posts_discovered": 20,
-      "new_records": 12,
-      "duplicates": 8,
+      "posts_discovered": 0,
+      "new_records": 0,
+      "duplicates": 0,
       "parse_errors": 0,
-      "http_errors": 0
+      "http_errors": 1
     },
     {
       "site": "mmgp",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
-      "new_records": 7,
-      "duplicates": 13,
+      "new_records": 5,
+      "duplicates": 15,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "niflheim",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 30,
-      "new_records": 17,
-      "duplicates": 13,
+      "new_records": 20,
+      "duplicates": 10,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "nodo313",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3257,8 +3260,8 @@
     {
       "site": "nulledbb",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
       "new_records": 15,
       "duplicates": 0,
@@ -3268,7 +3271,7 @@
     {
       "site": "piratebuhta",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3279,18 +3282,18 @@
     {
       "site": "probiv",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 30,
-      "new_records": 17,
-      "duplicates": 13,
+      "new_records": 5,
+      "duplicates": 25,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "sinister.ly",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3301,7 +3304,7 @@
     {
       "site": "spear",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": "2026-11-11T06:54:24.832010+00:00",
       "posts_discovered": 0,
       "new_records": 0,
@@ -3312,19 +3315,19 @@
     {
       "site": "spyhackerz",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
-      "new_records": 17,
-      "duplicates": 3,
+      "new_records": 12,
+      "duplicates": 8,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "toolbase",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 30,
       "new_records": 0,
       "duplicates": 30,
@@ -3334,7 +3337,7 @@
     {
       "site": "turkhackteam",
       "status": "unreachable",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
       "last_success": null,
       "posts_discovered": 0,
       "new_records": 0,
@@ -3345,19 +3348,19 @@
     {
       "site": "validmarket",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
-      "posts_discovered": 15,
-      "new_records": 0,
-      "duplicates": 15,
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
+      "posts_discovered": 12,
+      "new_records": 3,
+      "duplicates": 9,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "voided",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 15,
       "new_records": 15,
       "duplicates": 0,
@@ -3367,22 +3370,22 @@
     {
       "site": "warriors",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 10,
-      "new_records": 8,
-      "duplicates": 2,
+      "new_records": 9,
+      "duplicates": 1,
       "parse_errors": 0,
       "http_errors": 0
     },
     {
       "site": "xreactor",
       "status": "healthy",
-      "last_attempt": "2026-11-22T12:59:38.307129+00:00",
-      "last_success": "2026-11-22T12:59:38.307129+00:00",
+      "last_attempt": "2026-11-22T20:14:28.677095+00:00",
+      "last_success": "2026-11-22T20:14:28.677095+00:00",
       "posts_discovered": 20,
-      "new_records": 16,
-      "duplicates": 4,
+      "new_records": 14,
+      "duplicates": 6,
       "parse_errors": 0,
       "http_errors": 0
     }
